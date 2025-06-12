@@ -19,10 +19,17 @@ public class GameblockItem extends Item {
     }
 
     @Override
-    public InteractionResultHolder<ItemStack> use(Level p_43449_, Player p_43450_, InteractionHand p_43451_) {
-        ItemStack itemstack = p_43450_.getItemInHand(p_43451_);
-        if (p_43449_.isClientSide()) Minecraft.getInstance().setScreen(new GameScreen());
-        p_43450_.awardStat(Stats.ITEM_USED.get(this));
-        return InteractionResultHolder.sidedSuccess(itemstack, p_43449_.isClientSide());
+    public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
+        ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
+        if (pLevel.isClientSide()) {
+            if (pUsedHand == InteractionHand.MAIN_HAND) {
+                if (pPlayer.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge) {
+                    Minecraft.getInstance().setScreen(new GameScreen(cartridge.getNewGameInstance()));
+                    pPlayer.awardStat(Stats.ITEM_USED.get(this));
+                    return InteractionResultHolder.success(itemstack);
+                }
+            }
+        }
+        return InteractionResultHolder.fail(itemstack);
     }
 }
