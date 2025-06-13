@@ -1,20 +1,13 @@
 package gameblock;
 
 import com.mojang.logging.LogUtils;
-import gameblock.game.Game;
 import gameblock.game.evasion.EvasionGame;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -34,11 +27,13 @@ public class GameblockMod
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public static final RegistryObject<Item> GAMEBLOCK = ITEMS.register("gameblock", GameblockItem::new);
-    public static final RegistryObject<Item> CARTRIDGE_EVASION = ITEMS.register("evasion", () -> new CartridgeItem(EvasionGame::new)); // made up game that's just dodging projectiles
+    public static final RegistryObject<Item> CARTRIDGE_RHYTHM_FIGURES = ITEMS.register("rhythm_figures", () -> new CartridgeItem(EvasionGame::new)); // just shapes and beats
     /*public static final RegistryObject<Item> CARTRIDGE_SUPER_PLUMBER_DUDES = ITEMS.register("super_plumber_dudes", () -> new CartridgeItem(Game::new)); // super mario bros
     public static final RegistryObject<Item> CARTRIDGE_DEFUSAL = ITEMS.register("defusal", () -> new CartridgeItem(Game::new)); // minesweeper
+    public static final RegistryObject<Item> CARTRIDGE_FLYING_BIRD = ITEMS.register("flying_bird", () -> new CartridgeItem(Game::new)); // flappy bird
     public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(Game::new)); // snake
     public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("bock_break", () -> new CartridgeItem(Game::new)); // block break
+    public static final RegistryObject<Item> CARTRIDGE_MILLIONAIRE = ITEMS.register("millionaire", () -> new CartridgeItem(Game::new)); // monopoly
     public static final RegistryObject<Item> CARTRIDGE_FIRST_FABLE = ITEMS.register("first_fable", () -> new CartridgeItem(Game::new)); // final fantasy
     public static final RegistryObject<Item> CARTRIDGE_NOM_NOM = ITEMS.register("nom_nom", () -> new CartridgeItem(Game::new)); // pacman
     public static final RegistryObject<Item> CARTRIDGE_SUBTERRANEAN_LEGEND = ITEMS.register("subterranean_legend", () -> new CartridgeItem(Game::new));
@@ -57,7 +52,7 @@ public class GameblockMod
             .icon(() -> GAMEBLOCK.get().getDefaultInstance())
             .displayItems((parameters, output) -> {
                 output.accept(GAMEBLOCK.get());
-                output.accept(CARTRIDGE_EVASION.get());
+                output.accept(CARTRIDGE_RHYTHM_FIGURES.get());
             }).build());
 
     public GameblockMod(FMLJavaModLoadingContext context)

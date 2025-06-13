@@ -42,6 +42,18 @@ public class GameScreen extends Screen {
     }
 
     @Override
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (game.pressKey(pKeyCode)) return true;
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+
+    @Override
+    public boolean keyReleased(int pKeyCode, int pScanCode, int pModifiers) {
+        if (game.releaseKey(pKeyCode)) return true;
+        return super.keyReleased(pKeyCode, pScanCode, pModifiers);
+    }
+
+    @Override
     public boolean isPauseScreen() {
         return false;
     }
