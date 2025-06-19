@@ -1,7 +1,8 @@
 package gameblock;
 
 import com.mojang.logging.LogUtils;
-import gameblock.game.evasion.BlockBreakGame;
+import gameblock.game.blockbreak.BlockBreakGame;
+import gameblock.game.serpent.SerpentGame;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -28,11 +29,11 @@ public class GameblockMod
 
     public static final RegistryObject<Item> GAMEBLOCK = ITEMS.register("gameblock", GameblockItem::new);
     public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("bock_break", () -> new CartridgeItem(BlockBreakGame::new)); // block break
+    public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(SerpentGame::new)); // snake
     /*public static final RegistryObject<Item> CARTRIDGE_RHYTHM_FIGURES = ITEMS.register("rhythm_figures", () -> new CartridgeItem(Game::new)); // just shapes and beats
     public static final RegistryObject<Item> CARTRIDGE_SUPER_PLUMBER_DUDES = ITEMS.register("super_plumber_dudes", () -> new CartridgeItem(Game::new)); // super mario bros
     public static final RegistryObject<Item> CARTRIDGE_DEFUSAL = ITEMS.register("defusal", () -> new CartridgeItem(Game::new)); // minesweeper
     public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem(Game::new)); // flappy bird
-    public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(Game::new)); // snake
     public static final RegistryObject<Item> CARTRIDGE_MILLIONAIRE = ITEMS.register("millionaire", () -> new CartridgeItem(Game::new)); // monopoly
     public static final RegistryObject<Item> CARTRIDGE_FIRST_FABLE = ITEMS.register("first_fable", () -> new CartridgeItem(Game::new)); // final fantasy
     public static final RegistryObject<Item> CARTRIDGE_NOM_NOM = ITEMS.register("nom_nom", () -> new CartridgeItem(Game::new)); // pacman
@@ -53,6 +54,7 @@ public class GameblockMod
             .displayItems((parameters, output) -> {
                 output.accept(GAMEBLOCK.get());
                 output.accept(CARTRIDGE_BLOCK_BREAK.get());
+                output.accept(CARTRIDGE_SERPENT.get());
             }).build());
 
     public GameblockMod(FMLJavaModLoadingContext context)

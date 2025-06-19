@@ -64,6 +64,12 @@ public abstract class Game {
         return binding;
     }
 
+    protected final KeyBinding registerKey(int key, Runnable pressAction) {
+        KeyBinding binding = new KeyBinding(pressAction);
+        keyBindings.put(key, binding);
+        return binding;
+    }
+
     public final boolean pressKey(int key) {
         KeyBinding binding = keyBindings.get(key);
         if (binding != null) {
