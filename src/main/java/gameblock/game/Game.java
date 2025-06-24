@@ -15,6 +15,9 @@ import java.util.function.Consumer;
 public abstract class Game {
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
 
+    public static final int MAX_X = 100;
+    public static final int MAX_Y = 75;
+
     public abstract void tick();
 
     public abstract void render(GuiGraphics graphics, float partialTicks);

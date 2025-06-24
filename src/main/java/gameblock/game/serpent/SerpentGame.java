@@ -11,7 +11,7 @@ import java.util.Random;
 
 public class SerpentGame extends Game {
     private static final int INITIAL_SNAKE_LENGTH = 5;
-    private int[][] tiles = new int[101][101];
+    private int[][] tiles = new int[101][76];
 
     private int headX, headY;
     private int snakeLength = INITIAL_SNAKE_LENGTH;
@@ -28,7 +28,7 @@ public class SerpentGame extends Game {
 
     public SerpentGame() {
         for (int x = 0; x < 101; x++) {
-            for (int y = 0; y < 101; y++) {
+            for (int y = 0; y < 76; y++) {
                 tiles[x][y] = Integer.MAX_VALUE;
             }
         }
@@ -37,13 +37,13 @@ public class SerpentGame extends Game {
 
     private void setSnakeTicksOfTile(int x, int y, int ticks) {
         x += 50;
-        y += 50;
+        y += 37;
         tiles[x][y] = ticks;
     }
 
     private int getSnakeTicksFromTile(int x, int y) {
         x += 50;
-        y += 50;
+        y += 37;
         return tiles[x][y];
     }
 
@@ -62,16 +62,19 @@ public class SerpentGame extends Game {
     @Override
     public void tick() {
         if (!gameOver) {
-            if (getSnakeTicksFromTile(headX + direction.getNormal().getX(), headY + direction.getNormal().getY()) < snakeLength) {
+            int nextX = headX + direction.getNormal().getX();
+            int nextY = headY + direction.getNormal().getY();
+
+            if (Math.abs(nextX) > 50 || Math.abs(nextY) > 37 || getSnakeTicksFromTile(headX + direction.getNormal().getX(), headY + direction.getNormal().getY()) < snakeLength) {
                 gameOver = true;
             } else {
-                headX += direction.getNormal().getX();
-                headY += direction.getNormal().getY();
+                headX = nextX;
+                headY = nextY;
 
                 setSnakeTicksOfTile(headX, headY, 0);
 
                 for (int x = -50; x <= 50; x++) {
-                    for (int y = -50; y <= 50; y++) {
+                    for (int y = -37; y <= 37; y++) {
                         if (getSnakeTicksFromTile(x, y) < Integer.MAX_VALUE) {
                             setSnakeTicksOfTile(x, y, getSnakeTicksFromTile(x, y) + 1);
                         }
@@ -89,7 +92,7 @@ public class SerpentGame extends Game {
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         for (int x = -50; x <= 50; x++) {
-            for (int y = -50; y <= 50; y++) {
+            for (int y = -37; y <= 37; y++) {
                 if (getSnakeTicksFromTile(x, y) < snakeLength) {
                     drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, 255, 255, 255, 255, 0);
                 }

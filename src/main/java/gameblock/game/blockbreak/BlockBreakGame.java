@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class BlockBreakGame extends Game {
     private static final int UPDATES_PER_TICK = 3;
 
-    private static final float PLATFORM_Y = -40.0f;
+    private static final float PLATFORM_Y = -70.0f;
     private static final float PLATFORM_WIDTH = 20.0f;
     private static final float PLATFORM_HEIGHT = 3.0f;
     private static final float PLATFORM_SPEED = 2.1f;
@@ -77,7 +77,7 @@ public class BlockBreakGame extends Game {
                 } else if (ballX <= -100.0f + BALL_WIDTH / 2) {
                     ballMoveX = Math.abs(ballMoveX);
                 }
-                if (ballY >= 50.0f) {
+                if (ballY >= 75.0f - BALL_WIDTH / 2) {
                     ballMoveY = -Math.abs(ballMoveY);
                 }
                 if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {

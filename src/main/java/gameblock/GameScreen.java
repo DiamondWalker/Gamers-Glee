@@ -12,7 +12,7 @@ import net.minecraft.util.FastColor;
 
 public class GameScreen extends Screen {
     public static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/gameblock.png");
-    private static final int IMAGE_WIDTH = 200;
+    private static final int IMAGE_WIDTH = 206;
     private static final int IMAGE_HEIGHT = 208;
 
     private final Game game;
@@ -33,8 +33,7 @@ public class GameScreen extends Screen {
         RenderSystem.disableCull();
         int i = (this.width - IMAGE_WIDTH) / 2;
         int j = this.height - IMAGE_HEIGHT;
-        graphics.blit(TEXTURE_LOCATION, i, j, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
-        int frameMinX = i + 3, frameMaxX = i + IMAGE_WIDTH - 3, frameMinY = j + 3, frameMaxY = j + IMAGE_WIDTH - 43;
+        int frameMinX = i + 3, frameMaxX = i + IMAGE_WIDTH - 3, frameMinY = j + 3, frameMaxY = j + IMAGE_WIDTH - 53;
         graphics.enableScissor(frameMinX, frameMinY, frameMaxX, frameMaxY);
         graphics.fill(0, 0, width, height, FastColor.ARGB32.color(255, 0, 0, 0));
         PoseStack stack = graphics.pose();
@@ -49,6 +48,7 @@ public class GameScreen extends Screen {
         super.render(graphics, p_281550_, p_282878_, partialTicks);
         graphics.disableScissor();
         RenderSystem.enableCull();
+        graphics.blit(TEXTURE_LOCATION, i, j, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
 
     @Override
