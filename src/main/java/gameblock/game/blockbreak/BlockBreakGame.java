@@ -31,6 +31,8 @@ public class BlockBreakGame extends Game {
 
     boolean ballLaunched = false;
 
+    private boolean gameOver = false;
+
     ArrayList<Brick> bricks = new ArrayList<>();
 
     final KeyBinding left = registerKey(InputConstants.KEY_LEFT);
@@ -38,86 +40,91 @@ public class BlockBreakGame extends Game {
     final KeyBinding launch = registerKey(InputConstants.KEY_SPACE);
 
     public BlockBreakGame() {
-        for (int y = 1; y <= 4; y++) {
-            if (y < 4) {
-                for (int x = -10; x <= 10; x += 2) {
-                    bricks.add(new Brick(x, y * 2 - 1 + 1, 3));
+        for (int y = 3; y <= 6; y++) {
+            if (y < 6) {
+                for (int x = -14; x <= 14; x += 2) {
+                    bricks.add(new Brick(x, y * 2 - 2 + 1, 3));
                 }
             }
-            for (int x = -11; x <= 11; x += 2) {
-                bricks.add(new Brick(x, y * 2 - 1, 3));
+            for (int x = -15; x <= 15; x += 2) {
+                bricks.add(new Brick(x, y * 2 - 2, 3));
             }
         }
     }
 
     @Override
     public void tick() {
-        oldPlatformPos = platformPos;
-        oldBallX = ballX;
-        oldBallY = ballY;
+        if (!gameOver) {
+            oldPlatformPos = platformPos;
+            oldBallX = ballX;
+            oldBallY = ballY;
 
-        for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
-            if (left.pressed) platformPos -= PLATFORM_SPEED / UPDATES_PER_TICK;
-            if (right.pressed) platformPos += PLATFORM_SPEED / UPDATES_PER_TICK;
-            platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
+            for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
+                if (left.pressed) platformPos -= PLATFORM_SPEED / UPDATES_PER_TICK;
+                if (right.pressed) platformPos += PLATFORM_SPEED / UPDATES_PER_TICK;
+                platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
 
-            if (!ballLaunched) {
-                ballX = platformPos;
-                ballY = BALL_START_Y;
-                if (launch.pressed) {
-                    ballMoveY = BALL_SPEED / UPDATES_PER_TICK;
-                    ballLaunched = true;
-                }
-            } else {
-                ballX += ballMoveX;
-                ballY += ballMoveY;
-
-                if (ballX >= 100.0f - BALL_WIDTH / 2) {
-                    ballMoveX = -Math.abs(ballMoveX);
-                } else if (ballX <= -100.0f + BALL_WIDTH / 2) {
-                    ballMoveX = Math.abs(ballMoveX);
-                }
-                if (ballY >= 75.0f - BALL_WIDTH / 2) {
-                    ballMoveY = -Math.abs(ballMoveY);
-                }
-                if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
-                    if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
-                        if (left.pressed) {
-                            ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                            ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                        }
-                        if (right.pressed) {
-                            ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                            ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                        }
-                        ballMoveY = Math.abs(ballMoveY);
-                        double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
-                        ballMoveX *= (BALL_SPEED / UPDATES_PER_TICK / speed);
-                        ballMoveY *= (BALL_SPEED / UPDATES_PER_TICK / speed);
+                if (!ballLaunched) {
+                    ballX = platformPos;
+                    ballY = BALL_START_Y;
+                    if (launch.pressed) {
+                        ballMoveY = BALL_SPEED / UPDATES_PER_TICK;
+                        ballLaunched = true;
                     }
-                }
+                } else {
+                    ballX += ballMoveX;
+                    ballY += ballMoveY;
 
-                for (int i = 0; i < bricks.size();) {
-                    Brick brick = bricks.get(i);
-                    float brickX = brick.x * 5;
-                    float brickY = brick.y * 5;
-                    if (ballX >= brickX - (BALL_WIDTH + BRICK_WIDTH) / 2 && ballX <= brickX + (BALL_WIDTH + BRICK_WIDTH) / 2) {
-                        if (ballY >= brickY - (BALL_WIDTH + BRICK_HEIGHT) / 2 && ballY <= brickY + (BALL_WIDTH + BRICK_HEIGHT) / 2) {
-                            float xComponent = (ballX - brickX) / BRICK_WIDTH;
-                            float yComponent = (ballY - brickY) / BRICK_HEIGHT;
-                            if (Math.abs(xComponent) > Math.abs(yComponent)) {
-                                ballMoveX = Math.abs(ballMoveX) * Math.signum(xComponent);
-                            } else {
-                                ballMoveY = Math.abs(ballMoveY) * Math.signum(yComponent);
+                    if (ballX >= 100.0f - BALL_WIDTH / 2) {
+                        ballMoveX = -Math.abs(ballMoveX);
+                    } else if (ballX <= -100.0f + BALL_WIDTH / 2) {
+                        ballMoveX = Math.abs(ballMoveX);
+                    }
+                    if (ballY >= 75.0f - BALL_WIDTH / 2) {
+                        ballMoveY = -Math.abs(ballMoveY);
+                    } else if (ballY <= -75.0f - BALL_WIDTH / 2) {
+                        gameOver = true;
+                        return;
+                    }
+                    if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
+                        if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
+                            if (left.pressed) {
+                                ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
+                                ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
                             }
-                            brick.hitsLeft--;
-                            if (brick.hitsLeft <= 0) {
-                                bricks.remove(i);
-                                continue;
+                            if (right.pressed) {
+                                ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
+                                ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
                             }
+                            ballMoveY = Math.abs(ballMoveY);
+                            double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
+                            ballMoveX *= (BALL_SPEED / UPDATES_PER_TICK / speed);
+                            ballMoveY *= (BALL_SPEED / UPDATES_PER_TICK / speed);
                         }
                     }
-                    i++;
+
+                    for (int i = 0; i < bricks.size();) {
+                        Brick brick = bricks.get(i);
+                        float brickX = brick.x * 5;
+                        float brickY = brick.y * 5;
+                        if (ballX >= brickX - (BALL_WIDTH + BRICK_WIDTH) / 2 && ballX <= brickX + (BALL_WIDTH + BRICK_WIDTH) / 2) {
+                            if (ballY >= brickY - (BALL_WIDTH + BRICK_HEIGHT) / 2 && ballY <= brickY + (BALL_WIDTH + BRICK_HEIGHT) / 2) {
+                                float xComponent = (ballX - brickX) / BRICK_WIDTH;
+                                float yComponent = (ballY - brickY) / BRICK_HEIGHT;
+                                if (Math.abs(xComponent) > Math.abs(yComponent)) {
+                                    ballMoveX = Math.abs(ballMoveX) * Math.signum(xComponent);
+                                } else {
+                                    ballMoveY = Math.abs(ballMoveY) * Math.signum(yComponent);
+                                }
+                                brick.hitsLeft--;
+                                if (brick.hitsLeft <= 0) {
+                                    bricks.remove(i);
+                                    continue;
+                                }
+                            }
+                        }
+                        i++;
+                    }
                 }
             }
         }
