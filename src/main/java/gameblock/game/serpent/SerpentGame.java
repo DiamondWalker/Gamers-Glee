@@ -2,10 +2,8 @@ package gameblock.game.serpent;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
-import net.minecraft.client.Minecraft;
+import gameblock.util.Direction2D;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.core.Direction;
-import net.minecraft.util.FastColor;
 
 import java.util.Random;
 
@@ -17,12 +15,13 @@ public class SerpentGame extends Game {
     private int snakeLength = INITIAL_SNAKE_LENGTH;
     private int foodX, foodY;
 
-    private Direction direction = Direction.UP;
+    private Direction2D snakeDirection = Direction2D.UP;
+    private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
 
-    final Game.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> direction = Direction.WEST);
-    final Game.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> direction = Direction.EAST);
-    final Game.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> direction = Direction.UP);
-    final Game.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> direction = Direction.DOWN);
+    final Game.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
+    final Game.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> setSnakeDirection(Direction2D.RIGHT));
+    final Game.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP));
+    final Game.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
 
     private boolean gameOver = false;
 
@@ -33,6 +32,13 @@ public class SerpentGame extends Game {
             }
         }
         randomFoodPosition();
+    }
+
+    private void setSnakeDirection(Direction2D dir) {
+        if (dir != snakeDirection && dir != snakeDirection.getOpposite() && !snakeDirectionChanged) {
+            snakeDirection = dir;
+            snakeDirectionChanged = true;
+        }
     }
 
     private void setSnakeTicksOfTile(int x, int y, int ticks) {
@@ -62,10 +68,11 @@ public class SerpentGame extends Game {
     @Override
     public void tick() {
         if (!gameOver) {
-            int nextX = headX + direction.getNormal().getX();
-            int nextY = headY + direction.getNormal().getY();
+            int nextX = headX + snakeDirection.getNormal().getX();
+            int nextY = headY + snakeDirection.getNormal().getY();
+            snakeDirectionChanged = false;
 
-            if (Math.abs(nextX) > 50 || Math.abs(nextY) > 37 || getSnakeTicksFromTile(headX + direction.getNormal().getX(), headY + direction.getNormal().getY()) < snakeLength) {
+            if (Math.abs(nextX) > 50 || Math.abs(nextY) > 37 || getSnakeTicksFromTile(headX + snakeDirection.getNormal().getX(), headY + snakeDirection.getNormal().getY()) < snakeLength) {
                 gameOver = true;
             } else {
                 headX = nextX;
