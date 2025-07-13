@@ -41,7 +41,7 @@ public class GameScreen extends Screen {
         int frameWidth = frameMaxX - frameMinX;
         int frameHeight = frameMaxY - frameMinY;
         float scale = (float)frameWidth / 200;
-        stack.translate(0.5 * width, 0.5 * height, 0.0);
+        stack.translate((frameMinX + frameMaxX) / 2, (frameMinY + frameMaxY) / 2, 0.0);
         stack.scale(scale, -scale, 1.0f);
         game.render(graphics, partialTicks);
         stack.popPose();
