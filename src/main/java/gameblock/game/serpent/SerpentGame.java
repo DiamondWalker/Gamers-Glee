@@ -3,13 +3,14 @@ package gameblock.game.serpent;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
 import gameblock.util.Direction2D;
+import gameblock.util.TileGrid2D;
 import net.minecraft.client.gui.GuiGraphics;
 
 import java.util.Random;
 
 public class SerpentGame extends Game {
     private static final int INITIAL_SNAKE_LENGTH = 5;
-    private int[][] tiles = new int[101][76];
+    private final TileGrid2D<Integer> tiles;
 
     private int headX, headY;
     private int snakeLength = INITIAL_SNAKE_LENGTH;
@@ -26,11 +27,8 @@ public class SerpentGame extends Game {
     private boolean gameOver = false;
 
     public SerpentGame() {
-        for (int x = 0; x < 101; x++) {
-            for (int y = 0; y < 76; y++) {
-                tiles[x][y] = Integer.MAX_VALUE;
-            }
-        }
+        tiles = new TileGrid2D<>(-50, 50, -37, 37, -1);
+        tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         randomFoodPosition();
     }
 
@@ -42,15 +40,11 @@ public class SerpentGame extends Game {
     }
 
     private void setSnakeTicksOfTile(int x, int y, int ticks) {
-        x += 50;
-        y += 37;
-        tiles[x][y] = ticks;
+        tiles.set(x, y, ticks);
     }
 
     private int getSnakeTicksFromTile(int x, int y) {
-        x += 50;
-        y += 37;
-        return tiles[x][y];
+        return tiles.get(x, y);
     }
 
     private void randomFoodPosition() {

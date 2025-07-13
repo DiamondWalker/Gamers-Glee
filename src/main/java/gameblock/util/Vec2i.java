@@ -77,4 +77,16 @@ public class Vec2i implements Comparable<Vec2i> {
         this.y = pY;
         return this;
     }
+
+    public Vec2i offset(int x, int y) {
+        return new Vec2i(this.x + x, this.y + y);
+    }
+
+    public Vec2i offset(Vec2i offset) {
+        return offset(offset.x, offset.y);
+    }
+
+    public Vec2i scale(int scale) {
+        return new Vec2i(x * scale, y * scale);
+    }
 }
