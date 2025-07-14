@@ -2,12 +2,15 @@ package gameblock.registry;
 
 import gameblock.game.blockbreak.BallLaunchPacket;
 import gameblock.game.blockbreak.BallUpdatePacket;
+import gameblock.game.blockbreak.BrickUpdatePacket;
+import gameblock.game.blockbreak.PlatformMovePacket;
 import gameblock.packet.EndGamePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+import org.lwjgl.system.Platform;
 
 public class GameblockPackets {
     private static int id = 0;
@@ -26,6 +29,8 @@ public class GameblockPackets {
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
+        INSTANCE.registerMessage(id++, PlatformMovePacket.class, PlatformMovePacket::writeToBuffer, PlatformMovePacket::new, PlatformMovePacket::handle);
+        INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

@@ -27,6 +27,8 @@ public class BlockBreakGame extends Game {
 
     float platformPos = 0.0f;
     float oldPlatformPos = platformPos;
+    byte oldMoveDir = 0;
+    byte moveDir = 0;
 
     float ballX = 0.0f, ballY = BALL_START_Y;
     float oldBallX = ballX, oldBallY = ballY;
@@ -71,9 +73,16 @@ public class BlockBreakGame extends Game {
             boolean ballMoveUpdate = false;
 
             for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
-                if (left.pressed) platformPos -= PLATFORM_SPEED / UPDATES_PER_TICK;
-                if (right.pressed) platformPos += PLATFORM_SPEED / UPDATES_PER_TICK;
+                if (isClientSide()) {
+                    oldMoveDir = moveDir;
+                    moveDir = 0;
+                    if (left.pressed) moveDir--;
+                    if (right.pressed) moveDir++;
+                }
+                platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir;
                 platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
+
+                if (moveDir != oldMoveDir) GameblockPackets.sendToServer(new PlatformMovePacket(platformPos, moveDir));
 
                 if (!ballLaunched) {
                     ballX = platformPos;
@@ -102,11 +111,10 @@ public class BlockBreakGame extends Game {
                     }
                     if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
                         if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
-                            if (left.pressed) {
+                            if (moveDir < 0) {
                                 ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
                                 ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                            }
-                            if (right.pressed) {
+                            } else if (moveDir > 0) {
                                 ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
                                 ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
                             }
@@ -119,8 +127,9 @@ public class BlockBreakGame extends Game {
                         }
                     }
 
-                    for (int i = 0; i < bricks.size();) {
+                    for (int i = 0; i < bricks.size(); i++) {
                         Brick brick = bricks.get(i);
+                        if (brick == null) continue;
                         float brickX = brick.x * 5;
                         float brickY = brick.y * 5;
                         if (ballX >= brickX - (BALL_WIDTH + BRICK_WIDTH) / 2 && ballX <= brickX + (BALL_WIDTH + BRICK_WIDTH) / 2) {
@@ -134,14 +143,15 @@ public class BlockBreakGame extends Game {
                                 }
 
                                 ballMoveUpdate = true;
-                                brick.hitsLeft--;
-                                if (brick.hitsLeft <= 0) {
-                                    bricks.remove(i);
-                                    continue;
+                                if (!isClientSide()) {
+                                    brick.hitsLeft--;
+                                    if (brick.hitsLeft <= 0) {
+                                        bricks.set(i, null);
+                                    }
+                                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i, brick.hitsLeft));
                                 }
                             }
                         }
-                        i++;
                     }
                 }
             }
@@ -163,6 +173,8 @@ public class BlockBreakGame extends Game {
                 oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, 100, 100, 255, 255, 0);
 
         for (Brick brick : bricks) {
+            if (brick == null) continue;
+
             int red = 0, green = 0, blue = 0;
             switch (brick.hitsLeft) {
                 case 1: {
@@ -187,7 +199,7 @@ public class BlockBreakGame extends Game {
         }
     }
 
-    private class Brick {
+    protected class Brick {
         protected int x, y;
         protected int hitsLeft;
 
