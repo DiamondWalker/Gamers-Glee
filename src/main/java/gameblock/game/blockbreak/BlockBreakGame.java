@@ -9,7 +9,7 @@ import java.util.ArrayList;
 public class BlockBreakGame extends Game {
     private static final int UPDATES_PER_TICK = 3;
 
-    private static final float PLATFORM_Y = -70.0f;
+    private static final float PLATFORM_Y = -50.0f;
     private static final float PLATFORM_WIDTH = 20.0f;
     private static final float PLATFORM_HEIGHT = 3.0f;
     private static final float PLATFORM_SPEED = 2.1f;

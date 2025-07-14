@@ -1,0 +1,33 @@
+package gameblock.capability;
+
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+@Mod.EventBusSubscriber
+public class GameCapabilityProvider implements ICapabilityProvider {
+    public static Capability<GameCapability> CAPABILITY_GAME = null;
+    private GameCapability capability = new GameCapability();
+
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (cap == CAPABILITY_GAME) return (LazyOptional<T>) LazyOptional.of(() -> capability);
+        return null;
+    }
+
+    @SubscribeEvent
+    public static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
+        if (event.getObject() instanceof ServerPlayer) {
+            event.addCapability(new ResourceLocation("game_capability"), new GameCapabilityProvider());
+        }
+    }
+}

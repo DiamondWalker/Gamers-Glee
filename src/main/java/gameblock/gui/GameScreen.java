@@ -1,7 +1,8 @@
-package gameblock;
+package gameblock.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import gameblock.GameblockMod;
 import gameblock.game.Game;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.gui.GuiGraphics;
@@ -17,7 +18,7 @@ public class GameScreen extends Screen {
 
     private final Game game;
 
-    protected GameScreen(Game game) {
+    public GameScreen(Game game) {
         super(GameNarrator.NO_TITLE);
         this.game = game;
     }
@@ -66,5 +67,11 @@ public class GameScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+
+    @Override
+    public void onClose() {
+        super.onClose();
+        // TODO: send packet
     }
 }
