@@ -12,8 +12,10 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public abstract class UpdateGamePacket {
-    public UpdateGamePacket() {}
+public abstract class UpdateGamePacket<T extends Game> {
+    public UpdateGamePacket() {
+
+    }
 
     public UpdateGamePacket(FriendlyByteBuf buffer) {
         readFromBuffer(buffer);
@@ -23,14 +25,18 @@ public abstract class UpdateGamePacket {
 
     public abstract void readFromBuffer(FriendlyByteBuf buffer);
 
-    public abstract void handleGameUpdate(Game game);
+    public abstract void handleGameUpdate(T game);
 
     public final void handle(Supplier<NetworkEvent.Context> context) {
         Player player = context.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT ? Minecraft.getInstance().player : context.get().getSender();
         if (player != null) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
-                handleGameUpdate(cap.getGame());
+                try {
+                    handleGameUpdate((T) cap.getGame());
+                } catch (ClassCastException e) {
+                    // do nothing
+                }
             }
         }
 

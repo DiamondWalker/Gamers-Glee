@@ -1,5 +1,7 @@
 package gameblock.registry;
 
+import gameblock.game.blockbreak.BallLaunchPacket;
+import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.packet.EndGamePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -20,6 +22,10 @@ public class GameblockPackets {
 
     public static void registerPackets() {
         INSTANCE.registerMessage(id++, EndGamePacket.class, EndGamePacket::writeToBuffer, EndGamePacket::new, EndGamePacket::handle);
+
+        // block break
+        INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

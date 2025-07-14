@@ -2,7 +2,9 @@ package gameblock.game.blockbreak;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
+import gameblock.registry.GameblockPackets;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -54,12 +56,19 @@ public class BlockBreakGame extends Game {
         }
     }
 
+    protected void launchBall() {
+        ballMoveY = BALL_SPEED / UPDATES_PER_TICK;
+        ballLaunched = true;
+    }
+
     @Override
     public void tick() {
         if (!gameOver) {
             oldPlatformPos = platformPos;
             oldBallX = ballX;
             oldBallY = ballY;
+
+            boolean ballMoveUpdate = false;
 
             for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
                 if (left.pressed) platformPos -= PLATFORM_SPEED / UPDATES_PER_TICK;
@@ -70,8 +79,8 @@ public class BlockBreakGame extends Game {
                     ballX = platformPos;
                     ballY = BALL_START_Y;
                     if (launch.pressed) {
-                        ballMoveY = BALL_SPEED / UPDATES_PER_TICK;
-                        ballLaunched = true;
+                        launchBall();
+                        GameblockPackets.sendToServer(new BallLaunchPacket());
                     }
                 } else {
                     ballX += ballMoveX;
@@ -79,11 +88,14 @@ public class BlockBreakGame extends Game {
 
                     if (ballX >= 100.0f - BALL_WIDTH / 2) {
                         ballMoveX = -Math.abs(ballMoveX);
+                        ballMoveUpdate = true;
                     } else if (ballX <= -100.0f + BALL_WIDTH / 2) {
                         ballMoveX = Math.abs(ballMoveX);
+                        ballMoveUpdate = true;
                     }
                     if (ballY >= 75.0f - BALL_WIDTH / 2) {
                         ballMoveY = -Math.abs(ballMoveY);
+                        ballMoveUpdate = true;
                     } else if (ballY <= -75.0f - BALL_WIDTH / 2) {
                         gameOver = true;
                         return;
@@ -102,6 +114,8 @@ public class BlockBreakGame extends Game {
                             double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
                             ballMoveX *= (BALL_SPEED / UPDATES_PER_TICK / speed);
                             ballMoveY *= (BALL_SPEED / UPDATES_PER_TICK / speed);
+
+                            ballMoveUpdate = true;
                         }
                     }
 
@@ -118,6 +132,8 @@ public class BlockBreakGame extends Game {
                                 } else {
                                     ballMoveY = Math.abs(ballMoveY) * Math.signum(yComponent);
                                 }
+
+                                ballMoveUpdate = true;
                                 brick.hitsLeft--;
                                 if (brick.hitsLeft <= 0) {
                                     bricks.remove(i);
@@ -128,6 +144,10 @@ public class BlockBreakGame extends Game {
                         i++;
                     }
                 }
+            }
+
+            if (ballMoveUpdate && !isClientSide()) {
+                GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY));
             }
         }
     }

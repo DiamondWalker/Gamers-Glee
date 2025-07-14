@@ -24,7 +24,7 @@ import java.util.HashMap;
 public abstract class Game {
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
 
-    private final Player player;
+    protected final Player player;
 
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
