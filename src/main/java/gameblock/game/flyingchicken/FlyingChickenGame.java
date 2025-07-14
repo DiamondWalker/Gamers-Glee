@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
 import gameblock.util.CircularStack;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Random;
 
@@ -17,6 +18,10 @@ public class FlyingChickenGame extends Game {
 
     final Game.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, () -> chickenMotion = 2.56f);
     final CircularStack<Pipe> pipes = new CircularStack<>(5);
+
+    public FlyingChickenGame(Player player) {
+        super(player);
+    }
 
     @Override
     public void tick() {

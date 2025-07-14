@@ -1,6 +1,7 @@
 package gameblock.capability;
 
 import gameblock.game.Game;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;

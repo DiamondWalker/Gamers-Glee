@@ -1,7 +1,10 @@
 package gameblock.item;
 
 import gameblock.game.Game;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+
+import java.lang.reflect.Constructor;
 
 public class CartridgeItem<T extends Game> extends Item {
     private final Class<T> gameType;
@@ -11,9 +14,10 @@ public class CartridgeItem<T extends Game> extends Item {
         this.gameType = game;
     }
 
-    public T getNewGameInstance() {
+    public T getNewGameInstance(Player player) {
         try {
-            return gameType.newInstance();
+            Constructor<T> constructor = gameType.getConstructor(Player.class);
+            return constructor.newInstance(player);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

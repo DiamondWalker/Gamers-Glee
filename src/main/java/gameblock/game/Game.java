@@ -3,22 +3,63 @@ package gameblock.game;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import gameblock.packet.EndGamePacket;
+import gameblock.capability.GameCapability;
+import gameblock.capability.GameCapabilityProvider;
+import gameblock.gui.GameScreen;
+import gameblock.item.CartridgeItem;
+import gameblock.registry.GameblockItems;
+import gameblock.registry.GameblockPackets;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 
 import java.util.HashMap;
-import java.util.function.Consumer;
 
 public abstract class Game {
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
 
+    private final Player player;
+
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
 
-    public abstract void tick();
+    public Game(Player player) {
+        this.player = player;
+    }
+
+    public boolean isClientSide() {
+        return player.level().isClientSide();
+    }
+
+    public final void baseTick() {
+        tick();
+
+        if (
+                player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) &&
+                player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge &&
+                cartridge.isInstance(this)) {
+            return;
+        } else {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null && cap.isPlaying()) {
+                cap.setGame(null);
+                if (isClientSide()) {
+                    if (Minecraft.getInstance().screen instanceof GameScreen screen) screen.onClose();
+                    GameblockPackets.sendToServer(new EndGamePacket());
+                } else {
+                    GameblockPackets.sendToPlayer((ServerPlayer) player, new EndGamePacket());
+                }
+            }
+        }
+    }
+
+    protected abstract void tick();
 
     public abstract void render(GuiGraphics graphics, float partialTicks);
 

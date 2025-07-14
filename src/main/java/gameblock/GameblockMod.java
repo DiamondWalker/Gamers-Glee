@@ -35,6 +35,7 @@ public class GameblockMod
         IEventBus modEventBus = context.getModEventBus();
 
         GameblockItems.register(modEventBus);
+        context.getModEventBus().addListener(GameblockMod::commonSetup);
     }
 
     @SubscribeEvent

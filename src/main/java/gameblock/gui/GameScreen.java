@@ -2,14 +2,19 @@ package gameblock.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import gameblock.packet.EndGamePacket;
 import gameblock.GameblockMod;
+import gameblock.capability.GameCapability;
+import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.Game;
+import gameblock.registry.GameblockPackets;
 import net.minecraft.client.GameNarrator;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FastColor;
+import net.minecraft.world.entity.player.Player;
 
 public class GameScreen extends Screen {
     public static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/gameblock.png");
@@ -23,9 +28,21 @@ public class GameScreen extends Screen {
         this.game = game;
     }
 
+    public Game getGame() {
+        return game;
+    }
+
     @Override
     public void tick() {
-        game.tick();
+        super.tick();
+        Player player = Minecraft.getInstance().player;
+        if (player != null) {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null) {
+                if (cap.getGame() != null) return;
+            }
+        }
+        onClose();
     }
 
     @Override
@@ -72,6 +89,6 @@ public class GameScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        // TODO: send packet
+        GameblockPackets.sendToServer(new EndGamePacket());
     }
 }

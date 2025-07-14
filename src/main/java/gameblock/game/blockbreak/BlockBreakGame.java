@@ -3,6 +3,7 @@ package gameblock.game.blockbreak;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 
@@ -39,7 +40,8 @@ public class BlockBreakGame extends Game {
     final KeyBinding right = registerKey(InputConstants.KEY_RIGHT);
     final KeyBinding launch = registerKey(InputConstants.KEY_SPACE);
 
-    public BlockBreakGame() {
+    public BlockBreakGame(Player player) {
+        super(player);
         for (int y = 3; y <= 6; y++) {
             if (y < 6) {
                 for (int x = -14; x <= 14; x += 2) {

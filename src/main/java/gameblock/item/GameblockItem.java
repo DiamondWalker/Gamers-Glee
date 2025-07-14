@@ -24,17 +24,17 @@ public class GameblockItem extends Item {
         ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
         if (pUsedHand == InteractionHand.MAIN_HAND) {
             if (pPlayer.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge) {
-                Game gameInstance = cartridge.getNewGameInstance();
+                Game gameInstance = cartridge.getNewGameInstance(pPlayer);
 
-                if (pLevel.isClientSide()) {
-                    Minecraft.getInstance().setScreen(new GameScreen(gameInstance));
-                } else {
-                    GameCapability cap = pPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                    if (cap != null) {
-                        cap.setGame(gameInstance);
-                    } else {
-                        return InteractionResultHolder.fail(itemstack);
+                GameCapability cap = pPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (cap != null) {
+                    cap.setGame(gameInstance);
+
+                    if (pLevel.isClientSide()) {
+                        Minecraft.getInstance().setScreen(new GameScreen(gameInstance));
                     }
+                } else {
+                    return InteractionResultHolder.fail(itemstack);
                 }
 
                 pPlayer.awardStat(Stats.ITEM_USED.get(this));

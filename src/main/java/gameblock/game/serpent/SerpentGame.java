@@ -5,6 +5,7 @@ import gameblock.game.Game;
 import gameblock.util.Direction2D;
 import gameblock.util.TileGrid2D;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.Random;
 
@@ -26,7 +27,8 @@ public class SerpentGame extends Game {
 
     private boolean gameOver = false;
 
-    public SerpentGame() {
+    public SerpentGame(Player player) {
+        super(player);
         tiles = new TileGrid2D<>(-50, 50, -37, 37, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         randomFoodPosition();
