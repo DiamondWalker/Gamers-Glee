@@ -14,7 +14,7 @@ public class PlatformMovePacket extends UpdateGamePacket<BlockBreakGame> {
     }
 
     public PlatformMovePacket(FriendlyByteBuf buffer) {
-        readFromBuffer(buffer);
+        super(buffer);
     }
 
     @Override

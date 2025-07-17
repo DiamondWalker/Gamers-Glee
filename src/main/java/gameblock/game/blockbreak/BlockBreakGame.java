@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 
 public class BlockBreakGame extends Game {
-    private static final int UPDATES_PER_TICK = 3;
+    private static final int UPDATES_PER_TICK = 15;
 
     private static final float PLATFORM_Y = -50.0f;
     private static final float PLATFORM_WIDTH = 20.0f;
@@ -18,9 +18,9 @@ public class BlockBreakGame extends Game {
     private static final float PLATFORM_SPEED = 2.1f;
 
     private static final float BALL_WIDTH = 2.0f;
+    private static final float INITIAL_BALL_SPEED = 3.0f;
 
     private static final float BALL_START_Y = PLATFORM_Y + PLATFORM_HEIGHT / 2 + BALL_WIDTH / 2;
-    private static final float BALL_SPEED = 3.0f;
 
     private static final float BRICK_WIDTH = 9.7f;
     private static final float BRICK_HEIGHT = 4.7f;
@@ -39,6 +39,7 @@ public class BlockBreakGame extends Game {
     private boolean gameOver = false;
 
     ArrayList<Brick> bricks = new ArrayList<>();
+    protected int bricksBroken = 0;
 
     final KeyBinding left = registerKey(InputConstants.KEY_LEFT);
     final KeyBinding right = registerKey(InputConstants.KEY_RIGHT);
@@ -49,17 +50,21 @@ public class BlockBreakGame extends Game {
         for (int y = 3; y <= 6; y++) {
             if (y < 6) {
                 for (int x = -14; x <= 14; x += 2) {
-                    bricks.add(new Brick(x, y * 2 - 2 + 1, 3));
+                    bricks.add(new Brick(x, y * 2 - 2 + 1));
                 }
             }
             for (int x = -15; x <= 15; x += 2) {
-                bricks.add(new Brick(x, y * 2 - 2, 3));
+                bricks.add(new Brick(x, y * 2 - 2));
             }
         }
     }
 
+    private float calculateBallSpeed() {
+        return INITIAL_BALL_SPEED + ((float) bricksBroken / bricks.size()) * INITIAL_BALL_SPEED;
+    }
+
     protected void launchBall() {
-        ballMoveY = BALL_SPEED / UPDATES_PER_TICK;
+        ballMoveY = calculateBallSpeed() / UPDATES_PER_TICK;
         ballLaunched = true;
     }
 
@@ -113,15 +118,15 @@ public class BlockBreakGame extends Game {
                         if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
                             if (moveDir < 0) {
                                 ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                                ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
+                                //ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
                             } else if (moveDir > 0) {
                                 ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                                ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
+                                //ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
                             }
                             ballMoveY = Math.abs(ballMoveY);
                             double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
-                            ballMoveX *= (BALL_SPEED / UPDATES_PER_TICK / speed);
-                            ballMoveY *= (BALL_SPEED / UPDATES_PER_TICK / speed);
+                            ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
+                            ballMoveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
 
                             ballMoveUpdate = true;
                         }
@@ -144,11 +149,9 @@ public class BlockBreakGame extends Game {
 
                                 ballMoveUpdate = true;
                                 if (!isClientSide()) {
-                                    brick.hitsLeft--;
-                                    if (brick.hitsLeft <= 0) {
-                                        bricks.set(i, null);
-                                    }
-                                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i, brick.hitsLeft));
+                                    bricks.set(i, null);
+                                    bricksBroken++;
+                                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i));
                                 }
                             }
                         }
@@ -175,38 +178,16 @@ public class BlockBreakGame extends Game {
         for (Brick brick : bricks) {
             if (brick == null) continue;
 
-            int red = 0, green = 0, blue = 0;
-            switch (brick.hitsLeft) {
-                case 1: {
-                    red = 255;
-                    break;
-                }
-                case 2: {
-                    red = 255;
-                    green = 255;
-                    break;
-                }
-                case 3: {
-                    green = 255;
-                    break;
-                }
-                default: {
-                    red = 255;
-                    blue = 255;
-                }
-            }
-            drawRectangle(graphics, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT, red, green, blue, 255, 0);
+            drawRectangle(graphics, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT, 0, 255, 0, 255, 0);
         }
     }
 
     protected class Brick {
         protected int x, y;
-        protected int hitsLeft;
 
-        public Brick(int x, int y, int hits) {
+        public Brick(int x, int y) {
             this.x = x;
             this.y = y;
-            this.hitsLeft = hits;
         }
     }
 }

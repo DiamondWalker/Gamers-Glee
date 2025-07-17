@@ -11,10 +11,12 @@ import java.util.Random;
 
 public class SerpentGame extends Game {
     private static final int INITIAL_SNAKE_LENGTH = 5;
+    private static final int SNAKE_LENGTH_INCREASE = 5;
     private final TileGrid2D<Integer> tiles;
 
     private int headX, headY;
     private int snakeLength = INITIAL_SNAKE_LENGTH;
+    private int targetSnakeLength = INITIAL_SNAKE_LENGTH;
     private int foodX, foodY;
 
     private Direction2D snakeDirection = Direction2D.UP;
@@ -85,9 +87,10 @@ public class SerpentGame extends Game {
                 }
 
                 if (headX == foodX && headY == foodY) {
-                    snakeLength++;
+                    targetSnakeLength += SNAKE_LENGTH_INCREASE;
                     randomFoodPosition();
                 }
+                if (targetSnakeLength > snakeLength) snakeLength++;
             }
         }
     }

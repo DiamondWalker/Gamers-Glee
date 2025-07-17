@@ -4,6 +4,8 @@ import gameblock.game.blockbreak.BallLaunchPacket;
 import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.game.blockbreak.BrickUpdatePacket;
 import gameblock.game.blockbreak.PlatformMovePacket;
+import gameblock.game.flyingchicken.PipeSpawnPacket;
+import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.packet.EndGamePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -31,6 +33,10 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
         INSTANCE.registerMessage(id++, PlatformMovePacket.class, PlatformMovePacket::writeToBuffer, PlatformMovePacket::new, PlatformMovePacket::handle);
         INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
+
+        // flying chicken
+        INSTANCE.registerMessage(id++, WingFlapPacket.class, WingFlapPacket::writeToBuffer, WingFlapPacket::new, WingFlapPacket::handle);
+        INSTANCE.registerMessage(id++, PipeSpawnPacket.class, PipeSpawnPacket::writeToBuffer, PipeSpawnPacket::new, PipeSpawnPacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {
