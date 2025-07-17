@@ -43,6 +43,6 @@ public class TileGrid2D<T> {
 
     public T get(int x, int y) {
         Vec2i index = transformCoordinates(x, y);
-        return index != null ? (T) array[index.getX()][index.getY()] : null;
+        return index != null ? (T) array[index.getX()][index.getY()] : (T) defaultValue;
     }
 }

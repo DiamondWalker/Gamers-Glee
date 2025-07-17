@@ -10,7 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.Random;
 
 public class SerpentGame extends Game {
-    private static final int INITIAL_SNAKE_LENGTH = 5;
+    private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
     private final TileGrid2D<Integer> tiles;
 
@@ -70,21 +70,21 @@ public class SerpentGame extends Game {
             int nextY = headY + snakeDirection.getNormal().getY();
             snakeDirectionChanged = false;
 
-            if (Math.abs(nextX) > 50 || Math.abs(nextY) > 37 || getSnakeTicksFromTile(headX + snakeDirection.getNormal().getX(), headY + snakeDirection.getNormal().getY()) < snakeLength) {
+            int value = tiles.get(nextX, nextY);
+            if (value == -1 || value < snakeLength) {
                 gameOver = true;
             } else {
                 headX = nextX;
                 headY = nextY;
 
-                setSnakeTicksOfTile(headX, headY, 0);
-
-                for (int x = -50; x <= 50; x++) {
-                    for (int y = -37; y <= 37; y++) {
-                        if (getSnakeTicksFromTile(x, y) < Integer.MAX_VALUE) {
-                            setSnakeTicksOfTile(x, y, getSnakeTicksFromTile(x, y) + 1);
-                        }
+                tiles.setAll((Integer num) -> {
+                    if (num < Integer.MAX_VALUE) {
+                        return num + 1;
                     }
-                }
+                    return num;
+                });
+
+                setSnakeTicksOfTile(headX, headY, 0);
 
                 if (headX == foodX && headY == foodY) {
                     targetSnakeLength += SNAKE_LENGTH_INCREASE;
