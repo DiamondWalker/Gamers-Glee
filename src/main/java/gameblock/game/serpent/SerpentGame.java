@@ -49,7 +49,7 @@ public class SerpentGame extends Game {
                     snakeDirectionChanged = true;
                 }
             } else {
-                snakeDirection = dir; //
+                snakeDirection = dir;
             }
         } else {
             snakeDirection = dir;
