@@ -2,19 +2,22 @@ package gameblock.game.serpent;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
+import gameblock.registry.GameblockPackets;
 import gameblock.util.Direction2D;
 import gameblock.util.TileGrid2D;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class SerpentGame extends Game {
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
-    private final TileGrid2D<Integer> tiles;
+    protected final TileGrid2D<Integer> tiles;
 
-    private int headX, headY;
+    protected int headX, headY;
     private int snakeLength = INITIAL_SNAKE_LENGTH;
     private int targetSnakeLength = INITIAL_SNAKE_LENGTH;
     private int foodX, foodY;
@@ -22,10 +25,10 @@ public class SerpentGame extends Game {
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
 
-    final Game.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
-    final Game.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> setSnakeDirection(Direction2D.RIGHT));
-    final Game.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP));
-    final Game.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
+    final Game.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT, true));
+    final Game.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> setSnakeDirection(Direction2D.RIGHT, true));
+    final Game.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP, true));
+    final Game.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN, true));
 
     private boolean gameOver = false;
 
@@ -36,10 +39,42 @@ public class SerpentGame extends Game {
         randomFoodPosition();
     }
 
-    private void setSnakeDirection(Direction2D dir) {
-        if (dir != snakeDirection && dir != snakeDirection.getOpposite() && !snakeDirectionChanged) {
+    protected void setSnakeDirection(Direction2D dir, boolean sendUpdate) {
+        if (dir == snakeDirection) return;
+        if (tiles.get(headX + dir.getNormal().getX(), headY + dir.getNormal().getY()) == 1) return;
+        if (isClientSide()) {
+            if (sendUpdate) {
+                if (!snakeDirectionChanged) {
+                    GameblockPackets.sendToServer(new SnakeDirectionChangePacket(dir));
+                    snakeDirectionChanged = true;
+                }
+            } else {
+                snakeDirection = dir;
+            }
+        } else {
             snakeDirection = dir;
-            snakeDirectionChanged = true;
+            if (sendUpdate) {
+                ArrayList<Integer> coords = new ArrayList<>(snakeLength * 2);
+                int x = headX, y = headY;
+                int i = 0;
+                TILE_LOOP: while (true) {
+                    coords.add(x);
+                    coords.add(y);
+                    i++;
+
+                    for (Direction2D adjacent : Direction2D.values()) {
+                        int newX = adjacent.getNormal().getX() + x, newY = adjacent.getNormal().getY() + y;
+                        if (tiles.get(newX, newY) == i) {
+                            x = newX;
+                            y = newY;
+                            continue TILE_LOOP;
+                        }
+                    }
+
+                    break;
+                }
+                GameblockPackets.sendToPlayer((ServerPlayer) player, new SnakeUpdatePacket(snakeDirection, coords));
+            }
         }
     }
 

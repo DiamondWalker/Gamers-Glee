@@ -22,6 +22,7 @@ public class TileGrid2D<T> {
 
     private Vec2i transformCoordinates(int x, int y) {
         Vec2i index = origin.offset(x, y);
+        if (index.getX() < 0 || index.getY() < 0) return null;
         if (index.getX() >= array.length) return null;
         if (index.getY() >= array[0].length) return null;
         return index;
