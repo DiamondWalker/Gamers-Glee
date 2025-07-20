@@ -38,7 +38,7 @@ public class SerpentGame extends Game {
         if (!isClientSide()) randomFoodPosition();
     }
 
-    protected void setSnakeDirection(Direction2D dir, boolean sendUpdate) { // TODO: make turns
+    protected void setSnakeDirection(Direction2D dir, boolean sendUpdate) { // TODO: make turns less noticeably desynced
         if (dir == snakeDirection) return;
         if (tiles.get(headX + dir.getNormal().getX(), headY + dir.getNormal().getY()) == 1) return;
         if (isClientSide()) {

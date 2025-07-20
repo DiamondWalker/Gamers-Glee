@@ -33,7 +33,11 @@ public class TileGrid2D<T> {
         if (index != null) array[index.getX()][index.getY()] = value;
     }
 
-    // TODO: proper documentation here
+    /**
+     * Update all values in this grid
+     * @param func A function that takes the current value at these indices and returns the updated value.
+     *             Return the provided value if you want to leave it unchanged.
+     */
     public void setAll(Function<T, T> func) {
         for (int x = 0; x < array.length; x++) {
             for (int y = 0; y < array[0].length; y++) {
