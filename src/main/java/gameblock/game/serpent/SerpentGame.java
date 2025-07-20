@@ -19,7 +19,6 @@ public class SerpentGame extends Game {
 
     protected int headX, headY;
     private int snakeLength = INITIAL_SNAKE_LENGTH;
-    private int targetSnakeLength = INITIAL_SNAKE_LENGTH;
     private int foodX, foodY;
 
     private Direction2D snakeDirection = Direction2D.UP;
@@ -94,10 +93,6 @@ public class SerpentGame extends Game {
         } while (getSnakeTicksFromTile(foodX, foodY) < snakeLength);
     }
 
-    private int getScore() {
-        return snakeLength - INITIAL_SNAKE_LENGTH;
-    }
-
     @Override
     public void tick() {
         if (!gameOver) {
@@ -114,7 +109,8 @@ public class SerpentGame extends Game {
 
                 tiles.setAll((Integer num) -> {
                     if (num < Integer.MAX_VALUE) {
-                        return num + 1;
+                        if (num < snakeLength) return num + 1;
+                        return Integer.MAX_VALUE;
                     }
                     return num;
                 });
@@ -122,10 +118,10 @@ public class SerpentGame extends Game {
                 setSnakeTicksOfTile(headX, headY, 0);
 
                 if (headX == foodX && headY == foodY) {
-                    targetSnakeLength += SNAKE_LENGTH_INCREASE;
+                    snakeLength += SNAKE_LENGTH_INCREASE;
                     randomFoodPosition();
                 }
-                if (targetSnakeLength > snakeLength) snakeLength++;
+                //if (targetSnakeLength > snakeLength) snakeLength++;
             }
         }
     }
