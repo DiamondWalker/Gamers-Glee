@@ -22,7 +22,7 @@ public class GameblockItems {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GameblockMod.MODID);
 
     public static final RegistryObject<Item> GAMEBLOCK = ITEMS.register("gameblock", GameblockItem::new);
-    public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("bock_break", () -> new CartridgeItem(BlockBreakGame.class)); // block break
+    public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("block_break", () -> new CartridgeItem(BlockBreakGame.class)); // block break
     public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(SerpentGame.class)); // snake
     public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem(FlyingChickenGame.class)); // flappy bird
     /*public static final RegistryObject<Item> CARTRIDGE_RHYTHM_FIGURES = ITEMS.register("rhythm_figures", () -> new CartridgeItem(Game::new)); // just shapes and beats
