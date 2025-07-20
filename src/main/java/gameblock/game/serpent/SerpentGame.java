@@ -18,8 +18,8 @@ public class SerpentGame extends Game {
     protected final TileGrid2D<Integer> tiles;
 
     protected int headX, headY;
-    private int snakeLength = INITIAL_SNAKE_LENGTH;
-    private int foodX, foodY;
+    protected int snakeLength = INITIAL_SNAKE_LENGTH;
+    protected int foodX = Integer.MAX_VALUE, foodY = Integer.MAX_VALUE; // these values are why outside the game area so it's like the food doesn't exist
 
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
@@ -35,10 +35,10 @@ public class SerpentGame extends Game {
         super(player);
         tiles = new TileGrid2D<>(-50, 50, -37, 37, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
-        randomFoodPosition();
+        if (!isClientSide()) randomFoodPosition();
     }
 
-    protected void setSnakeDirection(Direction2D dir, boolean sendUpdate) {
+    protected void setSnakeDirection(Direction2D dir, boolean sendUpdate) { // TODO: make turns
         if (dir == snakeDirection) return;
         if (tiles.get(headX + dir.getNormal().getX(), headY + dir.getNormal().getY()) == 1) return;
         if (isClientSide()) {
@@ -91,6 +91,7 @@ public class SerpentGame extends Game {
             foodX = random.nextInt(51) - 25;
             foodY = random.nextInt(51) - 25;
         } while (getSnakeTicksFromTile(foodX, foodY) < snakeLength);
+        GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, snakeLength));
     }
 
     @Override
@@ -117,7 +118,7 @@ public class SerpentGame extends Game {
 
                 setSnakeTicksOfTile(headX, headY, 0);
 
-                if (headX == foodX && headY == foodY) {
+                if (headX == foodX && headY == foodY && !isClientSide()) {
                     snakeLength += SNAKE_LENGTH_INCREASE;
                     randomFoodPosition();
                 }

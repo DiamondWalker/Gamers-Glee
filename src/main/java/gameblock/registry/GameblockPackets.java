@@ -6,6 +6,7 @@ import gameblock.game.blockbreak.BrickUpdatePacket;
 import gameblock.game.blockbreak.PlatformMovePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
+import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeDirectionChangePacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
 import gameblock.packet.EndGamePacket;
@@ -39,6 +40,7 @@ public class GameblockPackets {
         // serpent
         INSTANCE.registerMessage(id++, SnakeDirectionChangePacket.class, SnakeDirectionChangePacket::writeToBuffer, SnakeDirectionChangePacket::new, SnakeDirectionChangePacket::handle);
         INSTANCE.registerMessage(id++, SnakeUpdatePacket.class, SnakeUpdatePacket::writeToBuffer, SnakeUpdatePacket::new, SnakeUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, EatFoodPacket.class, EatFoodPacket::writeToBuffer, EatFoodPacket::new, EatFoodPacket::handle);
 
         // flying chicken
         INSTANCE.registerMessage(id++, WingFlapPacket.class, WingFlapPacket::writeToBuffer, WingFlapPacket::new, WingFlapPacket::handle);
