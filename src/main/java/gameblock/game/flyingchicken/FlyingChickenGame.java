@@ -56,10 +56,6 @@ public class FlyingChickenGame extends Game {
     public void render(GuiGraphics graphics, float partialTicks) {
         graphics.fill(-100, -80, 100, 80, FastColor.ARGB32.color(255, 76, 196, 230)); // sky
 
-        drawTexture(graphics, SPRITE,
-                -70, (chickenY + partialTicks * chickenMotion) - 40, 12, 10, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
-                0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
-
         final float pipeOffset = calculatePipeOffset(partialTicks);
         pipes.forEach((Pipe pipe) -> {
             drawTexture(graphics, SPRITE,
@@ -70,6 +66,10 @@ public class FlyingChickenGame extends Game {
                     (pipe.x - pipeOffset), pipe.y + (80 + SPACE_BETWEEN_PIPES / 2), 23, 160, 0,
                     211, 0, 23, 160);
         });
+
+        drawTexture(graphics, SPRITE,
+                -70, (chickenY + partialTicks * chickenMotion) - 40, 12, 10, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
+                0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
     }
 
     private float calculatePipeOffset(float partialTicks) {
