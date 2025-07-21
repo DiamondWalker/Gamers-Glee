@@ -20,6 +20,7 @@ public class FlyingChickenGame extends Game {
     protected float chickenY = 0.0f;
     private float chickenMotion = 0.0f;
     protected long time = 0;
+    private long lastFlapTime = Long.MIN_VALUE;
 
     final Game.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
@@ -29,7 +30,10 @@ public class FlyingChickenGame extends Game {
     }
 
     protected void flap() {
-        if (isClientSide()) GameblockPackets.sendToServer(new WingFlapPacket(time, chickenY));
+        if (isClientSide()) {
+            GameblockPackets.sendToServer(new WingFlapPacket(time, chickenY));
+            lastFlapTime = time;
+        }
         chickenMotion = 2.56f;
     }
 
@@ -50,7 +54,9 @@ public class FlyingChickenGame extends Game {
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         graphics.fill(-100, -80, 100, 80, Integer.MAX_VALUE);
-        drawTexture(graphics, SPRITE, -70, (chickenY + partialTicks * chickenMotion) - 40, 10, 8, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK), 0, 0, 10, 8);
+        drawTexture(graphics, SPRITE,
+                -70, (chickenY + partialTicks * chickenMotion) - 40, 10, 8, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
+                0, time - lastFlapTime < 2 ? 0 : 8, 10, 8);
 
         final float pipeOffset = calculatePipeOffset(partialTicks);
         pipes.forEach((Pipe pipe) -> {
