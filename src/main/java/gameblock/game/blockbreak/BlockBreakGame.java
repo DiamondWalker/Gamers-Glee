@@ -36,8 +36,6 @@ public class BlockBreakGame extends Game {
 
     boolean ballLaunched = false;
 
-    private boolean gameOver = false;
-
     ArrayList<Brick> bricks = new ArrayList<>();
     protected int bricksBroken = 0;
 
@@ -70,7 +68,7 @@ public class BlockBreakGame extends Game {
 
     @Override
     public void tick() {
-        if (!gameOver) {
+        if (!isGameOver()) {
             oldPlatformPos = platformPos;
             oldBallX = ballX;
             oldBallY = ballY;
@@ -111,7 +109,7 @@ public class BlockBreakGame extends Game {
                         ballMoveY = -Math.abs(ballMoveY);
                         ballMoveUpdate = true;
                     } else if (ballY <= -75.0f - BALL_WIDTH / 2) {
-                        gameOver = true;
+                        if (!isClientSide()) gameOver();
                         return;
                     }
                     if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {

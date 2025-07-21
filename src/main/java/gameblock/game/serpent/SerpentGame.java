@@ -29,8 +29,6 @@ public class SerpentGame extends Game {
     final Game.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP, true));
     final Game.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN, true));
 
-    private boolean gameOver = false;
-
     public SerpentGame(Player player) {
         super(player);
         tiles = new TileGrid2D<>(-50, 50, -37, 37, -1);
@@ -96,14 +94,14 @@ public class SerpentGame extends Game {
 
     @Override
     public void tick() {
-        if (!gameOver) {
+        if (!isGameOver()) {
             int nextX = headX + snakeDirection.getNormal().getX();
             int nextY = headY + snakeDirection.getNormal().getY();
             snakeDirectionChanged = false;
 
             int value = tiles.get(nextX, nextY);
-            if (value == -1 || value < snakeLength) {
-                gameOver = true;
+            if (value == -1 || value < snakeLength && !isClientSide()) {
+                gameOver();
             } else {
                 headX = nextX;
                 headY = nextY;

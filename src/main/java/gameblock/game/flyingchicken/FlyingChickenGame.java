@@ -26,8 +26,6 @@ public class FlyingChickenGame extends Game {
     final Game.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
 
-    private boolean gameOver = false;
-
     public FlyingChickenGame(Player player) {
         super(player);
     }
@@ -42,15 +40,15 @@ public class FlyingChickenGame extends Game {
 
     @Override
     public void tick() {
-        if (!gameOver) {
+        if (!isGameOver()) {
             chickenY += chickenMotion;
             float chickenX = calculatePipeOffset(0.0f) - 70;
             chickenMotion -= 0.32f;
 
-            /*if (!isClientSide())*/ pipes.forEach((Pipe pipe) -> {
+            if (!isClientSide()) pipes.forEach((Pipe pipe) -> {
                 if (Math.abs(pipe.x - chickenX) - 6 < 12) {
                     if (Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
-                        this.gameOver = true;
+                        gameOver();
                     }
                 }
             });

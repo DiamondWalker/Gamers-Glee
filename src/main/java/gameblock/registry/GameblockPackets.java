@@ -1,5 +1,6 @@
 package gameblock.registry;
 
+import gameblock.game.GameOverPacket;
 import gameblock.game.blockbreak.BallLaunchPacket;
 import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.game.blockbreak.BrickUpdatePacket;
@@ -30,6 +31,7 @@ public class GameblockPackets {
 
     public static void registerPackets() {
         INSTANCE.registerMessage(id++, EndGamePacket.class, EndGamePacket::writeToBuffer, EndGamePacket::new, EndGamePacket::handle);
+        INSTANCE.registerMessage(id++, GameOverPacket.class, GameOverPacket::writeToBuffer, GameOverPacket::new, GameOverPacket::handle);
 
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);

@@ -31,12 +31,23 @@ public abstract class Game {
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
 
+    private boolean gameOver = false;
+
     public Game(Player player) {
         this.player = player;
     }
 
     public boolean isClientSide() {
         return player.level().isClientSide();
+    }
+
+    protected void gameOver() {
+        gameOver = true;
+        if (!isClientSide()) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameOverPacket());
+    }
+
+    protected boolean isGameOver() {
+        return gameOver;
     }
 
     public final void baseTick() {
@@ -159,6 +170,7 @@ public abstract class Game {
     }
 
     public final boolean pressKey(int key) {
+        if (isGameOver()) return false;
         KeyBinding binding = keyBindings.get(key);
         if (binding != null) {
             if (binding.pressAction != null) binding.pressAction.run();
@@ -169,6 +181,7 @@ public abstract class Game {
     }
 
     public final boolean releaseKey(int key) {
+        if (isGameOver()) return false;
         if (keyBindings.containsKey(key)) {
             keyBindings.get(key).pressed = false;
             return true;
