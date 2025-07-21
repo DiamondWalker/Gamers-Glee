@@ -26,6 +26,8 @@ public class FlyingChickenGame extends Game {
     final Game.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
 
+    private boolean gameOver = false;
+
     public FlyingChickenGame(Player player) {
         super(player);
     }
@@ -40,16 +42,28 @@ public class FlyingChickenGame extends Game {
 
     @Override
     public void tick() {
-        chickenY += chickenMotion;
-        chickenMotion -= 0.32f;
-        if (time % 60 == 0 && !isClientSide()) {
-            float x = calculatePipeOffset(0.0f) + 140;
-            float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
-            pipes.enqueue(new Pipe(x, y));
-            GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));
-        }
+        if (!gameOver) {
+            chickenY += chickenMotion;
+            float chickenX = calculatePipeOffset(0.0f) - 70;
+            chickenMotion -= 0.32f;
 
-        time++;
+            /*if (!isClientSide())*/ pipes.forEach((Pipe pipe) -> {
+                if (Math.abs(pipe.x - chickenX) - 6 < 12) {
+                    if (Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
+                        this.gameOver = true;
+                    }
+                }
+            });
+
+            if (time % 60 == 0 && !isClientSide()) {
+                float x = chickenX + 140;
+                float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
+                pipes.enqueue(new Pipe(x, y));
+                GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));
+            }
+
+            time++;
+        }
     }
 
     @Override
@@ -68,12 +82,12 @@ public class FlyingChickenGame extends Game {
         });
 
         drawTexture(graphics, SPRITE,
-                -70, (chickenY + partialTicks * chickenMotion) - 40, 12, 10, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
+                -70, (chickenY + partialTicks * chickenMotion), 12, 10, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
                 0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
     }
 
     private float calculatePipeOffset(float partialTicks) {
-        return ((float) time + partialTicks)  * HORIZONTAL_MOVEMENT_PER_TICK;
+        return ((float) time + partialTicks) * HORIZONTAL_MOVEMENT_PER_TICK;
     }
 
     protected static class Pipe {
