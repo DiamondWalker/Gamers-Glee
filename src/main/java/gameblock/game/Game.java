@@ -137,10 +137,10 @@ public abstract class Game {
 
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix4f, pMinX, pMinY, 0.0f).uv(pMinU, pMinV).endVertex();
-        bufferbuilder.vertex(matrix4f, pMinX, pMaxY, 0.0f).uv(pMinU, pMaxV).endVertex();
-        bufferbuilder.vertex(matrix4f, pMaxX, pMaxY, 0.0f).uv(pMaxU, pMaxV).endVertex();
-        bufferbuilder.vertex(matrix4f, pMaxX, pMinY, 0.0f).uv(pMaxU, pMinV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMinX, pMinY, 0.0f).uv(pMaxU, pMinV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMinX, pMaxY, 0.0f).uv(pMaxU, pMaxV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMaxX, pMaxY, 0.0f).uv(pMinU, pMaxV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMaxX, pMinY, 0.0f).uv(pMinU, pMinV).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
 
         pose.popPose();

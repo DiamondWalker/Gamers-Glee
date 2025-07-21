@@ -8,6 +8,7 @@ import gameblock.util.CircularStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Random;
@@ -53,10 +54,11 @@ public class FlyingChickenGame extends Game {
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        graphics.fill(-100, -80, 100, 80, Integer.MAX_VALUE);
+        graphics.fill(-100, -80, 100, 80, FastColor.ARGB32.color(255, 76, 196, 230)); // sky
+
         drawTexture(graphics, SPRITE,
-                -70, (chickenY + partialTicks * chickenMotion) - 40, 10, 8, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
-                0, time - lastFlapTime < 2 ? 0 : 8, 10, 8);
+                -70, (chickenY + partialTicks * chickenMotion) - 40, 12, 10, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
+                0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
 
         final float pipeOffset = calculatePipeOffset(partialTicks);
         pipes.forEach((Pipe pipe) -> {
