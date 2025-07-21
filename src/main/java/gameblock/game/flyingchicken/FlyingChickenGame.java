@@ -1,16 +1,19 @@
 package gameblock.game.flyingchicken;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import gameblock.GameblockMod;
 import gameblock.game.Game;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.CircularStack;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Random;
 
 public class FlyingChickenGame extends Game {
+    public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/flying_chicken.png");
     private static final float HORIZONTAL_MOVEMENT_PER_TICK = 1.5f;
     private static final float SPACE_BETWEEN_PIPES = 30.0f;
 
@@ -46,19 +49,18 @@ public class FlyingChickenGame extends Game {
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        drawRectangle(graphics,
-                -70, (chickenY + partialTicks * chickenMotion) - 40, 10, 8,
-                255, 255, 0, 255, 0);
+        graphics.fill(-100, -80, 100, 80, Integer.MAX_VALUE);
+        drawTexture(graphics, SPRITE, -70, (chickenY + partialTicks * chickenMotion) - 40, 10, 8, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK), 0, 0, 10, 8);
 
         final float pipeOffset = calculatePipeOffset(partialTicks);
         pipes.forEach((Pipe pipe) -> {
-            drawRectangle(graphics,
-                    (pipe.x - pipeOffset), pipe.y - (80 + SPACE_BETWEEN_PIPES / 2), 23, 160,
-                    0, 255, 0, 255, 0);
+            drawTexture(graphics, SPRITE,
+                    (pipe.x - pipeOffset), pipe.y - (80 + SPACE_BETWEEN_PIPES / 2), 23, 160, 0,
+                    233, 0, 23, 160);
 
-            drawRectangle(graphics,
-                    (pipe.x - pipeOffset), pipe.y + (80 + SPACE_BETWEEN_PIPES / 2), 23, 160,
-                    0, 255, 0, 255, 0);
+            drawTexture(graphics, SPRITE,
+                    (pipe.x - pipeOffset), pipe.y + (80 + SPACE_BETWEEN_PIPES / 2), 23, 160, 0,
+                    211, 0, 23, 160);
         });
     }
 

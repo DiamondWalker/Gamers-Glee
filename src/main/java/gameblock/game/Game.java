@@ -1,7 +1,7 @@
 package gameblock.game;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import gameblock.packet.EndGamePacket;
 import gameblock.capability.GameCapability;
@@ -12,7 +12,9 @@ import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
@@ -98,6 +100,48 @@ public abstract class Game {
         vertexconsumer.vertex(matrix4f, pMaxX, pMaxY, 0.0f).color(f, f1, f2, f3).endVertex();
         vertexconsumer.vertex(matrix4f, pMaxX, pMinY, 0.0f).color(f, f1, f2, f3).endVertex();
         graphics.flush();
+
+        pose.popPose();
+    }
+
+    protected final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
+        RenderSystem.setShaderTexture(0, texture);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0.0f);
+        pose.mulPose(Axis.ZP.rotation(angle));
+        Matrix4f matrix4f = pose.last().pose();
+
+        float pMinX = -width / 2;
+        float pMaxX = width / 2;
+        float pMinY = -height / 2;
+        float pMaxY = height / 2;
+
+        if (pMinX < pMaxX) {
+            float i = pMinX;
+            pMinX = pMaxX;
+            pMaxX = i;
+        }
+
+        if (pMinY < pMaxY) {
+            float j = pMinY;
+            pMinY = pMaxY;
+            pMaxY = j;
+        }
+
+        float pMinU = (float) u / 256;
+        float pMinV = (float) v / 256;
+        float pMaxU = (float) (u + uWidth) / 256;
+        float pMaxV = (float) (v + vHeight) / 256;
+
+        BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
+        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
+        bufferbuilder.vertex(matrix4f, pMinX, pMinY, 0.0f).uv(pMinU, pMinV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMinX, pMaxY, 0.0f).uv(pMinU, pMaxV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMaxX, pMaxY, 0.0f).uv(pMaxU, pMaxV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMaxX, pMinY, 0.0f).uv(pMaxU, pMinV).endVertex();
+        BufferUploader.drawWithShader(bufferbuilder.end());
 
         pose.popPose();
     }
