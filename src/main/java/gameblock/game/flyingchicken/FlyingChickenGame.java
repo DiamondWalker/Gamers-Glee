@@ -22,6 +22,8 @@ public class FlyingChickenGame extends Game {
     private float chickenMotion = 0.0f;
     protected long time = 0;
     private long lastFlapTime = Long.MIN_VALUE;
+    private long gameOverTime = 0;
+    private float gameOverFallDirection = 0.0f;
 
     final Game.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
@@ -36,6 +38,12 @@ public class FlyingChickenGame extends Game {
             lastFlapTime = time;
         }
         chickenMotion = 2.56f;
+    }
+
+    @Override
+    protected void gameOver() {
+        super.gameOver();
+        gameOverFallDirection = new Random().nextFloat() * 2 - 1;
     }
 
     @Override
@@ -61,6 +69,8 @@ public class FlyingChickenGame extends Game {
             }
 
             time++;
+        } else {
+            gameOverTime++;
         }
     }
 
@@ -79,12 +89,26 @@ public class FlyingChickenGame extends Game {
                     211, 0, 23, 160);
         });
 
-        drawTexture(graphics, SPRITE,
-                -70, (chickenY + partialTicks * chickenMotion), 12, 10, (float)Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
-                0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
+        if (!isGameOver()) {
+            drawTexture(graphics, SPRITE,
+                    -70, (chickenY + partialTicks * chickenMotion), 12, 10, (float) Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
+                    0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
+        } else {
+            float deathTime = gameOverTime + partialTicks;
+            float y = deathTime / 5 - 2;
+            y = -(y * y) + 4;
+            y *= 5;
+            y += chickenY;
+
+            float rotationOffset = deathTime / 5 * -gameOverFallDirection;
+            drawTexture(graphics, SPRITE,
+                    -70 + deathTime * gameOverFallDirection, y, 12, 10, (float) Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK) + rotationOffset,
+                    0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
+        }
     }
 
     private float calculatePipeOffset(float partialTicks) {
+        if (isGameOver()) partialTicks = 0.0f;
         return ((float) time + partialTicks) * HORIZONTAL_MOVEMENT_PER_TICK;
     }
 
