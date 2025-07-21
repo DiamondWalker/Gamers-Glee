@@ -7,6 +7,7 @@ import gameblock.game.serpent.SerpentGame;
 import gameblock.item.CartridgeItem;
 import gameblock.item.GameblockItem;
 import gameblock.registry.GameblockItems;
+import gameblock.registry.GameblockLootModifiers;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
@@ -35,6 +36,9 @@ public class GameblockMod
         IEventBus modEventBus = context.getModEventBus();
 
         GameblockItems.register(modEventBus);
+
+        GameblockLootModifiers.register(modEventBus);
+
         context.getModEventBus().addListener(GameblockMod::commonSetup);
     }
 

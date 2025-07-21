@@ -62,7 +62,7 @@ public class FlyingChickenGame extends Game {
             });
 
             if (time % 60 == 0 && !isClientSide()) {
-                float x = chickenX + 140;
+                float x = chickenX + 210;
                 float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
                 pipes.enqueue(new Pipe(x, y));
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));

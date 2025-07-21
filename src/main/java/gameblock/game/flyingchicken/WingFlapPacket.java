@@ -31,5 +31,7 @@ public class WingFlapPacket extends UpdateGamePacket<FlyingChickenGame> {
     @Override
     public void handleGameUpdate(FlyingChickenGame game) {
         game.chickenY = y;
+        game.time = time;
+        game.flap();
     }
 }
