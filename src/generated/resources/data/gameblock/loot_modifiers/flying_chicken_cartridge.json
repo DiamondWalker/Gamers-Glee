@@ -3,12 +3,12 @@
   "conditions": [
     {
       "condition": "forge:loot_table_id",
-      "loot_table_id": "minecraft:chests/simple_dungeon"
+      "loot_table_id": "minecraft:chests/pillager_outpost"
     },
     {
-      "chance": 0.2,
+      "chance": 0.5,
       "condition": "minecraft:random_chance"
     }
   ],
-  "item": "gameblock:block_break"
+  "item": "gameblock:flying_chicken"
 }

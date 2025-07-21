@@ -1,4 +1,4 @@
-package gameblock.loot;
+package gameblock.datagen;
 
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.Codec;

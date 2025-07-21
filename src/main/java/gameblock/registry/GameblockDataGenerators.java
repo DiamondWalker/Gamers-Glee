@@ -1,7 +1,7 @@
 package gameblock.registry;
 
 import gameblock.GameblockMod;
-import gameblock.loot.GameblockLootModifierProvider;
+import gameblock.datagen.GameblockLootModifierProvider;
 import net.minecraftforge.data.event.GatherDataEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

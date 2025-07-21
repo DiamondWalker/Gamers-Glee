@@ -1,6 +1,8 @@
 {
   "entries": [
-    "gameblock:block_break_cartridge"
+    "gameblock:flying_chicken_cartridge",
+    "gameblock:block_break_cartridge",
+    "gameblock:serpent_cartridge"
   ],
   "replace": false
 }
