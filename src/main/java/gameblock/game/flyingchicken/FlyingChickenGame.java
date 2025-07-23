@@ -21,6 +21,7 @@ public class FlyingChickenGame extends Game {
     protected float chickenY = 0.0f;
     private float chickenMotion = 0.0f;
     protected long time = 0;
+    private int pipesSpawned = 0; // used to ensure the same pipe isn't spawned twice, since wing flap packets can sometimes move the bird back and make another pair spawn
     private long lastFlapTime = Long.MIN_VALUE;
     private long gameOverTime = 0;
     private float gameOverFallDirection = 0.0f;
@@ -61,11 +62,13 @@ public class FlyingChickenGame extends Game {
                 }
             });
 
-            if (time % 60 == 0 && !isClientSide()) {
-                float x = chickenX + 210;
+            if (time / 60 >= pipesSpawned && !isClientSide()) {
+                float x = pipesSpawned * 60 * HORIZONTAL_MOVEMENT_PER_TICK + 120;
                 float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
                 pipes.enqueue(new Pipe(x, y));
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));
+
+                pipesSpawned++;
             }
 
             time++;
