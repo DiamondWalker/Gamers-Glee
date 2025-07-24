@@ -30,6 +30,6 @@ public class GameblockLootModifierProvider extends GlobalLootModifierProvider {
 
         add("flying_chicken_cartridge", new AddItemModifier(new LootItemCondition[] {
                 new LootTableIdCondition.Builder(new ResourceLocation("chests/pillager_outpost")).build(),
-                LootItemRandomChanceCondition.randomChance(0.3f).build()}, GameblockItems.CARTRIDGE_FLYING_CHICKEN.get()));
+                LootItemRandomChanceCondition.randomChance(0.5f).build()}, GameblockItems.CARTRIDGE_FLYING_CHICKEN.get()));
     }
 }
