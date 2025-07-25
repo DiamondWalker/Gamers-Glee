@@ -40,6 +40,6 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
     public void handleGameUpdate(SerpentGame game) {
         game.foodX = newFoodX;
         game.foodY = newFoodY;
-        game.snakeLength = newSnakeLength;
+        game.targetSnakeLength = newSnakeLength;
     }
 }
