@@ -28,7 +28,8 @@ public class BrickUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     public void handleGameUpdate(BlockBreakGame game) {
         BlockBreakGame.Brick brick = game.bricks.get(this.brick);
         if (brick != null) {
-            game.bricks.set(this.brick, null);
+            if (brick.breaking == 0) brick.breaking = BlockBreakGame.BRICK_BREAK_FLASH_TIME;
+            brick.confirmBreak = true;
             game.bricksBroken++;
         }
     }

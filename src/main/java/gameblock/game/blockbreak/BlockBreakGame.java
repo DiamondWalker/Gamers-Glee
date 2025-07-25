@@ -25,6 +25,8 @@ public class BlockBreakGame extends Game {
     private static final float BRICK_WIDTH = 9.7f;
     private static final float BRICK_HEIGHT = 4.7f;
 
+    protected static final int BRICK_BREAK_FLASH_TIME = 30;
+
     float platformPos = 0.0f;
     float oldPlatformPos = platformPos;
     byte oldMoveDir = 0;
@@ -133,6 +135,14 @@ public class BlockBreakGame extends Game {
                     for (int i = 0; i < bricks.size(); i++) {
                         Brick brick = bricks.get(i);
                         if (brick == null) continue;
+                        if (brick.breaking > 0) {
+                            brick.breaking--;
+                            continue;
+                        } else if (brick.confirmBreak) {
+                            bricks.set(i, null);
+                            continue;
+                        }
+
                         float brickX = brick.x * 5;
                         float brickY = brick.y * 5;
                         if (ballX >= brickX - (BALL_WIDTH + BRICK_WIDTH) / 2 && ballX <= brickX + (BALL_WIDTH + BRICK_WIDTH) / 2) {
@@ -150,6 +160,8 @@ public class BlockBreakGame extends Game {
                                     bricks.set(i, null);
                                     bricksBroken++;
                                     GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i));
+                                } else {
+                                    bricks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
                                 }
                             }
                         }
@@ -176,12 +188,18 @@ public class BlockBreakGame extends Game {
         for (Brick brick : bricks) {
             if (brick == null) continue;
 
-            drawRectangle(graphics, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT, 0, 255, 0, 255, 0);
+            drawRectangle(graphics, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
+                    brick.breaking > 0 ? 255 : 0,
+                    255,
+                    brick.breaking > 0 ? 255 : 0,
+                    255, 0);
         }
     }
 
     protected class Brick {
         protected int x, y;
+        protected boolean confirmBreak = false;
+        protected int breaking = 0;
 
         public Brick(int x, int y) {
             this.x = x;
