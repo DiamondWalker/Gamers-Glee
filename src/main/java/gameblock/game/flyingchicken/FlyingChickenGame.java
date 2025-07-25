@@ -54,13 +54,19 @@ public class FlyingChickenGame extends Game {
             float chickenX = calculatePipeOffset(0.0f) - 70;
             chickenMotion -= 0.32f;
 
-            if (!isClientSide()) pipes.forEach((Pipe pipe) -> {
-                if (Math.abs(pipe.x - chickenX) - 6 < 12) {
-                    if (Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
-                        gameOver();
-                    }
+            if (!isClientSide()) {
+                if (Math.abs(chickenY) > 75 - 5) {
+                    gameOver();
+                } else {
+                    pipes.forEach((Pipe pipe) -> {
+                        if (Math.abs(pipe.x - chickenX) - 6 < 12) {
+                            if (Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
+                                gameOver();
+                            }
+                        }
+                    });
                 }
-            });
+            }
 
             if (time / 60 >= pipesSpawned && !isClientSide()) {
                 float x = pipesSpawned * 60 * HORIZONTAL_MOVEMENT_PER_TICK + 120;
