@@ -58,10 +58,10 @@ public abstract class Game {
                 player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge &&
                 cartridge.isInstance(this)) {
             return;
-        } else {
+        } else if (!(this instanceof GameblockOS)) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
-                cap.setGame(null);
+                cap.setGame(null, isClientSide());
                 if (isClientSide()) {
                     if (Minecraft.getInstance().screen instanceof GameScreen screen) screen.onClose();
                     GameblockPackets.sendToServer(new EndGamePacket());

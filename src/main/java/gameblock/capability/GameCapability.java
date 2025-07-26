@@ -1,6 +1,7 @@
 package gameblock.capability;
 
 import gameblock.game.Game;
+import gameblock.gui.GameScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -23,8 +24,15 @@ public class GameCapability {
         return game != null;
     }
 
-    public void setGame(Game game) {
+    public void setGame(Game game, boolean clientSide) {
         this.game = game;
+        if (clientSide) {
+            if (game == null) {
+                if (Minecraft.getInstance().screen instanceof GameScreen) Minecraft.getInstance().screen.onClose();
+            } else {
+                Minecraft.getInstance().setScreen(new GameScreen(game));
+            }
+        }
     }
 
     public Game getGame() {

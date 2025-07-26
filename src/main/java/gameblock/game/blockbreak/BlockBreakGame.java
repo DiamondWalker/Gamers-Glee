@@ -86,8 +86,13 @@ public class BlockBreakGame extends Game {
         return INITIAL_BALL_SPEED + ((float) bricksBroken / bricks.size()) * INITIAL_BALL_SPEED;
     }
 
-    protected void launchBall() {
-        ballMoveY = calculateBallSpeed() / UPDATES_PER_TICK;
+    protected void launchBall(float xMotion) {
+        ballMoveX = xMotion / 2;
+        ballMoveY = INITIAL_BALL_SPEED / UPDATES_PER_TICK;
+
+        double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
+        ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
+        ballMoveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
         ballLaunched = true;
     }
 
@@ -97,7 +102,7 @@ public class BlockBreakGame extends Game {
             oldPlatformPos = platformPos;
             oldBallX = ballX;
             oldBallY = ballY;
-            if (ballPath != null) ballPath.enqueue(new Vector2f(oldBallX, oldBallY));
+            if (ballPath != null && ballLaunched) ballPath.enqueue(new Vector2f(oldBallX, oldBallY));
 
             boolean ballMoveUpdate = false;
 
@@ -117,8 +122,9 @@ public class BlockBreakGame extends Game {
                     ballX = platformPos;
                     ballY = BALL_START_Y;
                     if (launch.pressed) {
-                        launchBall();
-                        GameblockPackets.sendToServer(new BallLaunchPacket());
+                        float motion = moveDir * PLATFORM_SPEED / UPDATES_PER_TICK;
+                        launchBall(motion);
+                        GameblockPackets.sendToServer(new BallLaunchPacket(motion));
                     }
                 } else {
                     ballX += ballMoveX;

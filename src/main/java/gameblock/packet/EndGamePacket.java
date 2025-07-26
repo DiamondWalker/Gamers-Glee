@@ -5,6 +5,7 @@ import gameblock.capability.GameCapabilityProvider;
 import gameblock.gui.GameScreen;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -24,14 +25,14 @@ public class EndGamePacket {
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         if (context.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
-            if (Minecraft.getInstance().screen instanceof GameScreen screen) {
-                screen.onClose();
+            Player player = Minecraft.getInstance().player;
+            if (player != null) {
+                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (cap != null) cap.setGame(null, true);
             }
         } else {
             GameCapability cap = context.get().getSender().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null) {
-                cap.setGame(null);
-            }
+            if (cap != null) cap.setGame(null, false);
         }
 
         context.get().setPacketHandled(true);

@@ -3,6 +3,7 @@ package gameblock.item;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.Game;
+import gameblock.game.GameblockOS;
 import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.gui.GameScreen;
 import net.minecraft.client.Minecraft;
@@ -22,25 +23,21 @@ public class GameblockItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
+        Game gameInstance = null;
         if (pUsedHand == InteractionHand.MAIN_HAND) {
             if (pPlayer.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge) {
-                Game gameInstance = cartridge.getNewGameInstance(pPlayer);
-
-                GameCapability cap = pPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null) {
-                    cap.setGame(gameInstance);
-
-                    if (pLevel.isClientSide()) {
-                        Minecraft.getInstance().setScreen(new GameScreen(gameInstance));
-                    }
-                } else {
-                    return InteractionResultHolder.fail(itemstack);
-                }
-
-                pPlayer.awardStat(Stats.ITEM_USED.get(this));
-                return InteractionResultHolder.success(itemstack);
+                gameInstance = cartridge.getNewGameInstance(pPlayer);
             }
         }
-        return InteractionResultHolder.fail(itemstack);
+        if (gameInstance == null) gameInstance = new GameblockOS(pPlayer);
+
+        GameCapability cap = pPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+        if (cap != null) {
+            cap.setGame(gameInstance, pLevel.isClientSide());
+            pPlayer.awardStat(Stats.ITEM_USED.get(this));
+            return InteractionResultHolder.success(itemstack);
+        } else {
+            return InteractionResultHolder.fail(itemstack);
+        }
     }
 }
