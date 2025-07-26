@@ -32,6 +32,7 @@ public abstract class Game {
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
 
+    private long gameTime = 0;
     private boolean gameOver = false;
 
     public Game(Player player) {
@@ -47,12 +48,17 @@ public abstract class Game {
         if (!isClientSide()) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameOverPacket());
     }
 
+    public long getGameTime() {
+        return gameTime;
+    }
+
     protected boolean isGameOver() {
         return gameOver;
     }
 
     public final void baseTick() {
         tick();
+        gameTime++;
 
         if (
                 player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) &&
