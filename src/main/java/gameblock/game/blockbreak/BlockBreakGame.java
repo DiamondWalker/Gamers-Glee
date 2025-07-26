@@ -1,15 +1,22 @@
 package gameblock.game.blockbreak;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import gameblock.GameblockMod;
 import gameblock.game.Game;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.CircularStack;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.joml.Vector2f;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockBreakGame extends Game {
+    public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
+
     private static final int UPDATES_PER_TICK = 15;
 
     private static final float PLATFORM_Y = -50.0f;
@@ -22,8 +29,8 @@ public class BlockBreakGame extends Game {
 
     private static final float BALL_START_Y = PLATFORM_Y + PLATFORM_HEIGHT / 2 + BALL_WIDTH / 2;
 
-    private static final float BRICK_WIDTH = 9.7f;
-    private static final float BRICK_HEIGHT = 4.7f;
+    private static final float BRICK_WIDTH = 10.0f;
+    private static final float BRICK_HEIGHT = 5.0f;
 
     protected static final int BRICK_BREAK_FLASH_TIME = 30;
 
@@ -36,6 +43,8 @@ public class BlockBreakGame extends Game {
     float oldBallX = ballX, oldBallY = ballY;
     float ballMoveX, ballMoveY;
 
+    CircularStack<Vector2f> ballPath = null;
+
     boolean ballLaunched = false;
 
     ArrayList<Brick> bricks = new ArrayList<>();
@@ -47,16 +56,21 @@ public class BlockBreakGame extends Game {
 
     public BlockBreakGame(Player player) {
         super(player);
-        for (int y = 3; y <= 6; y++) {
+        int col = 0;
+        for (int y = 6; y >= 3; y--) {
             if (y < 6) {
                 for (int x = -14; x <= 14; x += 2) {
-                    bricks.add(new Brick(x, y * 2 - 2 + 1));
+                    bricks.add(new Brick(x, y * 2 - 2 + 1, col));
                 }
+                col++;
             }
             for (int x = -15; x <= 15; x += 2) {
-                bricks.add(new Brick(x, y * 2 - 2));
+                bricks.add(new Brick(x, y * 2 - 2, col));
             }
+            col++;
         }
+
+        if (isClientSide()) ballPath = new CircularStack<>(5);
     }
 
     private float calculateBallSpeed() {
@@ -74,6 +88,7 @@ public class BlockBreakGame extends Game {
             oldPlatformPos = platformPos;
             oldBallX = ballX;
             oldBallY = ballY;
+            if (ballPath != null) ballPath.enqueue(new Vector2f(oldBallX, oldBallY));
 
             boolean ballMoveUpdate = false;
 
@@ -138,9 +153,6 @@ public class BlockBreakGame extends Game {
                         if (brick.breaking > 0) {
                             brick.breaking--;
                             continue;
-                        } else if (brick.confirmBreak) {
-                            bricks.set(i, null);
-                            continue;
                         }
 
                         float brickX = brick.x * 5;
@@ -177,10 +189,26 @@ public class BlockBreakGame extends Game {
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        drawRectangle(graphics,
+        drawTexture(graphics, SPRITE,
                 oldPlatformPos + (platformPos - oldPlatformPos) * partialTicks,
                 PLATFORM_Y,
-                PLATFORM_WIDTH, PLATFORM_HEIGHT, 255, 255, 255, 255, 0);
+                PLATFORM_WIDTH, PLATFORM_HEIGHT, 0, 0, 0, 20, 3);
+        /*ballPath.forEach((Vector2f vect)-> drawTexture(graphics, SPRITE,
+                vect.x,
+                vect.y,
+                BALL_WIDTH, BALL_WIDTH, 0, 20, 4, 4, 4));*/
+        AtomicInteger i = new AtomicInteger();
+        ballPath.forEach((Vector2f vect) -> {
+            float f = (i.getAndIncrement() + partialTicks) / 5;
+            f = 1.0f - f;
+            drawRectangle(graphics,
+                    vect.x,
+                    vect.y, BALL_WIDTH * f, BALL_WIDTH * f, 100, 100, 100, (int) ((1.0f - f) * 255), 0);
+        });
+        /*drawTexture(graphics, SPRITE,
+                drawX,
+                drawY,
+                BALL_WIDTH, BALL_WIDTH, 0, 20, 0, 4, 4);*/
         drawRectangle(graphics,
                 oldBallX + (ballX - oldBallX) * partialTicks,
                 oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, 100, 100, 255, 255, 0);
@@ -188,22 +216,24 @@ public class BlockBreakGame extends Game {
         for (Brick brick : bricks) {
             if (brick == null) continue;
 
-            drawRectangle(graphics, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
-                    brick.breaking > 0 ? 255 : 0,
-                    255,
-                    brick.breaking > 0 ? 255 : 0,
-                    255, 0);
+            if (brick.breaking == 0) drawTexture(graphics, SPRITE, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
+                    0,
+                    246,
+                    brick.color * 5,
+                    10,
+                    5);
         }
     }
 
     protected class Brick {
         protected int x, y;
-        protected boolean confirmBreak = false;
         protected int breaking = 0;
+        private final int color;
 
-        public Brick(int x, int y) {
+        public Brick(int x, int y, int color) {
             this.x = x;
             this.y = y;
+            this.color = color % 7;
         }
     }
 }
