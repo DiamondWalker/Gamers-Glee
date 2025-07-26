@@ -27,6 +27,7 @@ public class BrickUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     @Override
     public void handleGameUpdate(BlockBreakGame game) {
         if (game.bricks.get(this.brick) != null) {
+            game.spawnBrickBreakParticles(game.bricks.get(this.brick));
             game.bricks.set(this.brick, null);
             game.bricksBroken++;
         }

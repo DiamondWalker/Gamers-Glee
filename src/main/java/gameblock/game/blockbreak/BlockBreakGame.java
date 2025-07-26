@@ -8,10 +8,14 @@ import gameblock.util.CircularStack;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import org.checkerframework.checker.units.qual.A;
 import org.joml.Vector2f;
 
+import java.awt.*;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockBreakGame extends Game {
@@ -50,6 +54,8 @@ public class BlockBreakGame extends Game {
     ArrayList<Brick> bricks = new ArrayList<>();
     protected int bricksBroken = 0;
 
+    ArrayList<Particle> particles = null;
+
     final KeyBinding left = registerKey(InputConstants.KEY_LEFT);
     final KeyBinding right = registerKey(InputConstants.KEY_RIGHT);
     final KeyBinding launch = registerKey(InputConstants.KEY_SPACE);
@@ -70,7 +76,10 @@ public class BlockBreakGame extends Game {
             col++;
         }
 
-        if (isClientSide()) ballPath = new CircularStack<>(5);
+        if (isClientSide()) {
+            ballPath = new CircularStack<>(5);
+            particles = new ArrayList<>();
+        }
     }
 
     private float calculateBallSpeed() {
@@ -174,6 +183,7 @@ public class BlockBreakGame extends Game {
                                     GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i));
                                 } else {
                                     bricks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
+                                    spawnBrickBreakParticles(bricks.get(i));
                                 }
                             }
                         }
@@ -183,6 +193,47 @@ public class BlockBreakGame extends Game {
 
             if (ballMoveUpdate && !isClientSide()) {
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY));
+            }
+        }
+
+        if (particles != null) {
+            synchronized (particles) {
+                for (int i = 0; i < particles.size();) {
+                    if (particles.get(i).update()) {
+                        i++;
+                    } else {
+                        particles.remove(i);
+                    }
+                }
+            }
+        }
+    }
+
+    protected void spawnBrickBreakParticles(Brick brick) {
+        Random random = new Random();
+        float x = brick.x * 5;
+        float y = brick.y * 5;
+        int count = 5 + random.nextInt(4);
+        synchronized (particles) {
+            for (int i = 0; i < count; i++) {
+                float angle = random.nextFloat(Mth.TWO_PI);
+                float magnitude = 0.9f + random.nextFloat(0.5f);
+                particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, brick.getColor()));
+            }
+        }
+    }
+
+    @Override
+    protected void gameOver() {
+        super.gameOver();
+        if (particles != null) {
+            Random random = new Random();
+            for (int i = 0; i < 25; i++) {
+                float x = random.nextFloat(10.0f) - 5.0f;
+                particles.add(new Particle(ballX + x, ballY,
+                        0.0f, 1.2f + random.nextFloat(3.0f),
+                        40,
+                        new Color(random.nextInt(256), 255, 255)));
             }
         }
     }
@@ -197,21 +248,23 @@ public class BlockBreakGame extends Game {
                 vect.x,
                 vect.y,
                 BALL_WIDTH, BALL_WIDTH, 0, 20, 4, 4, 4));*/
-        AtomicInteger i = new AtomicInteger();
-        ballPath.forEach((Vector2f vect) -> {
-            float f = (i.getAndIncrement() + partialTicks) / 5;
-            f = 1.0f - f;
-            drawRectangle(graphics,
-                    vect.x,
-                    vect.y, BALL_WIDTH * f, BALL_WIDTH * f, 100, 100, 100, (int) ((1.0f - f) * 255), 0);
-        });
+        if (!isGameOver()) {
+            AtomicInteger i = new AtomicInteger();
+            ballPath.forEach((Vector2f vect) -> {
+                float f = (i.getAndIncrement() + partialTicks) / 5;
+                f = 1.0f - f;
+                drawRectangle(graphics,
+                        vect.x,
+                        vect.y, BALL_WIDTH * f, BALL_WIDTH * f, 100, 100, 100, (int) ((1.0f - f) * 255), 0);
+            });
         /*drawTexture(graphics, SPRITE,
                 drawX,
                 drawY,
                 BALL_WIDTH, BALL_WIDTH, 0, 20, 0, 4, 4);*/
-        drawRectangle(graphics,
-                oldBallX + (ballX - oldBallX) * partialTicks,
-                oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, 100, 100, 255, 255, 0);
+            drawRectangle(graphics,
+                    oldBallX + (ballX - oldBallX) * partialTicks,
+                    oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, 100, 100, 255, 255, 0);
+        }
 
         for (Brick brick : bricks) {
             if (brick == null) continue;
@@ -222,6 +275,16 @@ public class BlockBreakGame extends Game {
                     brick.color * 5,
                     10,
                     5);
+        }
+
+        synchronized (particles) {
+            for (Particle particle : particles) {
+                float f = particle.time < 10 ? (float) particle.time / 10 : 1.0f;
+                drawRectangle(graphics,
+                        particle.oldX + (particle.x - particle.oldX) * partialTicks,
+                        particle.oldY + (particle.y - particle.oldY) * partialTicks, 1.0f, 1.0f,
+                        particle.color.getRed(), particle.color.getGreen(), particle.color.getBlue(), (int) (f * 255), 0);
+            }
         }
     }
 
@@ -234,6 +297,49 @@ public class BlockBreakGame extends Game {
             this.x = x;
             this.y = y;
             this.color = color % 7;
+        }
+
+        private Color getColor() {
+            return switch (color) {
+                case 0 -> new Color(0, 255, 0);
+                case 1 -> new Color(0, 0, 255);
+                case 2 -> new Color(0, 255, 255);
+                case 3 -> new Color(255, 255, 0);
+                case 4 -> new Color(255, 0, 0);
+                case 5 -> new Color(255, 0, 255);
+                case 6 -> new Color(255, 168, 0);
+                default -> null;
+            };
+        }
+    }
+
+    private class Particle {
+        private float x, y;
+        private float oldX, oldY;
+        private float motionX, motionY;
+        private Color color;
+        private int time;
+
+        private Particle(float x, float y, float motionX, float motionY, int time, Color color) {
+            this.x = this.oldX = x;
+            this.y = this.oldY = y;
+            this.motionX = motionX;
+            this.motionY = motionY;
+            this.time = time;
+            this.color = color;
+        }
+
+        private boolean update() {
+            this.oldX = x;
+            this.oldY = y;
+
+            x += motionX;
+            y += motionY;
+
+            motionX *= 0.95f;
+            motionY *= 0.95f;
+
+            return time-- > 0;
         }
     }
 }
