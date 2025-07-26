@@ -16,5 +16,6 @@ public class GameblockOS extends Game {
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         drawRectangle(graphics, 0, 0, 100, 100, 0, 0, 0, 255, 0);
+        drawText(graphics, 0, 0, "Cartridge not found.");
     }
 }

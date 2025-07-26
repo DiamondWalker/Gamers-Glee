@@ -11,6 +11,7 @@ import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
@@ -76,6 +77,20 @@ public abstract class Game {
 
     public abstract void render(GuiGraphics graphics, float partialTicks);
 
+    protected final void drawText(GuiGraphics graphics, float x, float y, String txt) {
+        Font font = Minecraft.getInstance().font;
+        float width = font.width(txt);
+        float height = font.lineHeight;
+
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x - width / 2, y + height / 2, 0);
+        pose.scale(1.0f, -1.0f, 1.0f);
+
+        graphics.drawString(font, txt, 0, 0, FastColor.ARGB32.color(255, 255, 255, 255));
+
+        pose.popPose();
+    }
     protected final void drawRectangle(GuiGraphics graphics, float x, float y, float width, float height, int red, int green, int blue, int alpha, float angle) {
         int color = FastColor.ARGB32.color(alpha, red, green, blue);
         PoseStack pose = graphics.pose();
