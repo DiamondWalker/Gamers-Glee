@@ -203,13 +203,11 @@ public class BlockBreakGame extends Game {
         }
 
         if (particles != null) {
-            synchronized (particles) {
-                for (int i = 0; i < particles.size();) {
-                    if (particles.get(i).update()) {
-                        i++;
-                    } else {
-                        particles.remove(i);
-                    }
+            for (int i = 0; i < particles.size();) {
+                if (particles.get(i).update()) {
+                    i++;
+                } else {
+                    particles.remove(i);
                 }
             }
         }
@@ -220,12 +218,10 @@ public class BlockBreakGame extends Game {
         float x = brick.x * 5;
         float y = brick.y * 5;
         int count = 5 + random.nextInt(4);
-        synchronized (particles) {
-            for (int i = 0; i < count; i++) {
-                float angle = random.nextFloat(Mth.TWO_PI);
-                float magnitude = 0.9f + random.nextFloat(0.5f);
-                particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, brick.getColor()));
-            }
+        for (int i = 0; i < count; i++) {
+            float angle = random.nextFloat(Mth.TWO_PI);
+            float magnitude = 0.9f + random.nextFloat(0.5f);
+            particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, brick.getColor()));
         }
     }
 
@@ -283,14 +279,12 @@ public class BlockBreakGame extends Game {
                     5);
         }
 
-        synchronized (particles) {
-            for (Particle particle : particles) {
-                float f = particle.time < 10 ? (float) particle.time / 10 : 1.0f;
-                drawRectangle(graphics,
-                        particle.oldX + (particle.x - particle.oldX) * partialTicks,
-                        particle.oldY + (particle.y - particle.oldY) * partialTicks, 1.0f, 1.0f,
-                        particle.color.getRed(), particle.color.getGreen(), particle.color.getBlue(), (int) (f * 255), 0);
-            }
+        for (Particle particle : particles) {
+            float f = particle.time < 10 ? (float) particle.time / 10 : 1.0f;
+            drawRectangle(graphics,
+                    particle.oldX + (particle.x - particle.oldX) * partialTicks,
+                    particle.oldY + (particle.y - particle.oldY) * partialTicks, 1.0f, 1.0f,
+                    particle.color.getRed(), particle.color.getGreen(), particle.color.getBlue(), (int) (f * 255), 0);
         }
     }
 

@@ -44,14 +44,12 @@ public class SnakeUpdatePacket extends UpdateGamePacket<SerpentGame> {
 
     @Override
     public void handleGameUpdate(SerpentGame game) {
-        synchronized(game.tiles) {
-            game.setSnakeDirection(dir);
-            game.tiles.setAll((Integer num) -> Integer.MAX_VALUE);
-            game.headX = coordinates.get(0).getX();
-            game.headY = coordinates.get(0).getY();
-            for (int i = 0; i < coordinates.size(); i++) {
-                game.tiles.set(coordinates.get(i).getX(), coordinates.get(i).getY(), i);
-            }
+        game.setSnakeDirection(dir);
+        game.tiles.setAll((Integer num) -> Integer.MAX_VALUE);
+        game.headX = coordinates.get(0).getX();
+        game.headY = coordinates.get(0).getY();
+        for (int i = 0; i < coordinates.size(); i++) {
+            game.tiles.set(coordinates.get(i).getX(), coordinates.get(i).getY(), i);
         }
     }
 }

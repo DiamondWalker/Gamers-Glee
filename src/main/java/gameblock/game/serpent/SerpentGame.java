@@ -40,32 +40,30 @@ public class SerpentGame extends Game {
 
     protected void setSnakeDirection(Direction2D dir) {
         if (dir == snakeDirection || dir == snakeDirection.getOpposite() || snakeDirectionChanged) return;
-        synchronized(tiles) {
-            snakeDirection = dir;
+        snakeDirection = dir;
 
-            if (isClientSide()) {
-                ArrayList<Vec2i> coords = new ArrayList<>(snakeLength);
-                int x = headX, y = headY;
-                int i = 0;
-                TILE_LOOP:
-                while (true) {
-                    coords.add(new Vec2i(x, y));
-                    i++;
+        if (isClientSide()) {
+            ArrayList<Vec2i> coords = new ArrayList<>(snakeLength);
+            int x = headX, y = headY;
+            int i = 0;
+            TILE_LOOP:
+            while (true) {
+                coords.add(new Vec2i(x, y));
+                i++;
 
-                    for (Direction2D adjacent : Direction2D.values()) {
-                        int newX = adjacent.getNormal().getX() + x, newY = adjacent.getNormal().getY() + y;
-                        if (tiles.get(newX, newY) == i) {
-                            x = newX;
-                            y = newY;
-                            continue TILE_LOOP;
-                        }
+                for (Direction2D adjacent : Direction2D.values()) {
+                    int newX = adjacent.getNormal().getX() + x, newY = adjacent.getNormal().getY() + y;
+                    if (tiles.get(newX, newY) == i) {
+                        x = newX;
+                        y = newY;
+                        continue TILE_LOOP;
                     }
-
-                    break;
                 }
-                GameblockPackets.sendToServer(new SnakeUpdatePacket(snakeDirection, coords));
-                snakeDirectionChanged = true;
+
+                break;
             }
+            GameblockPackets.sendToServer(new SnakeUpdatePacket(snakeDirection, coords));
+            snakeDirectionChanged = true;
         }
     }
 
@@ -93,32 +91,30 @@ public class SerpentGame extends Game {
     @Override
     public void tick() {
         if (!isGameOver()) {
-            synchronized (tiles) {
-                int nextX = headX + snakeDirection.getNormal().getX();
-                int nextY = headY + snakeDirection.getNormal().getY();
-                snakeDirectionChanged = false;
+            int nextX = headX + snakeDirection.getNormal().getX();
+            int nextY = headY + snakeDirection.getNormal().getY();
+            snakeDirectionChanged = false;
 
-                if (getSnakeTicksFromTile(nextX, nextY) == -1 || isSnakeTile(nextX, nextY) && !isClientSide()) {
-                    gameOver();
-                } else {
-                    headX = nextX;
-                    headY = nextY;
+            if (getSnakeTicksFromTile(nextX, nextY) == -1 || isSnakeTile(nextX, nextY) && !isClientSide()) {
+                gameOver();
+            } else {
+                headX = nextX;
+                headY = nextY;
 
-                    tiles.setAll((Integer num) -> {
-                        if (num < Integer.MAX_VALUE) {
-                            return num + 1;
-                        }
-                        return num;
-                    });
-
-                    setSnakeTicksOfTile(headX, headY, 0);
-
-                    if (targetSnakeLength > snakeLength) snakeLength++;
-
-                    if (headX == foodX && headY == foodY && !isClientSide()) {
-                        targetSnakeLength += SNAKE_LENGTH_INCREASE;
-                        randomFoodPosition();
+                tiles.setAll((Integer num) -> {
+                    if (num < Integer.MAX_VALUE) {
+                        return num + 1;
                     }
+                    return num;
+                });
+
+                setSnakeTicksOfTile(headX, headY, 0);
+
+                if (targetSnakeLength > snakeLength) snakeLength++;
+
+                if (headX == foodX && headY == foodY && !isClientSide()) {
+                    targetSnakeLength += SNAKE_LENGTH_INCREASE;
+                    randomFoodPosition();
                 }
             }
         }
