@@ -4,7 +4,6 @@ import gameblock.game.GameOverPacket;
 import gameblock.game.blockbreak.BallLaunchPacket;
 import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.game.blockbreak.BrickUpdatePacket;
-import gameblock.game.blockbreak.PlatformMovePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.game.serpent.EatFoodPacket;
@@ -35,7 +34,6 @@ public class GameblockPackets {
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
-        INSTANCE.registerMessage(id++, PlatformMovePacket.class, PlatformMovePacket::writeToBuffer, PlatformMovePacket::new, PlatformMovePacket::handle);
         INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
 
         // serpent

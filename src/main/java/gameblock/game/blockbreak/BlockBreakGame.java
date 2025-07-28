@@ -62,7 +62,7 @@ public class BlockBreakGame extends Game {
     final KeyBinding right = registerKey(InputConstants.KEY_RIGHT);
     final KeyBinding launch = registerKey(InputConstants.KEY_SPACE);
 
-    private long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
+    protected long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
 
     public BlockBreakGame(Player player) {
         super(player);
@@ -117,7 +117,6 @@ public class BlockBreakGame extends Game {
             }
 
             for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
-
                 platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir;
                 platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
 
@@ -147,21 +146,26 @@ public class BlockBreakGame extends Game {
                         if (!isClientSide()) gameOver();
                         return;
                     }
-                    if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
-                        if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
-                            if (moveDir < 0) {
-                                ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                                //ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                            } else if (moveDir > 0) {
-                                ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                                //ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                            }
-                            ballMoveY = Math.abs(ballMoveY);
-                            double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
-                            ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-                            ballMoveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
 
-                            ballMoveUpdate = true;
+                    // platform collision (this is handled on the client)
+                    if (isClientSide()) {
+                        if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
+                            if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
+                                if (moveDir < 0) {
+                                    ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
+                                    //ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
+                                } else if (moveDir > 0) {
+                                    ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
+                                    //ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
+                                }
+                                ballMoveY = Math.abs(ballMoveY);
+                                double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
+                                ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
+                                ballMoveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
+
+                                GameblockPackets.sendToServer(new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY));
+                                //ballMoveUpdate = true;
+                            }
                         }
                     }
 
@@ -201,15 +205,8 @@ public class BlockBreakGame extends Game {
             }
 
 
-            // handle movement packets
-            boolean forcePackets = getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL;
-            if (isClientSide()) { // client dictates the platform position
-                if (moveDir != oldMoveDir || forcePackets) {
-                    GameblockPackets.sendToServer(new PlatformMovePacket(platformPos, moveDir));
-                    lastPacketTime = getGameTime();
-                }
-            } else { // server dictates the ball position
-                if (ballMoveUpdate || forcePackets) {
+            if (ballLaunched && !isClientSide()) { // server dictates the ball position
+                if (ballMoveUpdate || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
                     GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY));
                     lastPacketTime = getGameTime();
                 }
@@ -247,7 +244,7 @@ public class BlockBreakGame extends Game {
             Random random = new Random();
             for (int i = 0; i < 25; i++) {
                 float x = random.nextFloat(10.0f) - 5.0f;
-                particles.add(new Particle(ballX + x, ballY,
+                particles.add(new Particle(ballX + x, -75.0f,
                         0.0f, 1.2f + random.nextFloat(3.0f),
                         40,
                         new Color(random.nextInt(256), 255, 255)));
