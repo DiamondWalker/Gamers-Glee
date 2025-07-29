@@ -126,7 +126,7 @@ public class BlockBreakGame extends Game {
                     if (launch.pressed) {
                         float motion = moveDir * PLATFORM_SPEED / UPDATES_PER_TICK;
                         launchBall(motion);
-                        GameblockPackets.sendToServer(new BallLaunchPacket(motion));
+                        GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
                     }
                 } else {
                     ballX += ballMoveX;

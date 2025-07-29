@@ -5,10 +5,12 @@ import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class BallLaunchPacket extends UpdateGamePacket<BlockBreakGame> {
+    float xPos;
     float xMotion;
 
-    public BallLaunchPacket(float initialXMotion) {
+    public BallLaunchPacket(float launchX, float initialXMotion) {
         super();
+        this.xPos = launchX;
         this.xMotion = initialXMotion;
     }
 
@@ -18,16 +20,20 @@ public class BallLaunchPacket extends UpdateGamePacket<BlockBreakGame> {
 
     @Override
     public void writeToBuffer(FriendlyByteBuf buffer) {
+        buffer.writeFloat(xPos);
         buffer.writeFloat(xMotion);
     }
 
     @Override
     public void readFromBuffer(FriendlyByteBuf buffer) {
+        xPos = buffer.readFloat();
         xMotion = buffer.readFloat();
     }
 
     @Override
     public void handleGameUpdate(BlockBreakGame game) {
+        game.lastPacketTime = game.getGameTime();
+        game.ballX = xPos;
         game.launchBall(xMotion);
     }
 }
