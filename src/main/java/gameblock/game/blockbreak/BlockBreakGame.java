@@ -5,6 +5,7 @@ import gameblock.GameblockMod;
 import gameblock.game.Game;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.CircularStack;
+import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,8 +43,8 @@ public class BlockBreakGame extends Game {
 
     float platformPos = 0.0f;
     float oldPlatformPos = platformPos;
-    byte oldMoveDir = 0;
-    byte moveDir = 0;
+    Direction1D oldMoveDir = Direction1D.CENTER;
+    Direction1D moveDir = Direction1D.CENTER;
 
     float ballX = 0.0f, ballY = BALL_START_Y;
     float oldBallX = ballX, oldBallY = ballY;
@@ -111,20 +112,22 @@ public class BlockBreakGame extends Game {
             boolean ballMoveUpdate = false;
             if (isClientSide()) {
                 oldMoveDir = moveDir;
-                moveDir = 0;
-                if (left.pressed) moveDir--;
-                if (right.pressed) moveDir++;
+                if (left.pressed == right.pressed) {
+                    moveDir = Direction1D.CENTER;
+                } else {
+                    moveDir = left.pressed ? Direction1D.LEFT : Direction1D.RIGHT;
+                }
             }
 
             for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
-                platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir;
+                platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir.getComponent();
                 platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
 
                 if (!ballLaunched) {
                     ballX = platformPos;
                     ballY = BALL_START_Y;
                     if (launch.pressed) {
-                        float motion = moveDir * PLATFORM_SPEED / UPDATES_PER_TICK;
+                        float motion = moveDir.getComponent() * PLATFORM_SPEED / UPDATES_PER_TICK;
                         launchBall(motion);
                         GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
                     }
@@ -151,13 +154,7 @@ public class BlockBreakGame extends Game {
                     if (isClientSide()) {
                         if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
                             if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
-                                if (moveDir < 0) {
-                                    ballMoveX -= PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                                    //ballMoveX = Math.max(-PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                                } else if (moveDir > 0) {
-                                    ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2;
-                                    //ballMoveX = Math.min(PLATFORM_SPEED / UPDATES_PER_TICK, ballMoveX);
-                                }
+                                ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2 * moveDir.getComponent();
                                 ballMoveY = Math.abs(ballMoveY);
                                 double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
                                 ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);

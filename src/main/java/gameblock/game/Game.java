@@ -10,6 +10,7 @@ import gameblock.gui.GameScreen;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.TextRenderingRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -83,20 +84,47 @@ public abstract class Game {
 
     public abstract void render(GuiGraphics graphics, float partialTicks);
 
-    protected final void drawText(GuiGraphics graphics, float x, float y, String txt) {
+    private void drawText(GuiGraphics graphics, float x, float y, float scale, String txt, int r, int g, int b, int a) {
         Font font = Minecraft.getInstance().font;
         float width = font.width(txt);
         float height = font.lineHeight;
 
         PoseStack pose = graphics.pose();
         pose.pushPose();
-        pose.translate(x - width / 2, y + height / 2, 0);
-        pose.scale(1.0f, -1.0f, 1.0f);
+        pose.translate(x - scale * (width / 2 - 0.5f), y + scale * (height / 2 - 1), 0);
+        pose.scale(scale, -scale, 1.0f);
 
-        graphics.drawString(font, txt, 0, 0, FastColor.ARGB32.color(255, 255, 255, 255));
+        graphics.drawString(font, txt, 0, 0, FastColor.ARGB32.color(a, r, g, b), false);
 
         pose.popPose();
     }
+
+    private void drawText(GuiGraphics graphics, float x, float y, float scale, String[] txt, int r, int g, int b, int a) {
+        Font font = Minecraft.getInstance().font;
+        float height = font.lineHeight * txt.length + 2 * (txt.length - 1);
+
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y + scale * (height / 2 - 1), 0);
+        pose.scale(scale, -scale, 1.0f);
+
+
+        for (String line : txt) {
+            float width = font.width(line);
+            pose.pushPose();
+            pose.translate(-width / 2 + 0.5f, 0.0f, 0.0f);
+            graphics.drawString(font, line, 0, 0, FastColor.ARGB32.color(a, r, g, b), false);
+            pose.popPose();
+            pose.translate(0.0f, font.lineHeight + 2, 0.0f);
+        }
+        pose.popPose();
+    }
+
+    protected final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, String txt, int r, int g, int b, int a) {
+        TextRenderingRules rules = new TextRenderingRules().setMaxWidth(maxWidth).setMaxLines(maxLines);
+        drawText(graphics, x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), r, g, b, a);
+    }
+
     protected final void drawRectangle(GuiGraphics graphics, float x, float y, float width, float height, int red, int green, int blue, int alpha, float angle) {
         int color = FastColor.ARGB32.color(alpha, red, green, blue);
         PoseStack pose = graphics.pose();
