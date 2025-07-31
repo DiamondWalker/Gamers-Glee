@@ -10,6 +10,7 @@ import gameblock.gui.GameScreen;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.ColorF;
 import gameblock.util.TextRenderingRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -84,7 +85,7 @@ public abstract class Game {
 
     public abstract void render(GuiGraphics graphics, float partialTicks);
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, String txt, int r, int g, int b, int a) {
+    private void drawText(GuiGraphics graphics, float x, float y, float scale, String txt, ColorF color) {
         Font font = Minecraft.getInstance().font;
         float width = font.width(txt);
         float height = font.lineHeight;
@@ -94,12 +95,12 @@ public abstract class Game {
         pose.translate(x - scale * (width / 2 - 0.5f), y + scale * (height / 2 - 1), 0);
         pose.scale(scale, -scale, 1.0f);
 
-        graphics.drawString(font, txt, 0, 0, FastColor.ARGB32.color(a, r, g, b), false);
+        graphics.drawString(font, txt, 0, 0, FastColor.ARGB32.color(Math.round(color.getAlpha() * 255), Math.round(color.getRed() * 255), Math.round(color.getGreen() * 255), Math.round(color.getBlue() * 255)), false);
 
         pose.popPose();
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, String[] txt, int r, int g, int b, int a) {
+    private void drawText(GuiGraphics graphics, float x, float y, float scale, String[] txt, ColorF colorF) {
         Font font = Minecraft.getInstance().font;
         float height = font.lineHeight * txt.length + 2 * (txt.length - 1);
 
@@ -113,20 +114,23 @@ public abstract class Game {
             float width = font.width(line);
             pose.pushPose();
             pose.translate(-width / 2 + 0.5f, 0.0f, 0.0f);
-            graphics.drawString(font, line, 0, 0, FastColor.ARGB32.color(a, r, g, b), false);
+            graphics.drawString(font, line, 0, 0, FastColor.ARGB32.color(Math.round(colorF.getAlpha() * 255), Math.round(colorF.getRed()) * 255, Math.round(colorF.getGreen() * 255), Math.round(colorF.getBlue() * 255)), false);
             pose.popPose();
             pose.translate(0.0f, font.lineHeight + 2, 0.0f);
         }
         pose.popPose();
     }
 
-    protected final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, String txt, int r, int g, int b, int a) {
+    protected final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, String txt, ColorF color) {
         TextRenderingRules rules = new TextRenderingRules().setMaxWidth(maxWidth).setMaxLines(maxLines);
-        drawText(graphics, x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), r, g, b, a);
+        drawText(graphics, x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
     }
 
-    protected final void drawRectangle(GuiGraphics graphics, float x, float y, float width, float height, int red, int green, int blue, int alpha, float angle) {
-        int color = FastColor.ARGB32.color(alpha, red, green, blue);
+    protected final void drawRectangle(GuiGraphics graphics, float x, float y, float width, float height, ColorF color, float angle) {
+        drawRectangle(graphics, RenderType.gui(), x, y, width, height, color, angle);
+    }
+
+    protected final void drawRectangle(GuiGraphics graphics, RenderType type, float x, float y, float width, float height, ColorF color, float angle) {
         PoseStack pose = graphics.pose();
         pose.pushPose();
         pose.translate(x, y, 0.0f);
@@ -150,15 +154,11 @@ public abstract class Game {
             pMaxY = j;
         }
 
-        float f3 = (float)FastColor.ARGB32.alpha(color) / 255.0F;
-        float f = (float)FastColor.ARGB32.red(color) / 255.0F;
-        float f1 = (float)FastColor.ARGB32.green(color) / 255.0F;
-        float f2 = (float)FastColor.ARGB32.blue(color) / 255.0F;
-        VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(RenderType.gui());
-        vertexconsumer.vertex(matrix4f, pMinX, pMinY, 0.0f).color(f, f1, f2, f3).endVertex();
-        vertexconsumer.vertex(matrix4f, pMinX, pMaxY, 0.0f).color(f, f1, f2, f3).endVertex();
-        vertexconsumer.vertex(matrix4f, pMaxX, pMaxY, 0.0f).color(f, f1, f2, f3).endVertex();
-        vertexconsumer.vertex(matrix4f, pMaxX, pMinY, 0.0f).color(f, f1, f2, f3).endVertex();
+        VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(type);
+        vertexconsumer.vertex(matrix4f, pMinX, pMinY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinX, pMaxY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxX, pMaxY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxX, pMinY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         graphics.flush();
 
         pose.popPose();

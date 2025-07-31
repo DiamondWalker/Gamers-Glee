@@ -3,6 +3,7 @@ package gameblock.game.serpent;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.Game;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.ColorF;
 import gameblock.util.Direction2D;
 import gameblock.util.TileGrid2D;
 import gameblock.util.Vec2i;
@@ -125,11 +126,11 @@ public class SerpentGame extends Game {
         for (int x = -50; x <= 50; x++) {
             for (int y = -37; y <= 37; y++) {
                 if (isSnakeTile(x, y)) {
-                    drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, 255, 255, 255, 255, 0);
+                    drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
                 }
             }
         }
 
-        drawRectangle(graphics, foodX * 2, foodY * 2, 2.0f, 2.0f, 255, 0, 0, 255, 0);
+        drawRectangle(graphics, foodX * 2, foodY * 2, 2.0f, 2.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
     }
 }

@@ -1,7 +1,9 @@
 package gameblock.game;
 
+import gameblock.util.ColorF;
 import gameblock.util.Vec2i;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 
@@ -171,8 +173,6 @@ public class GameblockOS extends Game {
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        drawRectangle(graphics, 0, 0, 100, 100, 0, 0, 0, 255, 0);
-
         if (getGameTime() <= 160) {
             for (Vec2i block : titleBlocks) {
                 long time = block.getX() + block.getY() + 50;
@@ -189,17 +189,19 @@ public class GameblockOS extends Game {
 
                     drawRectangle(graphics, block.getX() * BLOCK_WIDTH, (block.getY() - 2.5f) * BLOCK_WIDTH, // blocks are translated down 2.5 units so they're centered
                             BLOCK_WIDTH, BLOCK_WIDTH,
-                            (int)(255 * wave), (int)(255 * wave), (int)(255 * wave), (int) (f * 255), 0);
+                            new ColorF(wave, wave, wave, f), 0);
                 }
             }
         } else if (getGameTime() > 200) {
+            drawRectangle(graphics, RenderType.endPortal(), 0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f), 0);
+
             float iconTransparency = (partialTicks + getGameTime() - 200) / 40;
-            int a = (int) (Mth.clamp(iconTransparency, 0.0f, 1.0f) * 255);
+            iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
             for (int i = 0; i < 16; i++) {
                 int x = (i % 4) * 40 - 60;
                 int y = (i / 4) * 30 - 45;
-                drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, 255, 255, 255, a, 0);
-                drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, "Game Name", 255, 255, 255, a);
+                drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
+                drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, "Game Name", new ColorF(1.0f).withAlpha(iconTransparency));
             }
         }
         //drawText(graphics, 0, 0, 1.0f, 50, 3, "This is some long text to test the rendering");

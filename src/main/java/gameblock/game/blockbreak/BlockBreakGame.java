@@ -5,6 +5,7 @@ import gameblock.GameblockMod;
 import gameblock.game.Game;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.CircularStack;
+import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -244,7 +245,7 @@ public class BlockBreakGame extends Game {
                 particles.add(new Particle(ballX + x, -75.0f,
                         0.0f, 1.2f + random.nextFloat(3.0f),
                         40,
-                        new Color(random.nextInt(256), 255, 255)));
+                        new ColorF(random.nextInt(256), 255, 255)));
             }
         }
     }
@@ -266,7 +267,7 @@ public class BlockBreakGame extends Game {
                 f = 1.0f - f;
                 drawRectangle(graphics,
                         vect.x,
-                        vect.y, BALL_WIDTH * f, BALL_WIDTH * f, 100, 100, 100, (int) ((1.0f - f) * 255), 0);
+                        vect.y, BALL_WIDTH * f, BALL_WIDTH * f, new ColorF(100).withAlpha(1.0f - f), 0);
             });
         /*drawTexture(graphics, SPRITE,
                 drawX,
@@ -274,7 +275,7 @@ public class BlockBreakGame extends Game {
                 BALL_WIDTH, BALL_WIDTH, 0, 20, 0, 4, 4);*/
             drawRectangle(graphics,
                     oldBallX + (ballX - oldBallX) * partialTicks,
-                    oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, 100, 100, 255, 255, 0);
+                    oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, new ColorF(100, 100, 255), 0);
         }
 
         for (Brick brick : bricks) {
@@ -290,10 +291,14 @@ public class BlockBreakGame extends Game {
 
         for (Particle particle : particles) {
             float f = particle.time < 10 ? (float) particle.time / 10 : 1.0f;
+            float glowiness = Mth.sin(-partialTicks + particle.time) / 2 + 0.5f;
+            glowiness = glowiness * 0.4f + 0.6f;
+
+            ColorF col = particle.color.multiply(new ColorF(glowiness)).withAlpha(f);
             drawRectangle(graphics,
                     particle.oldX + (particle.x - particle.oldX) * partialTicks,
                     particle.oldY + (particle.y - particle.oldY) * partialTicks, 1.0f, 1.0f,
-                    particle.color.getRed(), particle.color.getGreen(), particle.color.getBlue(), (int) (f * 255), 0);
+                    col, 0);
         }
     }
 
@@ -308,15 +313,15 @@ public class BlockBreakGame extends Game {
             this.color = color % 7;
         }
 
-        private Color getColor() {
+        private ColorF getColor() {
             return switch (color) {
-                case 0 -> new Color(0, 255, 0);
-                case 1 -> new Color(0, 0, 255);
-                case 2 -> new Color(0, 255, 255);
-                case 3 -> new Color(255, 255, 0);
-                case 4 -> new Color(255, 0, 0);
-                case 5 -> new Color(255, 0, 255);
-                case 6 -> new Color(255, 168, 0);
+                case 0 -> new ColorF(0, 255, 0);
+                case 1 -> new ColorF(0, 0, 255);
+                case 2 -> new ColorF(0, 255, 255);
+                case 3 -> new ColorF(255, 255, 0);
+                case 4 -> new ColorF(255, 0, 0);
+                case 5 -> new ColorF(255, 0, 255);
+                case 6 -> new ColorF(255, 168, 0);
                 default -> null;
             };
         }
@@ -326,10 +331,10 @@ public class BlockBreakGame extends Game {
         private float x, y;
         private float oldX, oldY;
         private float motionX, motionY;
-        private Color color;
+        private ColorF color;
         private int time;
 
-        private Particle(float x, float y, float motionX, float motionY, int time, Color color) {
+        private Particle(float x, float y, float motionX, float motionY, int time, ColorF color) {
             this.x = this.oldX = x;
             this.y = this.oldY = y;
             this.motionX = motionX;
