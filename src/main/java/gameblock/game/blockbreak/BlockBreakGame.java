@@ -2,7 +2,7 @@ package gameblock.game.blockbreak;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
-import gameblock.game.Game;
+import gameblock.game.GameInstance;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
@@ -12,15 +12,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.units.qual.A;
 import org.joml.Vector2f;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BlockBreakGame extends Game {
+public class BlockBreakGame extends GameInstance {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
     private static final int UPDATES_PER_TICK = 15;

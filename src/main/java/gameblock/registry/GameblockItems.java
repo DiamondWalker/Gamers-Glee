@@ -22,9 +22,9 @@ public class GameblockItems {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GameblockMod.MODID);
 
     public static final RegistryObject<Item> GAMEBLOCK = ITEMS.register("gameblock", GameblockItem::new);
-    public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("block_break", () -> new CartridgeItem(BlockBreakGame.class)); // block break
-    public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(SerpentGame.class)); // snake
-    public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem(FlyingChickenGame.class)); // flappy bird
+    public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("block_break", () -> new CartridgeItem(GameRegistry.BLOCK_BREAK_GAME)); // block break
+    public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(GameRegistry.SERPENT_GAME)); // snake
+    public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem(GameRegistry.FLYING_CHICKEN_GAME)); // flappy bird
     /*public static final RegistryObject<Item> CARTRIDGE_RHYTHM_FIGURES = ITEMS.register("rhythm_figures", () -> new CartridgeItem(Game::new)); // just shapes and beats
     public static final RegistryObject<Item> CARTRIDGE_DEFUSAL = ITEMS.register("defusal", () -> new CartridgeItem(Game::new)); // minesweeper
     public static final RegistryObject<Item> CARTRIDGE_SUPER_PLUMBER_DUDES = ITEMS.register("super_plumber_dudes", () -> new CartridgeItem(Game::new)); // super mario bros

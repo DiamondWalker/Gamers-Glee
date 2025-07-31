@@ -1,7 +1,7 @@
 package gameblock.game.serpent;
 
 import com.mojang.blaze3d.platform.InputConstants;
-import gameblock.game.Game;
+import gameblock.game.GameInstance;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
 import gameblock.util.Direction2D;
@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SerpentGame extends Game {
+public class SerpentGame extends GameInstance {
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
     protected final TileGrid2D<Integer> tiles;
@@ -27,10 +27,10 @@ public class SerpentGame extends Game {
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
 
-    final Game.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
-    final Game.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> setSnakeDirection(Direction2D.RIGHT));
-    final Game.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP));
-    final Game.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
+    final GameInstance.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
+    final GameInstance.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> setSnakeDirection(Direction2D.RIGHT));
+    final GameInstance.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP));
+    final GameInstance.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
 
     public SerpentGame(Player player) {
         super(player);

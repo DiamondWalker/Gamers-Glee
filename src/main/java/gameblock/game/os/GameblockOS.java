@@ -1,18 +1,29 @@
-package gameblock.game;
+package gameblock.game.os;
 
+import gameblock.game.GameInstance;
+import gameblock.item.CartridgeItem;
+import gameblock.registry.GameRegistry;
+import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
 import gameblock.util.Vec2i;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
-public class GameblockOS extends Game {
+public class GameblockOS extends GameInstance {
     private static final int BLOCK_WIDTH = 4;
     private static final int BLOCK_FADE_TIME = 10;
     private final ArrayList<Vec2i> titleBlocks = new ArrayList<>();
+
+    protected HashSet<GameRegistry.Game> gamesFound = null;
 
     private void addBlock(int x, int y) {
         titleBlocks.add(new Vec2i(x, y));
@@ -169,6 +180,17 @@ public class GameblockOS extends Game {
 
     @Override
     protected void tick() {
+        if (!isClientSide() && gamesFound == null) {
+            gamesFound = new HashSet<>();
+            Inventory playerInventory = player.getInventory();
+            for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+                ItemStack stack = playerInventory.getItem(i);
+                if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                    if (!gamesFound.contains(cartridge.gameType)) gamesFound.add(cartridge.gameType);
+                }
+            }
+            GameblockPackets.sendToPlayer((ServerPlayer) player, new GamesListPacket(gamesFound.toArray(new GameRegistry.Game[0])));
+        }
     }
 
     @Override
@@ -197,11 +219,15 @@ public class GameblockOS extends Game {
 
             float iconTransparency = (partialTicks + getGameTime() - 200) / 40;
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
-            for (int i = 0; i < 16; i++) {
-                int x = (i % 4) * 40 - 60;
-                int y = (i / 4) * 30 - 45;
+
+            int count = 0;
+            for (GameRegistry.Game game : gamesFound) { // FIXME: if lag or something prevents the games from being sent during the loading screen this will cause a crash
+                int x = (count % 4) * 40 - 60;
+                int y = 45 - (count / 4) * 30;
                 drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
-                drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, "Game Name", new ColorF(1.0f).withAlpha(iconTransparency));
+                //drawTexture(graphics, game.logo, x, y + 5.5f, 9.0f, 9.0f, 0, 0, 0, 5, 5);
+                drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, game.gameID.getPath(), new ColorF(1.0f).withAlpha(iconTransparency));
+                count++;
             }
         }
         //drawText(graphics, 0, 0, 1.0f, 50, 3, "This is some long text to test the rendering");

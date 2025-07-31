@@ -2,11 +2,11 @@ package gameblock.gui;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import gameblock.game.GameInstance;
 import gameblock.packet.EndGamePacket;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.game.Game;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
@@ -21,14 +21,14 @@ public class GameScreen extends Screen {
     private static final int IMAGE_WIDTH = 206;
     private static final int IMAGE_HEIGHT = 208;
 
-    private final Game game;
+    private final GameInstance game;
 
-    public GameScreen(Game game) {
+    public GameScreen(GameInstance game) {
         super(GameNarrator.NO_TITLE);
         this.game = game;
     }
 
-    public Game getGame() {
+    public GameInstance getGame() {
         return game;
     }
 

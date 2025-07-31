@@ -1,7 +1,5 @@
 package gameblock.game.blockbreak;
 
-import gameblock.game.Game;
-import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 

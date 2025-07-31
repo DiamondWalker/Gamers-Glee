@@ -2,11 +2,8 @@ package gameblock.item;
 
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.game.Game;
-import gameblock.game.GameblockOS;
-import gameblock.game.blockbreak.BlockBreakGame;
-import gameblock.gui.GameScreen;
-import net.minecraft.client.Minecraft;
+import gameblock.game.GameInstance;
+import gameblock.game.os.GameblockOS;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -23,7 +20,7 @@ public class GameblockItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level pLevel, Player pPlayer, InteractionHand pUsedHand) {
         ItemStack itemstack = pPlayer.getItemInHand(pUsedHand);
-        Game gameInstance = null;
+        GameInstance gameInstance = null;
         if (pUsedHand == InteractionHand.MAIN_HAND) {
             if (pPlayer.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge) {
                 gameInstance = cartridge.getNewGameInstance(pPlayer);

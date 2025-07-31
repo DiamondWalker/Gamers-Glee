@@ -3,6 +3,7 @@ package gameblock.game;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import gameblock.game.os.GameblockOS;
 import gameblock.packet.EndGamePacket;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
@@ -26,7 +27,7 @@ import org.joml.Matrix4f;
 
 import java.util.HashMap;
 
-public abstract class Game {
+public abstract class GameInstance {
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
 
     protected final Player player;
@@ -37,7 +38,7 @@ public abstract class Game {
     private long gameTime = 0;
     private boolean gameOver = false;
 
-    public Game(Player player) {
+    public GameInstance(Player player) {
         this.player = player;
     }
 

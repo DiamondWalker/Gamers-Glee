@@ -6,6 +6,7 @@ import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.game.blockbreak.BrickUpdatePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
+import gameblock.game.os.GamesListPacket;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
 import gameblock.packet.EndGamePacket;
@@ -30,6 +31,8 @@ public class GameblockPackets {
     public static void registerPackets() {
         INSTANCE.registerMessage(id++, EndGamePacket.class, EndGamePacket::writeToBuffer, EndGamePacket::new, EndGamePacket::handle);
         INSTANCE.registerMessage(id++, GameOverPacket.class, GameOverPacket::writeToBuffer, GameOverPacket::new, GameOverPacket::handle);
+
+        INSTANCE.registerMessage(id++, GamesListPacket.class, GamesListPacket::writeToBuffer, GamesListPacket::new, GamesListPacket::handle);
 
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);

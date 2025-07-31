@@ -2,8 +2,7 @@ package gameblock.packet;
 
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.game.Game;
-import gameblock.gui.GameScreen;
+import gameblock.game.GameInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -12,7 +11,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public abstract class UpdateGamePacket<T extends Game> {
+public abstract class UpdateGamePacket<T extends GameInstance> {
     public UpdateGamePacket() {
 
     }
