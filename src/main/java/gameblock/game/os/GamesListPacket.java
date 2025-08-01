@@ -21,7 +21,7 @@ public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
     public void writeToBuffer(FriendlyByteBuf buffer) {
         buffer.writeInt(games.length);
         for (int i = 0; i < games.length; i++) {
-            buffer.writeResourceLocation(games[i].gameID);
+            buffer.writeUtf(games[i].gameID);
         }
     }
 
@@ -29,7 +29,7 @@ public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
     public void readFromBuffer(FriendlyByteBuf buffer) {
         games = new GameRegistry.Game[buffer.readInt()];
         for (int i = 0; i < games.length; i++) {
-            games[i] = GameRegistry.getGame(buffer.readResourceLocation());
+            games[i] = GameRegistry.getGame(buffer.readUtf());
         }
     }
 

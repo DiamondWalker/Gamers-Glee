@@ -226,7 +226,7 @@ public class GameblockOS extends GameInstance {
                 int y = 45 - (count / 4) * 30;
                 drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
                 //drawTexture(graphics, game.logo, x, y + 5.5f, 9.0f, 9.0f, 0, 0, 0, 5, 5);
-                drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, game.gameID.getPath(), new ColorF(1.0f).withAlpha(iconTransparency));
+                drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, game.gameID, new ColorF(1.0f).withAlpha(iconTransparency));
                 count++;
             }
         }
