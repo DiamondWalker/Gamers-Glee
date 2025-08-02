@@ -3,11 +3,17 @@ package gameblock.game.flyingchicken;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.Music;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 
@@ -37,6 +43,7 @@ public class FlyingChickenGame extends GameInstance {
         if (isClientSide()) {
             GameblockPackets.sendToServer(new WingFlapPacket(time, chickenY));
             lastFlapTime = time;
+            playSound(SoundEvents.PHANTOM_FLAP, 1.0f, 350.0f);
         }
         chickenMotion = 2.56f;
     }
@@ -44,7 +51,10 @@ public class FlyingChickenGame extends GameInstance {
     @Override
     protected void gameOver() {
         super.gameOver();
-        gameOverFallDirection = new Random().nextFloat() * 2 - 1;
+        if (isClientSide()) {
+            playSound(SoundEvents.CHICKEN_DEATH);
+            gameOverFallDirection = new Random().nextFloat() * 2 - 1;
+        }
     }
 
     @Override
@@ -81,6 +91,11 @@ public class FlyingChickenGame extends GameInstance {
         } else {
             gameOverTime++;
         }
+    }
+
+    @Override
+    public Music getMusic() {
+        return !isGameOver() ? GameblockMusic.FLYING_CHICKEN : null;
     }
 
     @Override

@@ -9,6 +9,7 @@ import gameblock.item.GameblockItem;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockLootModifiers;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -36,6 +37,7 @@ public class GameblockMod
         IEventBus modEventBus = context.getModEventBus();
 
         GameblockItems.register(modEventBus);
+        GameblockSounds.register(modEventBus);
 
         GameblockLootModifiers.register(modEventBus);
 

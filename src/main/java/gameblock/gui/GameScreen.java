@@ -12,9 +12,14 @@ import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.sounds.MusicManager;
+import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.Music;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.Nullable;
 
 public class GameScreen extends Screen {
     public static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/gameblock.png");
@@ -40,6 +45,17 @@ public class GameScreen extends Screen {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
                 if (cap.getGame() != null) return;
+            }
+        }
+        if (game.getGameTime() % 10 == 0) { // clear active sounds
+            SoundManager soundManager = minecraft.getSoundManager();
+            int i = 0;
+            while (i < game.sounds.size()) {
+                if (!soundManager.isActive(game.sounds.get(i))) {
+                    game.sounds.remove(i);
+                } else {
+                    i++;
+                }
             }
         }
         onClose();
@@ -69,6 +85,20 @@ public class GameScreen extends Screen {
         graphics.blit(TEXTURE_LOCATION, i, j, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
     }
 
+    private Music currentMusic = null;
+
+    @Nullable
+    @Override
+    public Music getBackgroundMusic() {
+        Music newMusic = game.getMusic();
+        MusicManager manager = minecraft.getMusicManager();
+        if (newMusic == null || !manager.isPlayingMusic(newMusic)) {
+            manager.stopPlaying();
+        }
+        currentMusic = newMusic;
+        return newMusic;
+    }
+
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (game.pressKey(pKeyCode)) return true;
@@ -90,5 +120,13 @@ public class GameScreen extends Screen {
     public void onClose() {
         super.onClose();
         GameblockPackets.sendToServer(new EndGamePacket());
+        Player player = Minecraft.getInstance().player;
+        if (player != null) {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null) cap.setGame(null, true);
+        }
+        SoundManager soundManager = minecraft.getSoundManager();
+        for (SimpleSoundInstance sound : game.sounds) if (soundManager.isActive(sound)) soundManager.stop(sound);
+        if (currentMusic != null) minecraft.getMusicManager().stopPlaying(currentMusic);
     }
 }

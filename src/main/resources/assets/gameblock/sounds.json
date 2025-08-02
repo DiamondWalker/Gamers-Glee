@@ -1,0 +1,42 @@
+{
+  "os_music": {
+    "sounds": [
+      {
+        "name": "gameblock:music/os",
+        "stream": true
+      }
+    ]
+  },
+  "snake_music": {
+    "sounds": [
+      {
+        "name": "gameblock:music/snake",
+        "stream": true
+      }
+    ]
+  },
+  "flying_chicken_music": {
+    "sounds": [
+      {
+        "name": "gameblock:music/flying_chicken",
+        "stream": true
+      }
+    ]
+  },
+  "ball_bounce": {
+    "sounds": [
+      {
+        "name": "gameblock:ball_bounce",
+        "stream": false
+      }
+    ]
+  },
+  "snake_death": {
+    "sounds": [
+      {
+        "name": "gameblock:snake_death",
+        "stream": false
+      }
+    ]
+  }
+}

@@ -12,7 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
-public class GameRegistry {
+public class GameblockGames {
     private static final HashMap<String, Game> registry = new HashMap<>();
 
     public static final Game<BlockBreakGame> BLOCK_BREAK_GAME = registerGame("block_break", BlockBreakGame.class);

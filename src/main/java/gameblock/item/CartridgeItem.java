@@ -1,16 +1,14 @@
 package gameblock.item;
 
 import gameblock.game.GameInstance;
-import gameblock.registry.GameRegistry;
+import gameblock.registry.GameblockGames;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 
-import java.lang.reflect.Constructor;
-
 public class CartridgeItem<T extends GameInstance> extends Item {
-    public final GameRegistry.Game<T> gameType;
+    public final GameblockGames.Game<T> gameType;
 
-    public CartridgeItem(GameRegistry.Game<T> game) {
+    public CartridgeItem(GameblockGames.Game<T> game) {
         super(new Item.Properties().stacksTo(1));
         this.gameType = game;
     }

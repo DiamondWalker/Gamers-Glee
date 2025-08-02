@@ -2,18 +2,17 @@ package gameblock.game.os;
 
 import gameblock.game.GameInstance;
 import gameblock.item.CartridgeItem;
-import gameblock.registry.GameRegistry;
-import gameblock.registry.GameblockPackets;
+import gameblock.registry.*;
 import gameblock.util.ColorF;
 import gameblock.util.Vec2i;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -23,7 +22,7 @@ public class GameblockOS extends GameInstance {
     private static final int BLOCK_FADE_TIME = 10;
     private final ArrayList<Vec2i> titleBlocks = new ArrayList<>();
 
-    protected HashSet<GameRegistry.Game> gamesFound = null;
+    protected HashSet<GameblockGames.Game> gamesFound = null;
 
     private void addBlock(int x, int y) {
         titleBlocks.add(new Vec2i(x, y));
@@ -189,7 +188,7 @@ public class GameblockOS extends GameInstance {
                     if (!gamesFound.contains(cartridge.gameType)) gamesFound.add(cartridge.gameType);
                 }
             }
-            GameblockPackets.sendToPlayer((ServerPlayer) player, new GamesListPacket(gamesFound.toArray(new GameRegistry.Game[0])));
+            GameblockPackets.sendToPlayer((ServerPlayer) player, new GamesListPacket(gamesFound.toArray(new GameblockGames.Game[0])));
         }
     }
 
@@ -221,7 +220,7 @@ public class GameblockOS extends GameInstance {
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
 
             int count = 0;
-            for (GameRegistry.Game game : gamesFound) { // FIXME: if lag or something prevents the games from being sent during the loading screen this will cause a crash
+            for (GameblockGames.Game game : gamesFound) { // FIXME: if lag or something prevents the games from being sent during the loading screen this will cause a crash
                 int x = (count % 4) * 40 - 60;
                 int y = 45 - (count / 4) * 30;
                 drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
@@ -231,5 +230,10 @@ public class GameblockOS extends GameInstance {
             }
         }
         //drawText(graphics, 0, 0, 1.0f, 50, 3, "This is some long text to test the rendering");
+    }
+
+    @Override
+    public Music getMusic() {
+        return getGameTime() > 200 ? GameblockMusic.OS : null;
     }
 }

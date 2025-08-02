@@ -1,15 +1,15 @@
 package gameblock.game.os;
 
 import gameblock.packet.UpdateGamePacket;
-import gameblock.registry.GameRegistry;
+import gameblock.registry.GameblockGames;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.HashSet;
 
 public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
-    private GameRegistry.Game[] games;
+    private GameblockGames.Game[] games;
 
-    public GamesListPacket(GameRegistry.Game[] games) {
+    public GamesListPacket(GameblockGames.Game[] games) {
         this.games = games;
     }
 
@@ -27,15 +27,15 @@ public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
 
     @Override
     public void readFromBuffer(FriendlyByteBuf buffer) {
-        games = new GameRegistry.Game[buffer.readInt()];
+        games = new GameblockGames.Game[buffer.readInt()];
         for (int i = 0; i < games.length; i++) {
-            games[i] = GameRegistry.getGame(buffer.readUtf());
+            games[i] = GameblockGames.getGame(buffer.readUtf());
         }
     }
 
     @Override
     public void handleGameUpdate(GameblockOS os) {
         os.gamesFound = new HashSet<>();
-        for (GameRegistry.Game game : games) os.gamesFound.add(game);
+        for (GameblockGames.Game game : games) os.gamesFound.add(game);
     }
 }

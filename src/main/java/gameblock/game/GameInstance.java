@@ -11,6 +11,7 @@ import gameblock.gui.GameScreen;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.ColorF;
 import gameblock.util.TextRenderingRules;
 import net.minecraft.client.Minecraft;
@@ -18,13 +19,17 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.Music;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Matrix4f;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public abstract class GameInstance {
@@ -37,6 +42,8 @@ public abstract class GameInstance {
 
     private long gameTime = 0;
     private boolean gameOver = false;
+
+    public final ArrayList<SimpleSoundInstance> sounds = new ArrayList<>();
 
     public GameInstance(Player player) {
         this.player = player;
@@ -85,6 +92,22 @@ public abstract class GameInstance {
     protected abstract void tick();
 
     public abstract void render(GuiGraphics graphics, float partialTicks);
+
+    public Music getMusic() {
+        return null;
+    }
+
+    public final void playSound(SoundEvent event, float pitch, float volume) {
+        if (isClientSide()) {
+            SimpleSoundInstance sound = SimpleSoundInstance.forUI(event, pitch, volume);
+            Minecraft.getInstance().getSoundManager().play(sound);
+            sounds.add(sound);
+        }
+    }
+
+    public final void playSound(SoundEvent event) {
+        playSound(event, 1.0f, 1.0f);
+    }
 
     private void drawText(GuiGraphics graphics, float x, float y, float scale, String txt, ColorF color) {
         Font font = Minecraft.getInstance().font;

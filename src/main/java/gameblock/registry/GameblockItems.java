@@ -1,9 +1,6 @@
 package gameblock.registry;
 
 import gameblock.GameblockMod;
-import gameblock.game.blockbreak.BlockBreakGame;
-import gameblock.game.flyingchicken.FlyingChickenGame;
-import gameblock.game.serpent.SerpentGame;
 import gameblock.item.CartridgeItem;
 import gameblock.item.GameblockItem;
 import net.minecraft.core.registries.Registries;
@@ -11,7 +8,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -22,9 +18,9 @@ public class GameblockItems {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, GameblockMod.MODID);
 
     public static final RegistryObject<Item> GAMEBLOCK = ITEMS.register("gameblock", GameblockItem::new);
-    public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("block_break", () -> new CartridgeItem(GameRegistry.BLOCK_BREAK_GAME)); // block break
-    public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(GameRegistry.SERPENT_GAME)); // snake
-    public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem(GameRegistry.FLYING_CHICKEN_GAME)); // flappy bird
+    public static final RegistryObject<Item> CARTRIDGE_BLOCK_BREAK = ITEMS.register("block_break", () -> new CartridgeItem(GameblockGames.BLOCK_BREAK_GAME)); // block break
+    public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem(GameblockGames.SERPENT_GAME)); // snake
+    public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem(GameblockGames.FLYING_CHICKEN_GAME)); // flappy bird
     /*public static final RegistryObject<Item> CARTRIDGE_RHYTHM_FIGURES = ITEMS.register("rhythm_figures", () -> new CartridgeItem(Game::new)); // just shapes and beats
     public static final RegistryObject<Item> CARTRIDGE_DEFUSAL = ITEMS.register("defusal", () -> new CartridgeItem(Game::new)); // minesweeper
     public static final RegistryObject<Item> CARTRIDGE_SUPER_PLUMBER_DUDES = ITEMS.register("super_plumber_dudes", () -> new CartridgeItem(Game::new)); // super mario bros

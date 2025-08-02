@@ -2,13 +2,18 @@ package gameblock.game.serpent;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.GameInstance;
+import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.ColorF;
 import gameblock.util.Direction2D;
 import gameblock.util.TileGrid2D;
 import gameblock.util.Vec2i;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
@@ -90,6 +95,12 @@ public class SerpentGame extends GameInstance {
     }
 
     @Override
+    protected void gameOver() {
+        super.gameOver();
+        playSound(GameblockSounds.SNAKE_DEATH.get());
+    }
+
+    @Override
     public void tick() {
         if (!isGameOver()) {
             int nextX = headX + snakeDirection.getNormal().getX();
@@ -132,5 +143,10 @@ public class SerpentGame extends GameInstance {
         }
 
         drawRectangle(graphics, foodX * 2, foodY * 2, 2.0f, 2.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
+    }
+
+    @Override
+    public Music getMusic() {
+        return !isGameOver() ? GameblockMusic.SNAKE : null;
     }
 }

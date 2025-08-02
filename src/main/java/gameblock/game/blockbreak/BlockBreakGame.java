@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
@@ -109,6 +110,7 @@ public class BlockBreakGame extends GameInstance {
             if (ballPath != null && ballLaunched) ballPath.enqueue(new Vector2f(oldBallX, oldBallY));
 
             boolean ballMoveUpdate = false;
+            boolean sendBounceNoise = false;
             if (isClientSide()) {
                 oldMoveDir = moveDir;
                 if (left.pressed == right.pressed) {
@@ -137,13 +139,16 @@ public class BlockBreakGame extends GameInstance {
                     if (ballX >= 100.0f - BALL_WIDTH / 2) {
                         ballMoveX = -Math.abs(ballMoveX);
                         ballMoveUpdate = true;
+                        sendBounceNoise = true;
                     } else if (ballX <= -100.0f + BALL_WIDTH / 2) {
                         ballMoveX = Math.abs(ballMoveX);
                         ballMoveUpdate = true;
+                        sendBounceNoise = true;
                     }
                     if (ballY >= 75.0f - BALL_WIDTH / 2) {
                         ballMoveY = -Math.abs(ballMoveY);
                         ballMoveUpdate = true;
+                        sendBounceNoise = true;
                     } else if (ballY <= -75.0f - BALL_WIDTH / 2) {
                         if (!isClientSide()) gameOver();
                         return;
@@ -159,7 +164,8 @@ public class BlockBreakGame extends GameInstance {
                                 ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
                                 ballMoveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
 
-                                GameblockPackets.sendToServer(new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY));
+                                playSound(GameblockSounds.BALL_BOUNCE.get());
+                                GameblockPackets.sendToServer(new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY, false));
                                 //ballMoveUpdate = true;
                             }
                         }
@@ -193,6 +199,7 @@ public class BlockBreakGame extends GameInstance {
                                 } else {
                                     bricks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
                                     spawnBrickBreakParticles(bricks.get(i));
+                                    //playSound(GameblockSounds.BRICK_BREAK.get());
                                 }
                             }
                         }
@@ -200,10 +207,9 @@ public class BlockBreakGame extends GameInstance {
                 }
             }
 
-
             if (ballLaunched && !isClientSide()) { // server dictates the ball position
                 if (ballMoveUpdate || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
-                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY));
+                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY, sendBounceNoise));
                     lastPacketTime = getGameTime();
                 }
             }
@@ -225,7 +231,7 @@ public class BlockBreakGame extends GameInstance {
         Random random = new Random();
         float x = brick.x * 5;
         float y = brick.y * 5;
-        int count = 5 + random.nextInt(4);
+        int count = 10 + random.nextInt(8);
         for (int i = 0; i < count; i++) {
             float angle = random.nextFloat(Mth.TWO_PI);
             float magnitude = 0.9f + random.nextFloat(0.5f);
