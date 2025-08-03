@@ -23,8 +23,8 @@ public class GameblockShaders {
     @SubscribeEvent
     public static void registerShaders(RegisterShadersEvent event) throws IOException {
         ResourceProvider resourceProvider = event.getResourceProvider();
-        /*event.registerShader(
+        event.registerShader(
                 new ShaderInstance(resourceProvider, new ResourceLocation(GameblockMod.MODID, "rendertype_os"), DefaultVertexFormat.POSITION_COLOR_TEX),
-                shaderInstance -> shaderOS = shaderInstance);*/
+                shaderInstance -> shaderOS = shaderInstance);
     }
 }

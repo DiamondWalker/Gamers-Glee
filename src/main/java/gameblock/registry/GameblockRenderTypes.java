@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.blockentity.TheEndPortalRenderer;
 public class GameblockRenderTypes {
     public static final RenderType OS_RENDER_TYPE = RenderType.create(
             "main_menu",
-            DefaultVertexFormat.POSITION_COLOR_TEX,
+            DefaultVertexFormat.POSITION_COLOR,
             VertexFormat.Mode.QUADS,
             256,
             false,

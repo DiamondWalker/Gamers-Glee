@@ -1,8 +1,11 @@
 package gameblock.game.os;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import gameblock.game.GameInstance;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.*;
+import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
 import gameblock.util.Vec2i;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,14 +16,22 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec2;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class GameblockOS extends GameInstance {
     private static final int BLOCK_WIDTH = 4;
     private static final int BLOCK_FADE_TIME = 10;
+    private static final int MENU_LOAD_TIME = 0;//160;
     private final ArrayList<Vec2i> titleBlocks = new ArrayList<>();
+
+    private final CircularStack<Vec2> cubes = new CircularStack<>(10);
 
     protected HashSet<GameblockGames.Game> gamesFound = null;
 
@@ -190,11 +201,19 @@ public class GameblockOS extends GameInstance {
             }
             GameblockPackets.sendToPlayer((ServerPlayer) player, new GamesListPacket(gamesFound.toArray(new GameblockGames.Game[0])));
         }
+
+        if (isClientSide()) {
+            if (getGameTime() % 100 == 0) {
+                Random random = new Random();
+                Vec2 pos = new Vec2(random.nextFloat() - 0.5f, random.nextFloat() - 0.5f).scale(2.0f);
+                cubes.enqueue(pos);
+            }
+        }
     }
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        if (getGameTime() <= 160) {
+        if (getGameTime() <= MENU_LOAD_TIME) {
             for (Vec2i block : titleBlocks) {
                 long time = block.getX() + block.getY() + 50;
                 if (getGameTime() >= time) {
@@ -213,27 +232,47 @@ public class GameblockOS extends GameInstance {
                             new ColorF(wave, wave, wave, f), 0);
                 }
             }
-        } else if (getGameTime() > 200) {
-            drawRectangle(graphics, RenderType.endPortal(), 0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f), 0);
+        } else if (menuLoaded()) {
+            drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 255), 0);
+            PoseStack pose = graphics.pose();
+
+            Vec2 cube = new Vec2(140, 140);
+            float time = partialTicks + getGameTime();
+            RenderSystem.disableDepthTest();
+            pose.pushPose();
+            pose.translate(cube.x, cube.y, 100 - time);
+            drawRectangle(graphics, RenderType.gui(), 0,0, 80.0f, 80.0f, new ColorF(1.0f), 0);
+            pose.popPose();
+            RenderSystem.enableDepthTest();
 
             float iconTransparency = (partialTicks + getGameTime() - 200) / 40;
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
 
-            int count = 0;
+            int cubeCount = 0;
             for (GameblockGames.Game game : gamesFound) { // FIXME: if lag or something prevents the games from being sent during the loading screen this will cause a crash
-                int x = (count % 4) * 40 - 60;
-                int y = 45 - (count / 4) * 30;
+                int x = (cubeCount % 4) * 40 - 60;
+                int y = 45 - (cubeCount / 4) * 30;
                 drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
                 //drawTexture(graphics, game.logo, x, y + 5.5f, 9.0f, 9.0f, 0, 0, 0, 5, 5);
                 drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, game.gameID, new ColorF(1.0f).withAlpha(iconTransparency));
-                count++;
+                cubeCount++;
+            }
+        } else { // loading screen
+            for (int i = 0; i < 8; i++) {
+                float angle = Mth.HALF_PI - (Mth.TWO_PI / 8) * i;
+                int currentlyLitRect = (int) ((getGameTime() / 3) % 8);
+                drawRectangle(graphics, Mth.cos(angle) * 12, Mth.sin(angle) * 12, 5.0f, 4.0f, new ColorF(i == currentlyLitRect ? 1.0f : 0.3f), angle);
             }
         }
         //drawText(graphics, 0, 0, 1.0f, 50, 3, "This is some long text to test the rendering");
     }
 
+    private boolean menuLoaded() {
+        return getGameTime() > MENU_LOAD_TIME && gamesFound != null;
+    }
+
     @Override
     public Music getMusic() {
-        return getGameTime() > 200 ? GameblockMusic.OS : null;
+        return menuLoaded() ? GameblockMusic.OS : null;
     }
 }
