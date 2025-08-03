@@ -31,7 +31,7 @@ public class GameblockOS extends GameInstance {
     private static final int MENU_LOAD_TIME = 0;//160;
     private final ArrayList<Vec2i> titleBlocks = new ArrayList<>();
 
-    private final CircularStack<Vec2> cubes = new CircularStack<>(10);
+    private final CircularStack<BackgroundBlock> cubes = new CircularStack<>(150);
 
     protected HashSet<GameblockGames.Game> gamesFound = null;
 
@@ -203,10 +203,8 @@ public class GameblockOS extends GameInstance {
         }
 
         if (isClientSide()) {
-            if (getGameTime() % 100 == 0) {
-                Random random = new Random();
-                Vec2 pos = new Vec2(random.nextFloat() - 0.5f, random.nextFloat() - 0.5f).scale(2.0f);
-                cubes.enqueue(pos);
+            if (getGameTime() % 10 == 0) {
+                cubes.enqueue(new BackgroundBlock());
             }
         }
     }
@@ -233,23 +231,30 @@ public class GameblockOS extends GameInstance {
                 }
             }
         } else if (menuLoaded()) {
-            drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 255), 0);
+            drawRectangle(graphics, 0, 0, 200, 200, new ColorF(1, 18, 23, 255), 0);
             PoseStack pose = graphics.pose();
 
-            Vec2 cube = new Vec2(140, 140);
-            float time = partialTicks + getGameTime();
-            RenderSystem.disableDepthTest();
-            pose.pushPose();
-            pose.translate(cube.x, cube.y, 100 - time);
-            drawRectangle(graphics, RenderType.gui(), 0,0, 80.0f, 80.0f, new ColorF(1.0f), 0);
-            pose.popPose();
-            RenderSystem.enableDepthTest();
+            cubes.forEach((BackgroundBlock block) -> {
+                for (int i = 0; i < 8; i++) {
+                    float time = partialTicks + getGameTime() - block.timeStart;
+                    time -= i * 10;
+                    float scale = (time * time) / 30000;
+                    float alpha = Mth.clamp((80 - (time - 1200)) / 80, 0.0f, 1.0f);
+                    alpha *= (1.0f - (float)i / 8);
+
+                    pose.pushPose();
+                    pose.scale(scale, scale, 1);
+                    pose.translate(block.x, block.y, /*100 - time*/0);
+                    drawRectangle(graphics, RenderType.gui(), 0,0, 0.5f, 0.5f, new ColorF(5, 129, 62).withAlpha(0.8f * alpha), 0);
+                    pose.popPose();
+                }
+            });
 
             float iconTransparency = (partialTicks + getGameTime() - 200) / 40;
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
 
             int cubeCount = 0;
-            for (GameblockGames.Game game : gamesFound) { // FIXME: if lag or something prevents the games from being sent during the loading screen this will cause a crash
+            for (GameblockGames.Game game : gamesFound) {
                 int x = (cubeCount % 4) * 40 - 60;
                 int y = 45 - (cubeCount / 4) * 30;
                 drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
@@ -274,5 +279,18 @@ public class GameblockOS extends GameInstance {
     @Override
     public Music getMusic() {
         return menuLoaded() ? GameblockMusic.OS : null;
+    }
+
+    private class BackgroundBlock {
+        private float x;
+        private float y;
+        private long timeStart;
+
+        private BackgroundBlock() {
+            Random rand = new Random();
+            this.x = rand.nextFloat() * 20 - 10;
+            this.y = rand.nextFloat() * 16 - 8;
+            this.timeStart = getGameTime();
+        }
     }
 }
