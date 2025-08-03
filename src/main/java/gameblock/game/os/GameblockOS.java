@@ -2,6 +2,7 @@ package gameblock.game.os;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import gameblock.game.GameInstance;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.*;
@@ -18,6 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -28,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameblockOS extends GameInstance {
     private static final int BLOCK_WIDTH = 4;
     private static final int BLOCK_FADE_TIME = 10;
-    private static final int MENU_LOAD_TIME = 0;//160;
+    private static final int MENU_LOAD_TIME = 160;
     private final ArrayList<Vec2i> titleBlocks = new ArrayList<>();
 
     private final CircularStack<BackgroundBlock> cubes = new CircularStack<>(150);
@@ -234,6 +236,8 @@ public class GameblockOS extends GameInstance {
             drawRectangle(graphics, 0, 0, 200, 200, new ColorF(1, 18, 23, 255), 0);
             PoseStack pose = graphics.pose();
 
+            //pose.pushPose();
+            //pose.mulPose(Axis.ZP.rotation((partialTicks + getGameTime()) / 400));
             cubes.forEach((BackgroundBlock block) -> {
                 for (int i = 0; i < 8; i++) {
                     float time = partialTicks + getGameTime() - block.timeStart;
@@ -243,12 +247,14 @@ public class GameblockOS extends GameInstance {
                     alpha *= (1.0f - (float)i / 8);
 
                     pose.pushPose();
+                    pose.mulPose(Axis.ZP.rotation((partialTicks + getGameTime() - i * 10) / 400));
                     pose.scale(scale, scale, 1);
                     pose.translate(block.x, block.y, /*100 - time*/0);
-                    drawRectangle(graphics, RenderType.gui(), 0,0, 0.5f, 0.5f, new ColorF(5, 129, 62).withAlpha(0.8f * alpha), 0);
+                    drawRectangle(graphics, RenderType.gui(), 0,0, 0.2f, 0.2f, new ColorF(5, 129, 62).withAlpha(0.8f * alpha), 0);
                     pose.popPose();
                 }
             });
+            //pose.popPose();
 
             float iconTransparency = (partialTicks + getGameTime() - 200) / 40;
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
@@ -288,8 +294,8 @@ public class GameblockOS extends GameInstance {
 
         private BackgroundBlock() {
             Random rand = new Random();
-            this.x = rand.nextFloat() * 20 - 10;
-            this.y = rand.nextFloat() * 16 - 8;
+            this.x = rand.nextFloat() * 10 - 5;
+            this.y = rand.nextFloat() * 10 - 5;
             this.timeStart = getGameTime();
         }
     }
