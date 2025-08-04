@@ -253,8 +253,8 @@ public class GameblockOS extends GameInstance {
             for (GameblockGames.Game game : gamesFound) {
                 int x = (cubeCount % 4) * 40 - 60;
                 int y = 45 - (cubeCount / 4) * 30;
-                drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
-                //drawTexture(graphics, game.logo, x, y + 5.5f, 9.0f, 9.0f, 0, 0, 0, 5, 5);
+                //drawRectangle(graphics, x, y + 5.5f, 9.0f, 9.0f, new ColorF(1.0f).withAlpha(iconTransparency), 0);
+                drawTexture(graphics, game.logo, x, y + 5.5f, 9.0f, 9.0f, 0);
                 drawText(graphics, x, y - 5.5f, 0.45f, 0, 2, game.gameID, new ColorF(1.0f).withAlpha(iconTransparency));
                 cubeCount++;
             }

@@ -20,7 +20,7 @@ public class GameblockGames {
     public static final Game<FlyingChickenGame> FLYING_CHICKEN_GAME = registerGame("flying_chicken", FlyingChickenGame.class);
 
     public static <T extends GameInstance> Game<T> registerGame(String name, Class<T> clazz) {
-        Game<T> game = new Game<T>(clazz, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/game/" + name + ".png"));
+        Game<T> game = new Game<T>(clazz, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));
         registry.put(name, game);
         return game;
     }
@@ -31,7 +31,7 @@ public class GameblockGames {
 
     public static class Game<T extends GameInstance> {
         public final Class<T> gameClass;
-        public final String gameID; // TODO: change to something other than ResourceLocation
+        public final String gameID;
         public final ResourceLocation logo;
 
         private Game(Class<T> clazz, String id, ResourceLocation tex) {

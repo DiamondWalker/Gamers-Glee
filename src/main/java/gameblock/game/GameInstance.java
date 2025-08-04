@@ -189,6 +189,18 @@ public abstract class GameInstance {
     }
 
     protected final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
+        float minU = (float) u / 256;
+        float minV = (float) v / 256;
+        float maxU = (float) (u + uWidth) / 256;
+        float maxV = (float) (v + vHeight) / 256;
+        drawTexture(graphics, texture, x, y, width, height, angle, minU, maxU, minV, maxV);
+    }
+
+    protected final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle) {
+        drawTexture(graphics, texture, x, y, width, height, angle, 0.0f, 1.0f, 0.0f, 1.0f);
+    }
+
+    private void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, float minU, float maxU, float minV, float maxV) {
         RenderSystem.setShaderTexture(0, texture);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         PoseStack pose = graphics.pose();
@@ -214,17 +226,12 @@ public abstract class GameInstance {
             pMaxY = j;
         }
 
-        float pMinU = (float) u / 256;
-        float pMinV = (float) v / 256;
-        float pMaxU = (float) (u + uWidth) / 256;
-        float pMaxV = (float) (v + vHeight) / 256;
-
         BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
         bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-        bufferbuilder.vertex(matrix4f, pMinX, pMinY, 0.0f).uv(pMaxU, pMinV).endVertex();
-        bufferbuilder.vertex(matrix4f, pMinX, pMaxY, 0.0f).uv(pMaxU, pMaxV).endVertex();
-        bufferbuilder.vertex(matrix4f, pMaxX, pMaxY, 0.0f).uv(pMinU, pMaxV).endVertex();
-        bufferbuilder.vertex(matrix4f, pMaxX, pMinY, 0.0f).uv(pMinU, pMinV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMinX, pMinY, 0.0f).uv(maxU, minV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMinX, pMaxY, 0.0f).uv(maxU, maxV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMaxX, pMaxY, 0.0f).uv(minU, maxV).endVertex();
+        bufferbuilder.vertex(matrix4f, pMaxX, pMinY, 0.0f).uv(minU, minV).endVertex();
         BufferUploader.drawWithShader(bufferbuilder.end());
 
         pose.popPose();
