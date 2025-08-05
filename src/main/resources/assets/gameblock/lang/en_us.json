@@ -2,5 +2,9 @@
   "item.gameblock.block_break": "Block Break Cartridge",
   "item.gameblock.flying_chicken": "Flying Chicken Cartridge",
   "item.gameblock.gameblock": "Gameblock",
-  "item.gameblock.serpent": "Serpent Cartridge"
+  "item.gameblock.serpent": "Serpent Cartridge",
+
+  "game.gameblock.serpent": "Serpent",
+  "game.gameblock.block_break": "Block Break",
+  "game.gameblock.flying_chicken": "Flying Chicken"
 }

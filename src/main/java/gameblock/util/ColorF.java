@@ -83,4 +83,13 @@ public class ColorF {
     public ColorF multiply(ColorF other) {
         return new ColorF(this.red * other.red, this.green * other.green, this.blue * other.blue, this.alpha * other.alpha);
     }
+
+    public ColorF fadeTo(ColorF other, float lerp) {
+        return new ColorF(
+                (other.red - this.red) * lerp + this.red,
+                (other.green - this.green) * lerp + this.green,
+                (other.blue - this.blue) * lerp + this.blue,
+                (other.alpha - this.alpha) * lerp + this.alpha
+        );
+    }
 }

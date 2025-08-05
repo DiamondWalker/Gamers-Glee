@@ -1,5 +1,6 @@
 package gameblock.gui;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gameblock.game.GameInstance;
@@ -8,6 +9,7 @@ import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.Direction1D;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -19,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
 
 public class GameScreen extends Screen {
@@ -83,6 +86,45 @@ public class GameScreen extends Screen {
         graphics.disableScissor();
         RenderSystem.enableCull();
         graphics.blit(TEXTURE_LOCATION, i, j, 0, 0, IMAGE_WIDTH, IMAGE_HEIGHT);
+    }
+
+    private Vec2 convertMouseCoordinatesToGameCoordinates(double mouseX, double mouseY) {
+        int i = (this.width - IMAGE_WIDTH) / 2;
+        int j = this.height - IMAGE_HEIGHT;
+        int frameMinX = i + 3, frameMaxX = i + IMAGE_WIDTH - 3, frameMinY = j + 3, frameMaxY = j + IMAGE_WIDTH - 53;
+        int centerX = (frameMinX + frameMaxX) / 2, centerY = (frameMinY + frameMaxY) / 2;
+        float scale = (float)(frameMaxX - frameMinX) / 200;
+
+        mouseX -= centerX;
+        mouseY -= centerY;
+        mouseX *= scale;
+        mouseY *= -scale;
+
+        if (Math.abs(mouseX) <= 100 && Math.abs(mouseY) <= 75) return new Vec2((float)mouseX, (float)mouseY);
+        return null;
+    }
+
+    @Override
+    public void mouseMoved(double pMouseX, double pMouseY) {
+        Vec2 gameCoords = convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY);
+        if (gameCoords != null) game.setMouseCoordinates(gameCoords);
+    }
+
+    @Override
+    public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+        Vec2 gameCoords = convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY);
+        if (gameCoords != null) {
+            Direction1D button = null;
+            switch (pButton) {
+                case (InputConstants.MOUSE_BUTTON_LEFT) -> button = Direction1D.LEFT;
+                case (InputConstants.MOUSE_BUTTON_RIGHT) -> button = Direction1D.RIGHT;
+                case (InputConstants.MOUSE_BUTTON_MIDDLE) -> button = Direction1D.CENTER;
+            }
+
+            game.click(gameCoords, button);
+            return true;
+        }
+        return false;
     }
 
     private Music currentMusic = null;

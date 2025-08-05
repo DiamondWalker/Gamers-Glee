@@ -1,10 +1,12 @@
 package gameblock.game.os;
 
+import gameblock.game.GameInstance;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockGames;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
     private GameblockGames.Game[] games;
@@ -20,8 +22,8 @@ public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
     @Override
     public void writeToBuffer(FriendlyByteBuf buffer) {
         buffer.writeInt(games.length);
-        for (int i = 0; i < games.length; i++) {
-            buffer.writeUtf(games[i].gameID);
+        for (GameblockGames.Game<?> game : games) {
+            buffer.writeUtf(game.gameID);
         }
     }
 
@@ -35,7 +37,9 @@ public class GamesListPacket extends UpdateGamePacket<GameblockOS> {
 
     @Override
     public void handleGameUpdate(GameblockOS os) {
-        os.gamesFound = new HashSet<>();
-        for (GameblockGames.Game game : games) os.gamesFound.add(game);
+        os.gameIcons = new HashSet<>();
+        for (int i = 0; i < games.length; i++) {
+            os.gameIcons.add(new OSIcon<>(os, games[i], i));
+        }
     }
 }
