@@ -11,9 +11,9 @@ import net.minecraft.world.phys.Vec2;
 public class OSIcon<T extends GameInstance> {
     public static final int SELECTION_TIME = 5;
 
-    private final GameblockOS os;
-    private final GameblockGames.Game<T> game;
-    private final int index;
+    public final GameblockOS os;
+    public final GameblockGames.Game<T> game;
+    public final int index;
     private boolean selected = false;
     private int selectionTicks = 0;
 

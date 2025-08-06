@@ -4,14 +4,14 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import gameblock.game.os.GameblockOS;
-import gameblock.packet.EndGamePacket;
+import gameblock.packet.GameChangePacket;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.gui.GameScreen;
 import gameblock.item.CartridgeItem;
+import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
-import gameblock.registry.GameblockSounds;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import gameblock.util.TextRenderingRules;
@@ -86,20 +86,13 @@ public abstract class GameInstance {
         gameTime++;
 
         if (
-                player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) &&
-                player.getItemInHand(InteractionHand.OFF_HAND).getItem() instanceof CartridgeItem cartridge &&
-                cartridge.isInstance(this)) {
-            return;
-        } else if (!(this instanceof GameblockOS)) {
+                !isClientSide() &&
+                !player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) &&
+                !player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get())
+        ) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
-                cap.setGame(null, isClientSide());
-                if (isClientSide()) {
-                    if (Minecraft.getInstance().screen instanceof GameScreen screen) screen.onClose();
-                    GameblockPackets.sendToServer(new EndGamePacket());
-                } else {
-                    GameblockPackets.sendToPlayer((ServerPlayer) player, new EndGamePacket());
-                }
+                cap.setGame(null, player);
             }
         }
     }

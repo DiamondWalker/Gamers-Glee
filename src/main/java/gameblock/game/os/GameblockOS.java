@@ -2,6 +2,8 @@ package gameblock.game.os;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import gameblock.capability.GameCapability;
+import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockGames;
@@ -30,7 +32,6 @@ public class GameblockOS extends GameInstance {
     private static final int ICON_FADE_IN_TIME = 80;
 
     protected HashSet<OSIcon<?>> gameIcons = null;
-    boolean gamesSent = false;
 
     private GameblockLogoRenderer logoRenderer;
     private GameblockBackgroundRenderer bgRenderer;
@@ -45,17 +46,21 @@ public class GameblockOS extends GameInstance {
 
     @Override
     protected void tick() {
-        if (!isClientSide() && !gamesSent) {
+        if (isClientSide() && gameIcons == null) {
+            gameIcons = new HashSet<>();
             LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
+            int index = 0;
+            
             Inventory playerInventory = player.getInventory();
             for (int i = 0; i < playerInventory.getContainerSize(); i++) {
                 ItemStack stack = playerInventory.getItem(i);
                 if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                    if (!gamesFound.contains(cartridge.gameType)) gamesFound.add(cartridge.gameType);
+                    if (!gamesFound.contains(cartridge.gameType)) {
+                        gamesFound.add(cartridge.gameType);
+                        gameIcons.add(new OSIcon<>(this, cartridge.gameType, index++));
+                    }
                 }
             }
-            GameblockPackets.sendToPlayer((ServerPlayer) player, new GamesListPacket(gamesFound.toArray(new GameblockGames.Game[0])));
-            gamesSent = true;
         }
 
         if (bgRenderer != null) bgRenderer.tick();
@@ -73,6 +78,7 @@ public class GameblockOS extends GameInstance {
         if (buttonPressed == Direction1D.LEFT && isMenuInteractable() && gameIcons != null) {
             for (OSIcon<?> icon : gameIcons) {
                 if (icon.isOverIcon(clickCoordinates)) {
+                    GameblockPackets.sendToServer(new SelectGamePacket(icon.game));
                     return;
                 }
             }
@@ -112,6 +118,21 @@ public class GameblockOS extends GameInstance {
         }
         if (fade < 1.0f) {
             drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f - fade), 0);
+        }
+    }
+
+    protected void selectGameAndSentToClient(GameblockGames.Game<?> game) {
+        Inventory playerInventory = player.getInventory();
+        for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+            ItemStack stack = playerInventory.getItem(i);
+            if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                if (cartridge.gameType == game) {
+                    GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                    if (cap != null) {
+                        cap.setGame(game, player);
+                    }
+                }
+            }
         }
     }
 

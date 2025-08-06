@@ -18,6 +18,7 @@ public class GameblockSounds {
     public static final RegistryObject<SoundEvent> OS_MUSIC = registerSound("os_music");
     public static final RegistryObject<SoundEvent> SNAKE_MUSIC = registerSound("snake_music");
     public static final RegistryObject<SoundEvent> FLYING_CHICKEN_MUSIC = registerSound("flying_chicken_music");
+    public static final RegistryObject<SoundEvent> BLOCK_BREAK_MUSIC = registerSound("block_break_music");
 
     public static final RegistryObject<SoundEvent> BALL_BOUNCE = registerSound("ball_bounce");
     public static final RegistryObject<SoundEvent> SNAKE_DEATH = registerSound("snake_death");

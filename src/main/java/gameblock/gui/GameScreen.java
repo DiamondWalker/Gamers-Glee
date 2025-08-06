@@ -4,7 +4,8 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gameblock.game.GameInstance;
-import gameblock.packet.EndGamePacket;
+import gameblock.game.os.GameblockOS;
+import gameblock.packet.GameChangePacket;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
@@ -161,12 +162,7 @@ public class GameScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        GameblockPackets.sendToServer(new EndGamePacket());
-        Player player = Minecraft.getInstance().player;
-        if (player != null) {
-            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null) cap.setGame(null, true);
-        }
+        // TODO: send packet to close game on server
         SoundManager soundManager = minecraft.getSoundManager();
         for (SimpleSoundInstance sound : game.sounds) if (soundManager.isActive(sound)) soundManager.stop(sound);
         if (currentMusic != null) minecraft.getMusicManager().stopPlaying(currentMusic);

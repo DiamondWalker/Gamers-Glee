@@ -4,6 +4,7 @@ import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.game.flyingchicken.FlyingChickenGame;
+import gameblock.game.os.GameblockOS;
 import gameblock.game.serpent.SerpentGame;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -15,6 +16,7 @@ import java.util.HashMap;
 public class GameblockGames {
     private static final HashMap<String, Game> registry = new HashMap<>();
 
+    public static final Game<GameblockOS> GAMEBLOCK_OS = registerGame("gameblock_os", GameblockOS.class);
     public static final Game<BlockBreakGame> BLOCK_BREAK_GAME = registerGame("block_break", BlockBreakGame.class);
     public static final Game<SerpentGame> SERPENT_GAME = registerGame("serpent", SerpentGame.class);
     public static final Game<FlyingChickenGame> FLYING_CHICKEN_GAME = registerGame("flying_chicken", FlyingChickenGame.class);

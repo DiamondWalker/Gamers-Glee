@@ -6,16 +6,16 @@ import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.game.blockbreak.BrickUpdatePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
-import gameblock.game.os.GamesListPacket;
+import gameblock.game.os.SelectGamePacket;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
-import gameblock.packet.EndGamePacket;
+import gameblock.packet.GameChangePacket;
+import gameblock.packet.GameClosePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
-import org.lwjgl.system.Platform;
 
 public class GameblockPackets {
     private static int id = 0;
@@ -29,10 +29,12 @@ public class GameblockPackets {
     );
 
     public static void registerPackets() {
-        INSTANCE.registerMessage(id++, EndGamePacket.class, EndGamePacket::writeToBuffer, EndGamePacket::new, EndGamePacket::handle);
+        INSTANCE.registerMessage(id++, GameChangePacket.class, GameChangePacket::writeToBuffer, GameChangePacket::new, GameChangePacket::handle);
         INSTANCE.registerMessage(id++, GameOverPacket.class, GameOverPacket::writeToBuffer, GameOverPacket::new, GameOverPacket::handle);
+        INSTANCE.registerMessage(id++, GameClosePacket.class, GameClosePacket::writeToBuffer, GameClosePacket::new, GameClosePacket::handle);
 
-        INSTANCE.registerMessage(id++, GamesListPacket.class, GamesListPacket::writeToBuffer, GamesListPacket::new, GamesListPacket::handle);
+        // OS
+        INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
 
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);

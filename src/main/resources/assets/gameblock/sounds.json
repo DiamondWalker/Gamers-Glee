@@ -23,6 +23,14 @@
       }
     ]
   },
+  "block_break_music": {
+    "sounds": [
+      {
+        "name": "gameblock:music/block_break",
+        "stream": true
+      }
+    ]
+  },
   "ball_bounce": {
     "sounds": [
       {

@@ -3,6 +3,7 @@ package gameblock.game.blockbreak;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
@@ -11,6 +12,7 @@ import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import org.joml.Vector2f;
@@ -225,6 +227,11 @@ public class BlockBreakGame extends GameInstance {
                 }
             }
         }
+    }
+
+    @Override
+    public Music getMusic() {
+        return (ballLaunched && !isGameOver()) ? GameblockMusic.BLOCK_BREAK : null;
     }
 
     protected void spawnBrickBreakParticles(Brick brick) {

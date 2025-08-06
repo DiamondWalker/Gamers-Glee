@@ -12,16 +12,4 @@ public class CartridgeItem<T extends GameInstance> extends Item {
         super(new Item.Properties().stacksTo(1));
         this.gameType = game;
     }
-
-    public T getNewGameInstance(Player player) {
-        try {
-            return gameType.createInstance(player);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    public boolean isInstance(GameInstance game) {
-        return this.gameType.isInstance(game);
-    }
 }

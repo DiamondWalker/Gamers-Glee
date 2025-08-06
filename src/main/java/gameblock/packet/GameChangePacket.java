@@ -2,7 +2,7 @@ package gameblock.packet;
 
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.gui.GameScreen;
+import gameblock.registry.GameblockGames;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Player;
@@ -11,17 +11,24 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class EndGamePacket {
+public class GameChangePacket {
+    private GameblockGames.Game<?> game;
 
-    public EndGamePacket() {}
+    public GameChangePacket(GameblockGames.Game<?> game) {
+        this.game = game;
+    }
 
-    public EndGamePacket(FriendlyByteBuf buffer) {
+    public GameChangePacket(FriendlyByteBuf buffer) {
         readFromBuffer(buffer);
     }
 
-    public void writeToBuffer(FriendlyByteBuf buffer) {}
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        buffer.writeUtf(game != null ? game.gameID : "");
+    }
 
-    public void readFromBuffer(FriendlyByteBuf buffer) {}
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        game = GameblockGames.getGame(buffer.readUtf());
+    }
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         context.get().enqueueWork(() -> {
@@ -29,11 +36,14 @@ public class EndGamePacket {
                 Player player = Minecraft.getInstance().player;
                 if (player != null) {
                     GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                    if (cap != null) cap.setGame(null, true);
+                    if (cap != null) {
+                        try {
+                            cap.setGame(game, player);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
                 }
-            } else {
-                GameCapability cap = context.get().getSender().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null) cap.setGame(null, false);
             }
 
             context.get().setPacketHandled(true);
