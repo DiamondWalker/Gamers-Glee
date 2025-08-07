@@ -22,6 +22,10 @@ public class GameblockSounds {
 
     public static final RegistryObject<SoundEvent> BALL_BOUNCE = registerSound("ball_bounce");
     public static final RegistryObject<SoundEvent> SNAKE_DEATH = registerSound("snake_death");
+    public static final RegistryObject<SoundEvent> BALL_BROKEN = registerSound("ball_broken");
+    public static final RegistryObject<SoundEvent> BLOCK_BROKEN = registerSound("block_broken");
+    public static final RegistryObject<SoundEvent> FLYING_CHICKEN_SCORE = registerSound("flying_chicken_score");
+    public static final RegistryObject<SoundEvent> GAMEBLOCK_LOGON = registerSound("gameblock_logon");
 
 
     private static RegistryObject<SoundEvent> registerSound(String name) {

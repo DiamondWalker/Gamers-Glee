@@ -9,6 +9,7 @@ import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
@@ -46,20 +47,26 @@ public class GameblockOS extends GameInstance {
 
     @Override
     protected void tick() {
-        if (isClientSide() && gameIcons == null) {
-            gameIcons = new HashSet<>();
-            LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
-            int index = 0;
-            
-            Inventory playerInventory = player.getInventory();
-            for (int i = 0; i < playerInventory.getContainerSize(); i++) {
-                ItemStack stack = playerInventory.getItem(i);
-                if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                    if (!gamesFound.contains(cartridge.gameType)) {
-                        gamesFound.add(cartridge.gameType);
-                        gameIcons.add(new OSIcon<>(this, cartridge.gameType, index++));
+        if (isClientSide()) {
+            if (gameIcons == null) {
+                gameIcons = new HashSet<>();
+                LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
+                int index = 0;
+
+                Inventory playerInventory = player.getInventory();
+                for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+                    ItemStack stack = playerInventory.getItem(i);
+                    if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                        if (!gamesFound.contains(cartridge.gameType)) {
+                            gamesFound.add(cartridge.gameType);
+                            gameIcons.add(new OSIcon<>(this, cartridge.gameType, index++));
+                        }
                     }
                 }
+            }
+
+            if (getGameTime() == 85) {
+                playSound(GameblockSounds.GAMEBLOCK_LOGON.get());
             }
         }
 

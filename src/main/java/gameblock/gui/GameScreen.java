@@ -9,6 +9,7 @@ import gameblock.packet.GameChangePacket;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
+import gameblock.packet.GameClosePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.Direction1D;
 import net.minecraft.client.GameNarrator;
@@ -162,7 +163,7 @@ public class GameScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        // TODO: send packet to close game on server
+        GameblockPackets.sendToServer(new GameClosePacket());
         SoundManager soundManager = minecraft.getSoundManager();
         for (SimpleSoundInstance sound : game.sounds) if (soundManager.isActive(sound)) soundManager.stop(sound);
         if (currentMusic != null) minecraft.getMusicManager().stopPlaying(currentMusic);

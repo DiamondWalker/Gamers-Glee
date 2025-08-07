@@ -46,5 +46,37 @@
         "stream": false
       }
     ]
+  },
+  "ball_broken": {
+    "sounds": [
+      {
+        "name": "gameblock:ball_broken",
+        "stream": false
+      }
+    ]
+  },
+  "block_broken": {
+    "sounds": [
+      {
+        "name": "gameblock:block_broken",
+        "stream": false
+      }
+    ]
+  },
+  "flying_chicken_score": {
+    "sounds": [
+      {
+        "name": "gameblock:flying_chicken_score",
+        "stream": false
+      }
+    ]
+  },
+  "gameblock_logon": {
+    "sounds": [
+      {
+        "name": "gameblock:gameblock_logon",
+        "stream": false
+      }
+    ]
   }
 }

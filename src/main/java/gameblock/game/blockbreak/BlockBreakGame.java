@@ -244,6 +244,8 @@ public class BlockBreakGame extends GameInstance {
             float magnitude = 0.9f + random.nextFloat(0.5f);
             particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, brick.getColor()));
         }
+
+        playSound(GameblockSounds.BLOCK_BROKEN.get());
     }
 
     @Override
@@ -258,6 +260,8 @@ public class BlockBreakGame extends GameInstance {
                         40,
                         new ColorF(random.nextInt(256), 255, 255)));
             }
+
+            playSound(GameblockSounds.BALL_BROKEN.get());
         }
     }
 
