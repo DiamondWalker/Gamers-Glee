@@ -132,7 +132,7 @@ public class BlockBreakGame extends GameInstance {
                 GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
             }
 
-            if (isGameOver() && getGameTime() - endTime > (score > highScore ? 100 : 80)) restart();
+            if (isGameOver() && getGameTime() - endTime > (score > highScore ? 120 : 100)) restart();
         }
     }
 
@@ -366,30 +366,31 @@ public class BlockBreakGame extends GameInstance {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
                 if (getGameState() == GameState.WIN) {
-                    drawText(graphics, 0.0f, 12.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), "YOU WIN!");
+                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), "YOU WIN!");
                 } else {
-                    drawText(graphics, 0.0f, 12.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), "GAME OVER!");
+                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), "GAME OVER!");
                 }
 
                 if (gameOverTime > 40) {
-                    drawText(graphics, 0.0f, 4.0f, 0.7f, new ColorF(1.0f), "Score: " + score);
+                    int percent = (int)(progress * 100);
+                    drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), "Blocks broken: " + bricksBroken + " (" + percent + "%)");
 
                     if (gameOverTime > 60) {
-                        if (score > highScore) { // new high score!
-                            drawText(graphics, 40.0f, 4.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), "(New high score!)");
+                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), timeString);
 
-                            if (gameOverTime > 80) {
-                                drawText(graphics, 0.0f, -4.0f, 0.7f, new ColorF(1.0f), timeString);
+                        if (gameOverTime > 80) {
+                            drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), "Score: " + score);
 
-                                if (gameOverTime > 100) {
-                                    drawText(graphics, 0.0f, -12.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                            if (gameOverTime > 100) {
+                                if (score > highScore) { // new high score!
+                                    drawText(graphics, 40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), "(New high score!)");
+
+                                    if (gameOverTime > 120) {
+                                        drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                                    }
+                                } else {
+                                    drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
                                 }
-                            }
-                        } else {
-                            drawText(graphics, 0.0f, -4.0f, 0.7f, new ColorF(1.0f), timeString);
-
-                            if (gameOverTime > 80) {
-                                drawText(graphics, 0.0f, -12.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
                             }
                         }
                     }
