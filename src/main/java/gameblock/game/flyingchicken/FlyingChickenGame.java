@@ -5,11 +5,9 @@ import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
-import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
-import net.minecraft.client.Minecraft;
+import gameblock.util.GameState;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
@@ -49,8 +47,7 @@ public class FlyingChickenGame extends GameInstance {
     }
 
     @Override
-    protected void gameOver() {
-        super.gameOver();
+    protected void onGameLoss() {
         if (isClientSide()) {
             playSound(SoundEvents.CHICKEN_DEATH);
             gameOverFallDirection = new Random().nextFloat() * 2 - 1;
@@ -66,12 +63,12 @@ public class FlyingChickenGame extends GameInstance {
 
             if (!isClientSide()) {
                 if (Math.abs(chickenY) > 75 - 5) {
-                    gameOver();
+                    setGameState(GameState.LOSS);
                 } else {
                     pipes.forEach((Pipe pipe) -> {
                         if (Math.abs(pipe.x - chickenX) - 6 < 12) {
                             if (Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
-                                gameOver();
+                                setGameState(GameState.LOSS);
                             }
                         }
                     });

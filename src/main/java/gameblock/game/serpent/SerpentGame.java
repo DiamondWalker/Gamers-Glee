@@ -5,13 +5,8 @@ import gameblock.game.GameInstance;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
-import gameblock.util.ColorF;
-import gameblock.util.Direction2D;
-import gameblock.util.TileGrid2D;
-import gameblock.util.Vec2i;
-import net.minecraft.client.Minecraft;
+import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.player.Player;
@@ -95,8 +90,7 @@ public class SerpentGame extends GameInstance {
     }
 
     @Override
-    protected void gameOver() {
-        super.gameOver();
+    protected void onGameLoss() {
         playSound(GameblockSounds.SNAKE_DEATH.get());
     }
 
@@ -108,7 +102,7 @@ public class SerpentGame extends GameInstance {
             snakeDirectionChanged = false;
 
             if (getSnakeTicksFromTile(nextX, nextY) == -1 || isSnakeTile(nextX, nextY) && !isClientSide()) {
-                gameOver();
+                setGameState(GameState.LOSS);
             } else {
                 headX = nextX;
                 headY = nextY;

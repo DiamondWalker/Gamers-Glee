@@ -1,9 +1,10 @@
 package gameblock.registry;
 
-import gameblock.game.GameOverPacket;
+import gameblock.game.GameStatePacket;
 import gameblock.game.blockbreak.BallLaunchPacket;
 import gameblock.game.blockbreak.BallUpdatePacket;
 import gameblock.game.blockbreak.BrickUpdatePacket;
+import gameblock.game.blockbreak.ScoreUpdatePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.game.os.SelectGamePacket;
@@ -30,7 +31,7 @@ public class GameblockPackets {
 
     public static void registerPackets() {
         INSTANCE.registerMessage(id++, GameChangePacket.class, GameChangePacket::writeToBuffer, GameChangePacket::new, GameChangePacket::handle);
-        INSTANCE.registerMessage(id++, GameOverPacket.class, GameOverPacket::writeToBuffer, GameOverPacket::new, GameOverPacket::handle);
+        INSTANCE.registerMessage(id++, GameStatePacket.class, GameStatePacket::writeToBuffer, GameStatePacket::new, GameStatePacket::handle);
         INSTANCE.registerMessage(id++, GameClosePacket.class, GameClosePacket::writeToBuffer, GameClosePacket::new, GameClosePacket::handle);
 
         // OS
@@ -40,6 +41,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
         INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, ScoreUpdatePacket.class, ScoreUpdatePacket::writeToBuffer, ScoreUpdatePacket::new, ScoreUpdatePacket::handle);
 
         // serpent
         INSTANCE.registerMessage(id++, SnakeUpdatePacket.class, SnakeUpdatePacket::writeToBuffer, SnakeUpdatePacket::new, SnakeUpdatePacket::handle);

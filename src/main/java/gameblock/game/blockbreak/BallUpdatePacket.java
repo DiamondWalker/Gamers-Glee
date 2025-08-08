@@ -39,7 +39,11 @@ public class BallUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
 
     @Override
     public void handleGameUpdate(BlockBreakGame game) {
-        if (!game.isClientSide()) game.lastPacketTime = game.getGameTime();
+        if (!game.isClientSide()) {
+            game.lastPacketTime = game.getGameTime();
+        } else {
+            if (game.getGameTime() - game.clientToPacketBallUpdateTime < 4) return;
+        }
         game.ballX = xPos;
         game.ballY = yPos;
         game.ballMoveX = xMotion;

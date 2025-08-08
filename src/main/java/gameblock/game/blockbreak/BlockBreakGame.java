@@ -1,6 +1,5 @@
 package gameblock.game.blockbreak;
 
-import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
@@ -10,6 +9,7 @@ import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
+import gameblock.util.GameState;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -57,6 +57,7 @@ public class BlockBreakGame extends GameInstance {
     CircularStack<Vector2f> ballPath = null;
 
     boolean ballLaunched = false;
+    long timeSinceLaunch = 0;
 
     ArrayList<Brick> bricks = new ArrayList<>();
     protected int bricksBroken = 0;
@@ -64,6 +65,10 @@ public class BlockBreakGame extends GameInstance {
     ArrayList<Particle> particles = null;
 
     protected long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
+
+    protected int score = 0;
+
+    protected long clientToPacketBallUpdateTime = -1;
 
     public BlockBreakGame(Player player) {
         super(player);
@@ -87,8 +92,21 @@ public class BlockBreakGame extends GameInstance {
         }
     }
 
+    private float calculateProgress() {
+        return (float) bricksBroken / bricks.size();
+    }
+
     private float calculateBallSpeed() {
-        return INITIAL_BALL_SPEED + ((float) bricksBroken / bricks.size()) * BALL_SPEED_INCREASE;
+        return INITIAL_BALL_SPEED + calculateProgress() * BALL_SPEED_INCREASE;
+    }
+
+    private void recalculateScore() {
+        if (!isClientSide()) {
+            int oldScore = score;
+            score = (int) Math.max(0, bricksBroken - timeSinceLaunch / 100);
+            if (getGameState() == GameState.WIN) score += 100;
+            if (score != oldScore || timeSinceLaunch % 20 == 0) GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20));
+        }
     }
 
     protected void launchBall(float xMotion) {
@@ -103,10 +121,12 @@ public class BlockBreakGame extends GameInstance {
 
     @Override
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
-        if (!ballLaunched && buttonPressed == Direction1D.LEFT) {
-            float motion = (platformPos - oldPlatformPos) / UPDATES_PER_TICK;
-            launchBall(motion);
-            GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
+        if (buttonPressed == Direction1D.LEFT) {
+            if (!ballLaunched) {
+                float motion = (platformPos - oldPlatformPos) / UPDATES_PER_TICK;
+                launchBall(motion);
+                GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
+            }
         }
     }
 
@@ -147,7 +167,7 @@ public class BlockBreakGame extends GameInstance {
                         ballMoveUpdate = true;
                         sendBounceNoise = true;
                     } else if (ballY <= -75.0f - BALL_WIDTH / 2) {
-                        if (!isClientSide()) gameOver();
+                        if (!isClientSide()) setGameState(GameState.LOSS);
                         return;
                     }
 
@@ -165,6 +185,7 @@ public class BlockBreakGame extends GameInstance {
 
                                 playSound(GameblockSounds.BALL_BOUNCE.get());
                                 GameblockPackets.sendToServer(new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY, false));
+                                clientToPacketBallUpdateTime = getGameTime();
                                 //ballMoveUpdate = true;
                             }
                         }
@@ -214,8 +235,9 @@ public class BlockBreakGame extends GameInstance {
                     GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY, sendBounceNoise));
                     lastPacketTime = getGameTime();
                 }
+                timeSinceLaunch++;
+                recalculateScore();
             }
-
         }
 
         if (particles != null) {
@@ -248,9 +270,19 @@ public class BlockBreakGame extends GameInstance {
         playSound(GameblockSounds.BLOCK_BROKEN.get());
     }
 
+    private long endTime = -1;
+
     @Override
-    protected void gameOver() {
-        super.gameOver();
+    protected void onGameWin() {
+        if (!isClientSide()) {
+            score += 100;
+            GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20));
+        }
+        endTime = getGameTime();
+    }
+
+    @Override
+    protected void onGameLoss() {
         if (particles != null) {
             Random random = new Random();
             for (int i = 0; i < 25; i++) {
@@ -263,11 +295,12 @@ public class BlockBreakGame extends GameInstance {
 
             playSound(GameblockSounds.BALL_BROKEN.get());
         }
+        endTime = getGameTime();
     }
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        float progress = (float)bricksBroken / bricks.size();
+        float progress = calculateProgress();
 
         Matrix4f matrix = graphics.pose().last().pose();
         VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(RenderType.gui());
@@ -292,6 +325,47 @@ public class BlockBreakGame extends GameInstance {
         vertexconsumer.vertex(matrix, maxX, 63.0f, 0.0f).color(barCol.getRed(), barCol.getGreen(), barCol.getBlue(), barCol.getAlpha()).endVertex();*/
 
         graphics.flush();
+
+        //TODO: localization
+        String timeString = "XX:XX";
+        if (ballLaunched) {
+            long seconds = timeSinceLaunch / 20;
+            int minutes = (int)(seconds / 60);
+            seconds -= (minutes * 60);
+
+            String minutesString = String.valueOf(minutes);
+            if (minutesString.length() == 1) minutesString = '0' + minutesString;
+
+            String secondsString = String.valueOf(seconds);
+            if (secondsString.length() == 1) secondsString = '0' + secondsString;
+
+            timeString = "Time: " + minutesString + ':' + secondsString;
+        }
+        if (!isGameOver()) {
+            drawText(graphics, 80.0f, 65.0f, 0.5f, new ColorF(1.0f), "Score: " + score);
+            drawText(graphics, 80.0f, 60.0f, 0.5f, new ColorF(1.0f), timeString);
+        } else {
+            long gameOverTime = getGameTime() - endTime;
+            if (gameOverTime > 20) {
+                if (getGameState() == GameState.WIN) {
+                    drawText(graphics, 0.0f, 12.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), "YOU WIN!");
+                } else {
+                    drawText(graphics, 0.0f, 12.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), "GAME OVER!");
+                }
+
+                if (gameOverTime > 40) {
+                    drawText(graphics, 0.0f, 4.0f, 0.7f, new ColorF(1.0f), "Score: " + score);
+
+                    if (gameOverTime > 60) {
+                        drawText(graphics, 0.0f, -4.0f, 0.7f, new ColorF(1.0f), timeString);
+
+                        if (gameOverTime > 80) {
+                            drawText(graphics, 0.0f, -12.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                        }
+                    }
+                }
+            }
+        }
 
         drawTexture(graphics, SPRITE,
                 oldPlatformPos + (platformPos - oldPlatformPos) * partialTicks,

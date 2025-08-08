@@ -3,17 +3,13 @@ package gameblock.game;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
-import gameblock.game.os.GameblockOS;
-import gameblock.packet.GameChangePacket;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.gui.GameScreen;
-import gameblock.item.CartridgeItem;
-import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
+import gameblock.util.GameState;
 import gameblock.util.TextRenderingRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -46,7 +42,7 @@ public abstract class GameInstance {
     public static final int MAX_Y = 75;
 
     private long gameTime = 0;
-    private boolean gameOver = false;
+    private GameState gameState = GameState.ACTIVE;
 
     public final ArrayList<SimpleSoundInstance> sounds = new ArrayList<>();
 
@@ -58,9 +54,26 @@ public abstract class GameInstance {
         return player.level().isClientSide();
     }
 
-    protected void gameOver() {
-        gameOver = true;
-        if (!isClientSide()) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameOverPacket());
+    protected final void setGameState(GameState state) {
+        gameState = state;
+        if (!isClientSide()) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state));
+        if (state == GameState.WIN) {
+            onGameWin();
+        } else if (state == GameState.LOSS) {
+            onGameLoss();
+        }
+    }
+
+    public final GameState getGameState() {
+        return gameState;
+    }
+
+    protected void onGameWin() {
+
+    }
+
+    protected void onGameLoss() {
+
     }
 
     public long getGameTime() {
@@ -78,7 +91,7 @@ public abstract class GameInstance {
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {}
 
     protected boolean isGameOver() {
-        return gameOver;
+        return gameState != GameState.ACTIVE;
     }
 
     public final void baseTick() {
