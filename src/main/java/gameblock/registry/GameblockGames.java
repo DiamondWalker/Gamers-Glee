@@ -42,13 +42,9 @@ public class GameblockGames {
             this.logo = tex;
         }
 
-        public T createInstance(Player player) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException { // TODO: remove
+        public T createInstance(Player player) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
             Constructor<T> constructor = gameClass.getConstructor(Player.class);
             return constructor.newInstance(player);
-        }
-
-        public boolean isInstance(GameInstance instance) {
-            return gameClass.isInstance(instance);
         }
     }
 }

@@ -2,6 +2,7 @@ package gameblock.game.serpent;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.game.GameInstance;
+import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
@@ -33,7 +34,7 @@ public class SerpentGame extends GameInstance {
     final GameInstance.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
 
     public SerpentGame(Player player) {
-        super(player);
+        super(player, GameblockGames.SERPENT_GAME);
         tiles = new TileGrid2D<>(-50, 50, -37, 37, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         if (!isClientSide()) randomFoodPosition();

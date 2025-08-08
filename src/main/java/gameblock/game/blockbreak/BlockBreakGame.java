@@ -3,6 +3,7 @@ package gameblock.game.blockbreak;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
@@ -12,12 +13,14 @@ import gameblock.util.Direction1D;
 import gameblock.util.GameState;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
+import org.checkerframework.checker.units.qual.C;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
@@ -67,11 +70,12 @@ public class BlockBreakGame extends GameInstance {
     protected long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
 
     protected int score = 0;
+    protected int highScore = 0;
 
     protected long clientToPacketBallUpdateTime = -1;
 
     public BlockBreakGame(Player player) {
-        super(player);
+        super(player, GameblockGames.BLOCK_BREAK_GAME);
         int col = 0;
         for (int y = 6; y >= 3; y--) {
             if (y < 6) {
@@ -127,6 +131,8 @@ public class BlockBreakGame extends GameInstance {
                 launchBall(motion);
                 GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
             }
+
+            if (isGameOver() && getGameTime() - endTime > (score > highScore ? 100 : 80)) restart();
         }
     }
 
@@ -172,7 +178,6 @@ public class BlockBreakGame extends GameInstance {
                     }
 
                     // platform collision (this is handled on the client)
-                    // FIXME: sync issues at high velocities
                     if (isClientSide() && ballMoveY < 0.0f) {
                         if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
                             if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
@@ -299,6 +304,19 @@ public class BlockBreakGame extends GameInstance {
     }
 
     @Override
+    protected CompoundTag writeSaveData() {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("highScore", Math.max(score, highScore));
+        return tag;
+    }
+
+    @Override
+    protected void readSaveData(CompoundTag tag) {
+        highScore = tag.getInt("highScore");
+        GameblockPackets.sendToPlayer((ServerPlayer)player, new HighScorePacket(highScore));
+    }
+
+    @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         float progress = calculateProgress();
 
@@ -342,8 +360,8 @@ public class BlockBreakGame extends GameInstance {
             timeString = "Time: " + minutesString + ':' + secondsString;
         }
         if (!isGameOver()) {
-            drawText(graphics, 80.0f, 65.0f, 0.5f, new ColorF(1.0f), "Score: " + score);
-            drawText(graphics, 80.0f, 60.0f, 0.5f, new ColorF(1.0f), timeString);
+            drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), "Score: " + score);
+            drawText(graphics, 80.0f, 62.5f, 0.5f, new ColorF(1.0f), timeString);
         } else {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
@@ -357,14 +375,28 @@ public class BlockBreakGame extends GameInstance {
                     drawText(graphics, 0.0f, 4.0f, 0.7f, new ColorF(1.0f), "Score: " + score);
 
                     if (gameOverTime > 60) {
-                        drawText(graphics, 0.0f, -4.0f, 0.7f, new ColorF(1.0f), timeString);
+                        if (score > highScore) { // new high score!
+                            drawText(graphics, 40.0f, 4.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), "(New high score!)");
 
-                        if (gameOverTime > 80) {
-                            drawText(graphics, 0.0f, -12.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                            if (gameOverTime > 80) {
+                                drawText(graphics, 0.0f, -4.0f, 0.7f, new ColorF(1.0f), timeString);
+
+                                if (gameOverTime > 100) {
+                                    drawText(graphics, 0.0f, -12.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                                }
+                            }
+                        } else {
+                            drawText(graphics, 0.0f, -4.0f, 0.7f, new ColorF(1.0f), timeString);
+
+                            if (gameOverTime > 80) {
+                                drawText(graphics, 0.0f, -12.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                            }
                         }
                     }
                 }
             }
+
+            partialTicks = 0.0f; // fix vibration when game ends
         }
 
         drawTexture(graphics, SPRITE,
@@ -377,8 +409,9 @@ public class BlockBreakGame extends GameInstance {
                 BALL_WIDTH, BALL_WIDTH, 0, 20, 4, 4, 4));*/
         if (!isGameOver()) {
             AtomicInteger i = new AtomicInteger();
+            float finalPartialTicks = partialTicks;
             ballPath.forEach((Vector2f vect) -> {
-                float f = (i.getAndIncrement() + partialTicks) / 5;
+                float f = (i.getAndIncrement() + finalPartialTicks) / 5;
                 f = 1.0f - f;
                 drawRectangle(graphics,
                         vect.x,

@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
+import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
@@ -17,6 +18,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -26,13 +28,15 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public abstract class GameInstance {
+public abstract class GameInstance<T extends GameInstance<?>> {
+    public final GameblockGames.Game<T> gameType;
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
@@ -46,8 +50,9 @@ public abstract class GameInstance {
 
     public final ArrayList<SimpleSoundInstance> sounds = new ArrayList<>();
 
-    public GameInstance(Player player) {
+    public GameInstance(Player player, GameblockGames.Game<T> gameType) {
         this.player = player;
+        this.gameType = gameType;
     }
 
     public boolean isClientSide() {
@@ -61,6 +66,86 @@ public abstract class GameInstance {
             onGameWin();
         } else if (state == GameState.LOSS) {
             onGameLoss();
+        }
+    }
+
+    public final void save() {
+        ItemStack gameblockItem = null;
+        for (InteractionHand hand : InteractionHand.values()) {
+            gameblockItem = player.getItemInHand(hand);
+            if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
+                break;
+            } else {
+                gameblockItem = null;
+            }
+        }
+
+        if (gameblockItem != null) {
+            String playerName = player.getGameProfile().getName();
+            String gameName = gameType.gameID;
+            CompoundTag tag = gameblockItem.getOrCreateTag();
+
+            if (!tag.contains("gameSaveData")) tag.put("gameSaveData", new CompoundTag());
+            tag = tag.getCompound("gameSaveData");
+
+            if (!tag.contains(playerName)) tag.put(playerName, new CompoundTag());
+            tag = tag.getCompound(playerName);
+
+            CompoundTag saveData = writeSaveData();
+            if (saveData != null) {
+                tag.put(gameName, saveData);
+            }
+        }
+    }
+
+    public final void load() {
+        ItemStack gameblockItem = null;
+        for (InteractionHand hand : InteractionHand.values()) {
+            gameblockItem = player.getItemInHand(hand);
+            if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
+                break;
+            } else {
+                gameblockItem = null;
+            }
+        }
+
+        if (gameblockItem != null) {
+            String playerName = player.getGameProfile().getName();
+            String gameName = gameType.gameID;
+            CompoundTag tag = gameblockItem.getOrCreateTag();
+
+            if (tag.contains("gameSaveData")) {
+                tag = tag.getCompound("gameSaveData");
+
+                if (tag.contains(playerName)) {
+                    tag = tag.getCompound(playerName);
+
+                    if (tag.contains(gameName)) {
+                        tag = tag.getCompound(gameName);
+
+                        readSaveData(tag);
+                    }
+                }
+            }
+        }
+    }
+
+    protected CompoundTag writeSaveData() {
+        return null;
+    }
+
+    protected void readSaveData(CompoundTag tag) {
+
+    }
+
+    public final void restart() {
+        if (!isClientSide()) {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null) {
+                cap.setGame(gameType, player);
+            }
+        } else {
+            GameblockPackets.sendToServer(new GameRestartPacket());
         }
     }
 

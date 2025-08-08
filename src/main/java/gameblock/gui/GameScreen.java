@@ -31,7 +31,7 @@ public class GameScreen extends Screen {
     private static final int IMAGE_WIDTH = 206;
     private static final int IMAGE_HEIGHT = 208;
 
-    private final GameInstance game;
+    private final GameInstance<?> game;
 
     public GameScreen(GameInstance game) {
         super(GameNarrator.NO_TITLE);

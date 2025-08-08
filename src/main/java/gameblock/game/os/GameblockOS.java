@@ -38,7 +38,7 @@ public class GameblockOS extends GameInstance {
     private GameblockBackgroundRenderer bgRenderer;
 
     public GameblockOS(Player player) {
-        super(player);
+        super(player, GameblockGames.GAMEBLOCK_OS);
         if (isClientSide()) {
             logoRenderer = new GameblockLogoRenderer(this);
             bgRenderer = new GameblockBackgroundRenderer(this);

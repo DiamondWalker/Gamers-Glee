@@ -28,6 +28,7 @@ public class GameCapability {
              */
             if (player instanceof ServerPlayer serverPlayer) {
                 GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(gameType));
+                if (game != null) game.save();
             }
             this.game = gameType != null ? gameType.createInstance(player) : null;
 
@@ -37,6 +38,8 @@ public class GameCapability {
                 } else {
                     Minecraft.getInstance().setScreen(new GameScreen(game));
                 }
+            } else {
+                if (game != null) game.load();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

@@ -29,11 +29,7 @@ public class GameClosePacket {
                 if (player != null) {
                     GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap != null) {
-                        try {
-                            cap.setGame(null, player);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
+                        cap.setGame(null, player);
                     }
                 }
             }

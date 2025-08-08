@@ -1,10 +1,8 @@
 package gameblock.registry;
 
+import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
-import gameblock.game.blockbreak.BallLaunchPacket;
-import gameblock.game.blockbreak.BallUpdatePacket;
-import gameblock.game.blockbreak.BrickUpdatePacket;
-import gameblock.game.blockbreak.ScoreUpdatePacket;
+import gameblock.game.blockbreak.*;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.game.os.SelectGamePacket;
@@ -33,6 +31,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, GameChangePacket.class, GameChangePacket::writeToBuffer, GameChangePacket::new, GameChangePacket::handle);
         INSTANCE.registerMessage(id++, GameStatePacket.class, GameStatePacket::writeToBuffer, GameStatePacket::new, GameStatePacket::handle);
         INSTANCE.registerMessage(id++, GameClosePacket.class, GameClosePacket::writeToBuffer, GameClosePacket::new, GameClosePacket::handle);
+        INSTANCE.registerMessage(id++, GameRestartPacket.class, GameRestartPacket::writeToBuffer, GameRestartPacket::new, GameRestartPacket::handle);
 
         // OS
         INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
@@ -42,6 +41,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
         INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
         INSTANCE.registerMessage(id++, ScoreUpdatePacket.class, ScoreUpdatePacket::writeToBuffer, ScoreUpdatePacket::new, ScoreUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, HighScorePacket.class, HighScorePacket::writeToBuffer, HighScorePacket::new, HighScorePacket::handle);
 
         // serpent
         INSTANCE.registerMessage(id++, SnakeUpdatePacket.class, SnakeUpdatePacket::writeToBuffer, SnakeUpdatePacket::new, SnakeUpdatePacket::handle);

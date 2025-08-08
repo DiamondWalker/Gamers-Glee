@@ -3,6 +3,7 @@ package gameblock.game.flyingchicken;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.CircularStack;
@@ -34,7 +35,7 @@ public class FlyingChickenGame extends GameInstance {
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
 
     public FlyingChickenGame(Player player) {
-        super(player);
+        super(player, GameblockGames.FLYING_CHICKEN_GAME);
     }
 
     protected void flap() {
