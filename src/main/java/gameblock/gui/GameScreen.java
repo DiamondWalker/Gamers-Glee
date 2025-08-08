@@ -102,31 +102,26 @@ public class GameScreen extends Screen {
         mouseX *= scale;
         mouseY *= -scale;
 
-        if (Math.abs(mouseX) <= 100 && Math.abs(mouseY) <= 75) return new Vec2((float)mouseX, (float)mouseY);
-        return null;
+        return new Vec2((float)mouseX, (float)mouseY);
     }
 
     @Override
     public void mouseMoved(double pMouseX, double pMouseY) {
-        Vec2 gameCoords = convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY);
-        if (gameCoords != null) game.setMouseCoordinates(gameCoords);
+        game.setMouseCoordinates(convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY));
     }
 
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
         Vec2 gameCoords = convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY);
-        if (gameCoords != null) {
-            Direction1D button = null;
-            switch (pButton) {
-                case (InputConstants.MOUSE_BUTTON_LEFT) -> button = Direction1D.LEFT;
-                case (InputConstants.MOUSE_BUTTON_RIGHT) -> button = Direction1D.RIGHT;
-                case (InputConstants.MOUSE_BUTTON_MIDDLE) -> button = Direction1D.CENTER;
-            }
-
-            game.click(gameCoords, button);
-            return true;
+        Direction1D button = null;
+        switch (pButton) {
+            case (InputConstants.MOUSE_BUTTON_LEFT) -> button = Direction1D.LEFT;
+            case (InputConstants.MOUSE_BUTTON_RIGHT) -> button = Direction1D.RIGHT;
+            case (InputConstants.MOUSE_BUTTON_MIDDLE) -> button = Direction1D.CENTER;
         }
-        return false;
+
+        game.click(gameCoords, button);
+        return true;
     }
 
     private Music currentMusic = null;

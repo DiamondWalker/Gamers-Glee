@@ -1,6 +1,7 @@
 package gameblock.game.blockbreak;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockMusic;
@@ -10,11 +11,14 @@ import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
+import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
 import java.util.ArrayList;
@@ -24,15 +28,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BlockBreakGame extends GameInstance {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
-    private static final int UPDATES_PER_TICK = 15;
+    private static final int UPDATES_PER_TICK = 30;
 
     private static final float PLATFORM_Y = -50.0f;
     private static final float PLATFORM_WIDTH = 20.0f;
     private static final float PLATFORM_HEIGHT = 3.0f;
-    private static final float PLATFORM_SPEED = 2.1f;
 
     private static final float BALL_WIDTH = 2.0f;
     private static final float INITIAL_BALL_SPEED = 3.0f;
+    private static final float BALL_SPEED_INCREASE = 6.0f;
 
     private static final float BALL_START_Y = PLATFORM_Y + PLATFORM_HEIGHT / 2 + BALL_WIDTH / 2;
 
@@ -45,8 +49,6 @@ public class BlockBreakGame extends GameInstance {
 
     float platformPos = 0.0f;
     float oldPlatformPos = platformPos;
-    Direction1D oldMoveDir = Direction1D.CENTER;
-    Direction1D moveDir = Direction1D.CENTER;
 
     float ballX = 0.0f, ballY = BALL_START_Y;
     float oldBallX = ballX, oldBallY = ballY;
@@ -61,10 +63,6 @@ public class BlockBreakGame extends GameInstance {
 
     ArrayList<Particle> particles = null;
 
-    final KeyBinding left = registerKey(InputConstants.KEY_LEFT);
-    final KeyBinding right = registerKey(InputConstants.KEY_RIGHT);
-    final KeyBinding launch = registerKey(InputConstants.KEY_SPACE);
-
     protected long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
 
     public BlockBreakGame(Player player) {
@@ -73,12 +71,12 @@ public class BlockBreakGame extends GameInstance {
         for (int y = 6; y >= 3; y--) {
             if (y < 6) {
                 for (int x = -14; x <= 14; x += 2) {
-                    bricks.add(new Brick(x, y * 2 - 2 + 1, col));
+                    bricks.add(new Brick(x, y * 2 - 1 + 1, col));
                 }
                 col++;
             }
             for (int x = -15; x <= 15; x += 2) {
-                bricks.add(new Brick(x, y * 2 - 2, col));
+                bricks.add(new Brick(x, y * 2 - 1, col));
             }
             col++;
         }
@@ -90,7 +88,7 @@ public class BlockBreakGame extends GameInstance {
     }
 
     private float calculateBallSpeed() {
-        return INITIAL_BALL_SPEED + ((float) bricksBroken / bricks.size()) * INITIAL_BALL_SPEED;
+        return INITIAL_BALL_SPEED + ((float) bricksBroken / bricks.size()) * BALL_SPEED_INCREASE;
     }
 
     protected void launchBall(float xMotion) {
@@ -104,6 +102,15 @@ public class BlockBreakGame extends GameInstance {
     }
 
     @Override
+    public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
+        if (!ballLaunched && buttonPressed == Direction1D.LEFT) {
+            float motion = (platformPos - oldPlatformPos) / UPDATES_PER_TICK;
+            launchBall(motion);
+            GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
+        }
+    }
+
+    @Override
     public void tick() {
         if (!isGameOver()) {
             oldPlatformPos = platformPos;
@@ -113,27 +120,15 @@ public class BlockBreakGame extends GameInstance {
 
             boolean ballMoveUpdate = false;
             boolean sendBounceNoise = false;
-            if (isClientSide()) {
-                oldMoveDir = moveDir;
-                if (left.pressed == right.pressed) {
-                    moveDir = Direction1D.CENTER;
-                } else {
-                    moveDir = left.pressed ? Direction1D.LEFT : Direction1D.RIGHT;
-                }
-            }
 
             for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
-                platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir.getComponent();
+                //platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir.getComponent();
+                platformPos = getMouseCoordinates().x;
                 platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
 
                 if (!ballLaunched) {
                     ballX = platformPos;
                     ballY = BALL_START_Y;
-                    if (launch.pressed) {
-                        float motion = moveDir.getComponent() * PLATFORM_SPEED / UPDATES_PER_TICK;
-                        launchBall(motion);
-                        GameblockPackets.sendToServer(new BallLaunchPacket(ballX, motion));
-                    }
                 } else {
                     ballX += ballMoveX;
                     ballY += ballMoveY;
@@ -157,10 +152,12 @@ public class BlockBreakGame extends GameInstance {
                     }
 
                     // platform collision (this is handled on the client)
-                    if (isClientSide()) {
+                    // FIXME: sync issues at high velocities
+                    if (isClientSide() && ballMoveY < 0.0f) {
                         if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
                             if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
-                                ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 2 * moveDir.getComponent();
+                                //ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 4 * moveDir.getComponent();
+                                ballMoveX += (platformPos - oldPlatformPos) / UPDATES_PER_TICK / 2;
                                 ballMoveY = Math.abs(ballMoveY);
                                 double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
                                 ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
@@ -192,6 +189,9 @@ public class BlockBreakGame extends GameInstance {
                                 } else {
                                     ballMoveY = Math.abs(ballMoveY) * Math.signum(yComponent);
                                 }
+                                double speed = Math.sqrt(ballMoveX * ballMoveX + ballMoveY * ballMoveY);
+                                ballMoveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
+                                ballMoveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
 
                                 ballMoveUpdate = true;
                                 if (!isClientSide()) {
@@ -267,6 +267,32 @@ public class BlockBreakGame extends GameInstance {
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
+        float progress = (float)bricksBroken / bricks.size();
+
+        Matrix4f matrix = graphics.pose().last().pose();
+        VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(RenderType.gui());
+
+        // gradient
+        ColorF col1 = new ColorF(0.0f, 1.0f, 1.0f, 0.3f)
+                .fadeTo(new ColorF(1.0f, 0.0f, 0.0f, 0.6f), progress);
+        ColorF col2 = col1.withAlpha(0.0f);
+        float offset = Mth.sin((partialTicks + getGameTime()) / 10) * 10.0f;
+        vertexconsumer.vertex(matrix, -100.0f, -30.0f + offset, 0.0f).color(col2.getRed(), col2.getGreen(), col2.getBlue(), col2.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix, -100.0f, 75.0f, 0.0f).color(col1.getRed(), col1.getGreen(), col1.getBlue(), col1.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix, 100.0f, 75.0f, 0.0f).color(col1.getRed(), col1.getGreen(), col1.getBlue(), col1.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix, 100.0f, -30.0f + offset, 0.0f).color(col2.getRed(), col2.getGreen(), col2.getBlue(), col2.getAlpha()).endVertex();
+
+        // progress bar
+        /*ColorF barCol = new ColorF(1.0f);
+        float minX = -70.0f;
+        float maxX = -70.0f + progress * (70.0f * 2);
+        vertexconsumer.vertex(matrix, minX, 63.0f, 0.0f).color(barCol.getRed(), barCol.getGreen(), barCol.getBlue(), barCol.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix, minX, 65.0f, 0.0f).color(barCol.getRed(), barCol.getGreen(), barCol.getBlue(), barCol.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix, maxX, 65.0f, 0.0f).color(barCol.getRed(), barCol.getGreen(), barCol.getBlue(), barCol.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix, maxX, 63.0f, 0.0f).color(barCol.getRed(), barCol.getGreen(), barCol.getBlue(), barCol.getAlpha()).endVertex();*/
+
+        graphics.flush();
+
         drawTexture(graphics, SPRITE,
                 oldPlatformPos + (platformPos - oldPlatformPos) * partialTicks,
                 PLATFORM_Y,
