@@ -223,6 +223,7 @@ public class BlockBreakGame extends GameInstance {
                                 if (!isClientSide()) {
                                     bricks.set(i, null);
                                     bricksBroken++;
+                                    if (bricksBroken == bricks.size()) setGameState(GameState.WIN);
                                     GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i));
                                 } else {
                                     bricks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
@@ -280,7 +281,7 @@ public class BlockBreakGame extends GameInstance {
     @Override
     protected void onGameWin() {
         if (!isClientSide()) {
-            score += 100;
+            score += 50;
             GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20));
         }
         endTime = getGameTime();
