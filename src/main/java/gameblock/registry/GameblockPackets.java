@@ -3,7 +3,9 @@ package gameblock.registry;
 import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
 import gameblock.game.blockbreak.*;
+import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
+import gameblock.game.flyingchicken.ScorePacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.game.os.SelectGamePacket;
 import gameblock.game.serpent.EatFoodPacket;
@@ -41,7 +43,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
         INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
         INSTANCE.registerMessage(id++, ScoreUpdatePacket.class, ScoreUpdatePacket::writeToBuffer, ScoreUpdatePacket::new, ScoreUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, HighScorePacket.class, HighScorePacket::writeToBuffer, HighScorePacket::new, HighScorePacket::handle);
+        INSTANCE.registerMessage(id++, BlockBreakHighScorePacket.class, BlockBreakHighScorePacket::writeToBuffer, BlockBreakHighScorePacket::new, BlockBreakHighScorePacket::handle);
 
         // serpent
         INSTANCE.registerMessage(id++, SnakeUpdatePacket.class, SnakeUpdatePacket::writeToBuffer, SnakeUpdatePacket::new, SnakeUpdatePacket::handle);
@@ -50,6 +52,8 @@ public class GameblockPackets {
         // flying chicken
         INSTANCE.registerMessage(id++, WingFlapPacket.class, WingFlapPacket::writeToBuffer, WingFlapPacket::new, WingFlapPacket::handle);
         INSTANCE.registerMessage(id++, PipeSpawnPacket.class, PipeSpawnPacket::writeToBuffer, PipeSpawnPacket::new, PipeSpawnPacket::handle);
+        INSTANCE.registerMessage(id++, ScorePacket.class, ScorePacket::writeToBuffer, ScorePacket::new, ScorePacket::handle);
+        INSTANCE.registerMessage(id++, FlyingChickenHighScorePacket.class, FlyingChickenHighScorePacket::writeToBuffer, FlyingChickenHighScorePacket::new, FlyingChickenHighScorePacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

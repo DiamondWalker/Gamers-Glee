@@ -20,7 +20,6 @@ import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
-import org.checkerframework.checker.units.qual.C;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
 
@@ -314,7 +313,7 @@ public class BlockBreakGame extends GameInstance {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        GameblockPackets.sendToPlayer((ServerPlayer)player, new HighScorePacket(highScore));
+        GameblockPackets.sendToPlayer((ServerPlayer)player, new BlockBreakHighScorePacket(highScore));
     }
 
     @Override

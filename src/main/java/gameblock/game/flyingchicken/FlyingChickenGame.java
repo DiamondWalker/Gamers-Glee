@@ -6,15 +6,21 @@ import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.CircularStack;
+import gameblock.util.ColorF;
+import gameblock.util.Direction1D;
 import gameblock.util.GameState;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
 
 import java.util.Random;
 
@@ -30,6 +36,10 @@ public class FlyingChickenGame extends GameInstance {
     private long lastFlapTime = Long.MIN_VALUE;
     private long gameOverTime = 0;
     private float gameOverFallDirection = 0.0f;
+
+    protected int score = 0;
+    protected int highScore = 0;
+    protected long lastScoreTime = 0;
 
     final GameInstance.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
@@ -67,9 +77,13 @@ public class FlyingChickenGame extends GameInstance {
                     setGameState(GameState.LOSS);
                 } else {
                     pipes.forEach((Pipe pipe) -> {
-                        if (Math.abs(pipe.x - chickenX) - 6 < 12) {
-                            if (Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
-                                setGameState(GameState.LOSS);
+                        if (Math.abs(pipe.x - chickenX) - 6 < 12 && Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
+                            setGameState(GameState.LOSS);
+                        } else {
+                            if (!pipe.passed && chickenX > (pipe.x - 12)) {
+                                score++;
+                                pipe.passed = true;
+                                GameblockPackets.sendToPlayer((ServerPlayer) player, new ScorePacket(score));
                             }
                         }
                     });
@@ -89,6 +103,19 @@ public class FlyingChickenGame extends GameInstance {
         } else {
             gameOverTime++;
         }
+    }
+
+    @Override
+    protected CompoundTag writeSaveData() {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("highScore", Math.max(score, highScore));
+        return tag;
+    }
+
+    @Override
+    protected void readSaveData(CompoundTag tag) {
+        highScore = tag.getInt("highScore");
+        GameblockPackets.sendToPlayer((ServerPlayer) player, new FlyingChickenHighScorePacket(highScore));
     }
 
     @Override
@@ -127,6 +154,41 @@ public class FlyingChickenGame extends GameInstance {
                     -70 + deathTime * gameOverFallDirection, y, 12, 10, (float) Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK) + rotationOffset,
                     0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
         }
+
+        // TODO: localize
+        String scoreString = String.valueOf(score);
+        while (scoreString.length() < 3) scoreString = '0' + scoreString;
+        if (!isGameOver()) {
+            ColorF col = score > highScore ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
+            float time = (partialTicks + (getGameTime() - lastScoreTime)) / 15;
+            if (lastScoreTime > 0 && time < 1.0f) drawText(graphics, 0.0f, 55.0f, 1.5f + time * 0.65f, col.withAlpha(1.0f - time), scoreString);
+            drawText(graphics, 0.0f, 55.0f, 1.5f, col, scoreString);
+        } else {
+            drawRectangle(graphics, 0.0f, 30.0f, 50.0f, 10.0f, new ColorF(1.0f, 0.5f, 0.0f), 0);
+            drawText(graphics, 0.0f, 30.0f, 0.7f, new ColorF(1.0f), "Game Over");
+            drawText(graphics, -40.0f, 10.0f, 0.9f, new ColorF(1.0f), "Score: " + score);
+            drawText(graphics, 40.0f, 10.0f, 0.9f, new ColorF(1.0f), "Best: " + highScore);
+            if (score > highScore) {
+                float time = partialTicks + getGameTime();
+                float expand = (time % 20) / 20;
+                ColorF col = new ColorF(1.0f, 1.0f, 0.0f).fadeTo(new ColorF(1.0f), 1.0f - expand);
+                drawText(graphics, 0.0f, 10.0f, 0.7f + expand * 0.2f, col.withAlpha(1.0f - expand), "New Best!");
+                drawText(graphics, 0.0f, 10.0f, 0.7f, col, "New Best!");
+            }
+            ColorF col = overRetryButton(getMouseCoordinates()) ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
+            drawText(graphics, 0.0f, -20.0f, 0.9f, col, "Retry?");
+        }
+
+
+    }
+
+    @Override
+    public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
+        if (buttonPressed == Direction1D.LEFT && overRetryButton(clickCoordinates)) restart();
+    }
+
+    private boolean overRetryButton(Vec2 coordinates) {
+        return Math.abs(coordinates.x) < 15 && Math.abs(coordinates.y - -20) < 5;
     }
 
     private float calculatePipeOffset(float partialTicks) {
@@ -137,6 +199,7 @@ public class FlyingChickenGame extends GameInstance {
     protected static class Pipe {
         float x;
         float y;
+        boolean passed = false;
 
         Pipe(float x, float y) {
             this.x = x;

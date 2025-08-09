@@ -3,14 +3,14 @@ package gameblock.game.blockbreak;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class HighScorePacket extends UpdateGamePacket<BlockBreakGame> {
+public class BlockBreakHighScorePacket extends UpdateGamePacket<BlockBreakGame> {
     int highScore;
 
-    public HighScorePacket(int highScore) {
+    public BlockBreakHighScorePacket(int highScore) {
         this.highScore = highScore;
     }
 
-    public HighScorePacket(FriendlyByteBuf buf) {
+    public BlockBreakHighScorePacket(FriendlyByteBuf buf) {
         super(buf);
     }
 
