@@ -147,7 +147,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         drawRectangle(graphics, rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right
 
         float y = (75.0f - rectMaxY + 1) / 2 + rectMaxY;
-        drawText(graphics, 80.0f, y, 1.0f, new ColorF(1.0f), String.valueOf(targetSnakeLength));
+        drawText(graphics, 80.0f, y, 1.0f, new ColorF(1.0f), String.valueOf(targetSnakeLength)); // TODO: food count not snake length
         drawTexture(graphics, SPRITE, 70.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
 
         tiles.forEach((Vec2i coords, Integer i) -> {

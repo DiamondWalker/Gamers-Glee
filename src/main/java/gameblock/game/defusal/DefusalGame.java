@@ -96,7 +96,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         }
     }
 
-    private Vec2i getTile(Vec2 mouse) {
+    private Vec2i getTile(Vec2 mouse) { // FIXME: tile selection has a small offset
         Vec2 mouseCoords = mouse.add(new Vec2(0, 8));
         Vec2i tileCoords = new Vec2i(Math.round(mouseCoords.x / 7), Math.round(mouseCoords.y) / 7);
         if (tileCoords.getX() >= tiles.minX && tileCoords.getX() <= tiles.maxX && tileCoords.getY() >= tiles.minY && tileCoords.getY() <= tiles.maxY) {
