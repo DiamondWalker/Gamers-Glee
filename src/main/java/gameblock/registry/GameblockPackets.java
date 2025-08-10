@@ -3,6 +3,9 @@ package gameblock.registry;
 import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
 import gameblock.game.blockbreak.*;
+import gameblock.game.defusal.BombRevealPacket;
+import gameblock.game.defusal.TileClickPacket;
+import gameblock.game.defusal.TileRevealPacket;
 import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.ScorePacket;
@@ -54,6 +57,11 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, PipeSpawnPacket.class, PipeSpawnPacket::writeToBuffer, PipeSpawnPacket::new, PipeSpawnPacket::handle);
         INSTANCE.registerMessage(id++, ScorePacket.class, ScorePacket::writeToBuffer, ScorePacket::new, ScorePacket::handle);
         INSTANCE.registerMessage(id++, FlyingChickenHighScorePacket.class, FlyingChickenHighScorePacket::writeToBuffer, FlyingChickenHighScorePacket::new, FlyingChickenHighScorePacket::handle);
+
+        // defusal
+        INSTANCE.registerMessage(id++, TileClickPacket.class, TileClickPacket::writeToBuffer, TileClickPacket::new, TileClickPacket::handle);
+        INSTANCE.registerMessage(id++, TileRevealPacket.class, TileRevealPacket::writeToBuffer, TileRevealPacket::new, TileRevealPacket::handle);
+        INSTANCE.registerMessage(id++, BombRevealPacket.class, BombRevealPacket::writeToBuffer, BombRevealPacket::new, BombRevealPacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

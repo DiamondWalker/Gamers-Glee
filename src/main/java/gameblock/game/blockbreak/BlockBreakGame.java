@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BlockBreakGame extends GameInstance {
+public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
     private static final int UPDATES_PER_TICK = 30;

@@ -24,9 +24,9 @@ public class GameblockLootModifierProvider extends GlobalLootModifierProvider {
                 new LootTableIdCondition.Builder(new ResourceLocation("chests/jungle_temple")).build(),
                 LootItemRandomChanceCondition.randomChance(0.4f).build()}, GameblockItems.CARTRIDGE_SERPENT.get()));
 
-        /*add("defusal_cartridge", new AddItemModifier(new LootItemCondition[] {
+        add("defusal_cartridge", new AddItemModifier(new LootItemCondition[] {
                 new LootTableIdCondition.Builder(new ResourceLocation("chests/desert_pyramid")).build(),
-                LootItemRandomChanceCondition.randomChance(0.05f).build()}, GameblockItems.CARTRIDGE_DEFUSAL.get()));*/
+                LootItemRandomChanceCondition.randomChance(0.16f).build()}, GameblockItems.CARTRIDGE_DEFUSAL.get()));
 
         add("flying_chicken_cartridge", new AddItemModifier(new LootItemCondition[] {
                 new LootTableIdCondition.Builder(new ResourceLocation("chests/pillager_outpost")).build(),

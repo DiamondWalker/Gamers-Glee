@@ -1,6 +1,7 @@
 package gameblock.game.serpent;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
@@ -8,6 +9,7 @@ import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.player.Player;
@@ -15,7 +17,8 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SerpentGame extends GameInstance {
+public class SerpentGame extends GameInstance<SerpentGame> {
+    public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/serpent.png");
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
     protected final TileGrid2D<Integer> tiles;
@@ -35,7 +38,7 @@ public class SerpentGame extends GameInstance {
 
     public SerpentGame(Player player) {
         super(player, GameblockGames.SERPENT_GAME);
-        tiles = new TileGrid2D<>(-50, 50, -37, 37, -1);
+        tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         if (!isClientSide()) randomFoodPosition();
     }
@@ -84,8 +87,8 @@ public class SerpentGame extends GameInstance {
     private void randomFoodPosition() {
         Random random = new Random();
         do {
-            foodX = random.nextInt(51) - 25;
-            foodY = random.nextInt(51) - 25;
+            foodX = random.nextInt((tiles.maxX - tiles.minX) + 1) + tiles.minX;
+            foodY = random.nextInt((tiles.maxY - tiles.minY) + 1) + tiles.minY;
         } while (isSnakeTile(foodX, foodY));
         GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, targetSnakeLength));
     }
@@ -129,15 +132,38 @@ public class SerpentGame extends GameInstance {
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        for (int x = -50; x <= 50; x++) {
-            for (int y = -37; y <= 37; y++) {
-                if (isSnakeTile(x, y)) {
-                    drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
-                }
-            }
-        }
+        int rectMinX = tiles.minX * 2 - 2;
+        int rectMaxX = tiles.maxX * 2 + 2;
+        int rectMinY = tiles.minY * 2 - 9 - 2;
+        int rectMaxY = tiles.maxY * 2 - 9 + 2;
+        float midX = (float)(rectMinX + rectMaxX) / 2;
+        float midY = (float)(rectMinY + rectMaxY) / 2;
+        int sideWidth = rectMaxX - rectMinX + 2;
+        int sideHeight = rectMaxY - rectMinY + 2;
 
-        drawRectangle(graphics, foodX * 2, foodY * 2, 2.0f, 2.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
+        drawRectangle(graphics, midX, rectMaxY, sideWidth, 2, new ColorF(1.0f), 0); // top
+        drawRectangle(graphics, midX, rectMinY, sideWidth, 2, new ColorF(1.0f), 0); // bottom
+        drawRectangle(graphics, rectMinX, midY, 2, sideHeight, new ColorF(1.0f), 0); // left
+        drawRectangle(graphics, rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right
+
+        float y = (75.0f - rectMaxY + 1) / 2 + rectMaxY;
+        drawText(graphics, 80.0f, y, 1.0f, new ColorF(1.0f), String.valueOf(targetSnakeLength));
+        drawTexture(graphics, SPRITE, 70.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
+
+        tiles.forEach((Vec2i coords, Integer i) -> {
+            if (isSnakeTile(coords.getX(), coords.getY())) {
+                drawRectangle(graphics, coords.getX() * 2, coords.getY() * 2 - 9, 2.0f, 2.0f, new ColorF(1.0f), 0);
+            }
+        });
+        /*for (int x = tiles.minX; x <= tiles.maxX; x++) {
+            for (int y = tiles.minY; y <= tiles.maxY; y++) {
+                //if (isSnakeTile(x, y)) {
+                    drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
+                //}
+            }
+        }*/
+
+        drawRectangle(graphics, foodX * 2, foodY * 2 - 9, 2.0f, 2.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
     }
 
     @Override

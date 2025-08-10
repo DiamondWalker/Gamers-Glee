@@ -1,18 +1,25 @@
 package gameblock.util;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class TileGrid2D<T> {
     private final Object[][] array;
     private final Object defaultValue;
     private final Vec2i origin;
+    public final int minX, maxX, minY, maxY;
 
     public TileGrid2D(int minX, int maxX, int minY, int maxY) {
         this(minX, maxX, minY, maxY, null);
     }
 
     public TileGrid2D(int minX, int maxX, int minY, int maxY, T defaultValue) {
+        this.minX = minX;
+        this.maxX = maxX;
+        this.minY = minY;
+        this.maxY = maxY;
+
         int xRange = maxX - minX;
         int yRange = maxY - minY;
         array = new Object[xRange + 1][yRange + 1];
@@ -49,5 +56,13 @@ public class TileGrid2D<T> {
     public T get(int x, int y) {
         Vec2i index = transformCoordinates(x, y);
         return index != null ? (T) array[index.getX()][index.getY()] : (T) defaultValue;
+    }
+
+    public void forEach(BiConsumer<Vec2i, T> func) {
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                func.accept(new Vec2i(x, y), get(x, y));
+            }
+        }
     }
 }

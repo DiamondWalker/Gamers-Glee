@@ -1,6 +1,7 @@
 {
   "entries": [
     "gameblock:flying_chicken_cartridge",
+    "gameblock:defusal_cartridge",
     "gameblock:block_break_cartridge",
     "gameblock:serpent_cartridge"
   ],

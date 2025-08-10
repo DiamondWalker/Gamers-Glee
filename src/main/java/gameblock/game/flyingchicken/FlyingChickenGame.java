@@ -24,7 +24,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.Random;
 
-public class FlyingChickenGame extends GameInstance {
+public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/flying_chicken.png");
     private static final float HORIZONTAL_MOVEMENT_PER_TICK = 1.5f;
     private static final float SPACE_BETWEEN_PIPES = 30.0f;

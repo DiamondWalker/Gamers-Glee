@@ -25,7 +25,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.*;
 
-public class GameblockOS extends GameInstance {
+public class GameblockOS extends GameInstance<GameblockOS> {
     private static final int LOGO_DURATION = 200;
     private static final int LOGO_FADE_OUT_TIME = 20;
     private static final int MENU_FADE_IN_TIME = 80;
