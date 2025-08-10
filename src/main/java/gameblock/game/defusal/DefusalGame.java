@@ -19,6 +19,8 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/defusal.png");
 
     protected TileGrid2D<DefusalTile> tiles;
+    protected int bombCount;
+
     public DefusalGame(Player player) {
         super(player, GameblockGames.DEFUSAL_GAME);
 
@@ -26,13 +28,14 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         tiles.setAll((DefusalTile t) -> new DefusalTile());
 
         if (!isClientSide()) {
-            int bombCount = 0;
             Random rand = new Random();
             while (bombCount < 30) {
                 int randX = tiles.minX + rand.nextInt((tiles.maxX - tiles.minX) + 1);
                 int randY = tiles.minY + rand.nextInt((tiles.maxY - tiles.minY) + 1);
                 if (setBomb(randX, randY)) bombCount++;
             }
+
+            GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
         }
     }
 
@@ -66,7 +69,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
 
     protected void reveal(Vec2i tile) {
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
-        if (defusalTile != null && defusalTile.isBomb()) {
+        if (defusalTile != null && defusalTile.getState() == DefusalTile.State.HIDDEN && defusalTile.isBomb()) {
             ArrayList<Vec2i> bombs = new ArrayList<>();
             tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
                 if (otherDefusalTile.isBomb()) bombs.add(coords);
@@ -77,6 +80,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         }
         ArrayList<TileRevealPacket.TileInfo> tileInfos = new ArrayList<>();
         recursiveReveal(tile.getX(), tile.getY(), tileInfos);
+        GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
         GameblockPackets.sendToPlayer((ServerPlayer) player, new TileRevealPacket(tileInfos.toArray(new TileRevealPacket.TileInfo[]{})));
 
         // TODO: win condition
@@ -85,6 +89,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     private void recursiveReveal(int x, int y, ArrayList<TileRevealPacket.TileInfo> tileInfos) {
         DefusalTile tile = tiles.get(x, y);
         if (tile != null && tile.getState() != DefusalTile.State.REVEALED) {
+            if (tile.getState() == DefusalTile.State.FLAGGED) bombCount++;
             tile.reveal();
             tileInfos.add(new TileRevealPacket.TileInfo(new Vec2i(x, y), tile.adjacentBombs));
             if (tile.adjacentBombs == 0) {
@@ -96,9 +101,20 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         }
     }
 
-    private Vec2i getTile(Vec2 mouse) { // FIXME: tile selection has a small offset
+    protected void cycle(Vec2i tile) {
+        DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
+        if (defusalTile != null && defusalTile.getState() != DefusalTile.State.REVEALED) {
+            if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount++;
+            defusalTile.cycleState();
+            if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount--;
+            GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
+            GameblockPackets.sendToPlayer((ServerPlayer) player, new TileStatePacket(tile, defusalTile.getState()));
+        }
+    }
+
+    private Vec2i getTile(Vec2 mouse) {
         Vec2 mouseCoords = mouse.add(new Vec2(0, 8));
-        Vec2i tileCoords = new Vec2i(Math.round(mouseCoords.x / 7), Math.round(mouseCoords.y) / 7);
+        Vec2i tileCoords = new Vec2i(Math.round(mouseCoords.x / 7), Math.round(mouseCoords.y / 7));
         if (tileCoords.getX() >= tiles.minX && tileCoords.getX() <= tiles.maxX && tileCoords.getY() >= tiles.minY && tileCoords.getY() <= tiles.maxY) {
             return tileCoords;
         }
@@ -108,7 +124,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     @Override
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
         Vec2i tileCoords = getTile(clickCoordinates);
-        if (tileCoords != null) {
+        if (!isGameOver() && tileCoords != null) {
             if (buttonPressed != Direction1D.CENTER) {
                 GameblockPackets.sendToServer(new TileClickPacket(buttonPressed, tileCoords));
             }
@@ -119,21 +135,36 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     public void render(GuiGraphics graphics, float partialTicks) {
         drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0.8f), 0);
         drawRectangle(graphics, 0, -8, 168 + 8, 112 + 8, new ColorF(0.4f), 0);
+
+        drawRectangle(graphics, 70, 63.5f, 21, 10, new ColorF(0.0f), 0);
+        drawText(graphics, 70, 63.5f, 1.0f, new ColorF(1.0f, 0.0f, 0.0f), TextUtil.formatWithUnits(bombCount, 3));
+
+        drawRectangle(graphics, -70, 63.5f, 21, 10, new ColorF(0.0f), 0);
+        drawText(graphics, -70, 63.5f, 1.0f, new ColorF(0.0f, 0.0f, 1.0f), TextUtil.getTimeString(6000, false, false));
+
         tiles.forEach((Vec2i coords, DefusalTile tile) -> {
             if (tile.getState() == DefusalTile.State.REVEALED) {
                 drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.6f), 0);
-                if (tile.isBomb()) {
-                    drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(1.0f, 0.0f, 0.0f), 0);
-                } else if (tile.adjacentBombs > 0) {
+                if (tile.adjacentBombs > 0 && !tile.isBomb()) {
                     drawText(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, new ColorF(1.0f), String.valueOf(tile.adjacentBombs));
                 }
             } else {
                 drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.8f), 0);
+                if (tile.getState() == DefusalTile.State.FLAGGED) {
+                    drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 7, 0, 7, 7, new ColorF(1.0f));
+                } else if (tile.getState() == DefusalTile.State.QUESTION) {
+                    drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 14, 0, 7, 7, new ColorF(1.0f));
+                }
+            }
+
+            if (tile.isBomb()) {
+                drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
+                //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(1.0f, 0.0f, 0.0f), 0);
             }
         });
 
         Vec2i tileCoords = getTile(getMouseCoordinates());
-        if (tileCoords != null && tiles.get(tileCoords.getX(), tileCoords.getY()) != null && tiles.get(tileCoords.getX(), tileCoords.getY()).getState() != DefusalTile.State.REVEALED) {
+        if (!isGameOver() && tileCoords != null && tiles.get(tileCoords.getX(), tileCoords.getY()) != null && tiles.get(tileCoords.getX(), tileCoords.getY()).getState() != DefusalTile.State.REVEALED) {
             drawRectangle(graphics, tileCoords.getX() * 7, tileCoords.getY() * 7 - 8, 6, 6, new ColorF(1.0f).withAlpha(1.0f), 0);
         }
     }

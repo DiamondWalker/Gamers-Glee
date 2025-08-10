@@ -7,10 +7,7 @@ import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
-import gameblock.util.CircularStack;
-import gameblock.util.ColorF;
-import gameblock.util.Direction1D;
-import gameblock.util.GameState;
+import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
@@ -156,11 +153,10 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
         }
 
         // TODO: localize
-        String scoreString = String.valueOf(score);
-        while (scoreString.length() < 3) scoreString = '0' + scoreString;
         if (!isGameOver()) {
             ColorF col = score > highScore ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
             float time = (partialTicks + (getGameTime() - lastScoreTime)) / 15;
+            String scoreString = TextUtil.formatWithUnits(score, 3);
             if (lastScoreTime > 0 && time < 1.0f) drawText(graphics, 0.0f, 55.0f, 1.5f + time * 0.65f, col.withAlpha(1.0f - time), scoreString);
             drawText(graphics, 0.0f, 55.0f, 1.5f, col, scoreString);
         } else {

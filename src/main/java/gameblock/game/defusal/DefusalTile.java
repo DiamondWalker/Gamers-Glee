@@ -9,6 +9,10 @@ public class DefusalTile {
         state = State.REVEALED;
     }
 
+    public void setState(State state) {
+        this.state = state;
+    }
+
     public State getState() {
         return state;
     }

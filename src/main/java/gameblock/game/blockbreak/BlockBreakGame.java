@@ -7,10 +7,7 @@ import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
-import gameblock.util.CircularStack;
-import gameblock.util.ColorF;
-import gameblock.util.Direction1D;
-import gameblock.util.GameState;
+import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
@@ -347,18 +344,9 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         //TODO: localization
         String timeString = "XX:XX";
         if (ballLaunched) {
-            long seconds = timeSinceLaunch / 20;
-            int minutes = (int)(seconds / 60);
-            seconds -= (minutes * 60);
-
-            String minutesString = String.valueOf(minutes);
-            if (minutesString.length() == 1) minutesString = '0' + minutesString;
-
-            String secondsString = String.valueOf(seconds);
-            if (secondsString.length() == 1) secondsString = '0' + secondsString;
-
-            timeString = "Time: " + minutesString + ':' + secondsString;
+            timeString = TextUtil.getTimeString(timeSinceLaunch, false, true);
         }
+
         if (!isGameOver()) {
             drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), "Score: " + score);
             drawText(graphics, 80.0f, 62.5f, 0.5f, new ColorF(1.0f), timeString);
@@ -376,7 +364,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                     drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), "Blocks broken: " + bricksBroken + " (" + percent + "%)");
 
                     if (gameOverTime > 60) {
-                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), timeString);
+                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), "Time: " + timeString);
 
                         if (gameOverTime > 80) {
                             drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), "Score: " + score);

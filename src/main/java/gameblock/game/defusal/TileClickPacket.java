@@ -36,7 +36,7 @@ public class TileClickPacket extends UpdateGamePacket<DefusalGame> {
         if (mouseClick == Direction1D.LEFT) {
             game.reveal(tileClicked);
         } else if (mouseClick == Direction1D.RIGHT) {
-            // cycle
+            game.cycle(tileClicked);
         }
     }
 }

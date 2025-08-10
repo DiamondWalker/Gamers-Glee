@@ -3,9 +3,7 @@ package gameblock.registry;
 import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
 import gameblock.game.blockbreak.*;
-import gameblock.game.defusal.BombRevealPacket;
-import gameblock.game.defusal.TileClickPacket;
-import gameblock.game.defusal.TileRevealPacket;
+import gameblock.game.defusal.*;
 import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.ScorePacket;
@@ -62,6 +60,8 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, TileClickPacket.class, TileClickPacket::writeToBuffer, TileClickPacket::new, TileClickPacket::handle);
         INSTANCE.registerMessage(id++, TileRevealPacket.class, TileRevealPacket::writeToBuffer, TileRevealPacket::new, TileRevealPacket::handle);
         INSTANCE.registerMessage(id++, BombRevealPacket.class, BombRevealPacket::writeToBuffer, BombRevealPacket::new, BombRevealPacket::handle);
+        INSTANCE.registerMessage(id++, TileStatePacket.class, TileStatePacket::writeToBuffer, TileStatePacket::new, TileStatePacket::handle);
+        INSTANCE.registerMessage(id++, BombCountPacket.class, BombCountPacket::writeToBuffer, BombCountPacket::new, BombCountPacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {
