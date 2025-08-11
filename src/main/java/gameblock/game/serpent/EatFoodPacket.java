@@ -11,11 +11,13 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
     private int newFoodX;
     private int newFoodY;
     private int newSnakeLength;
+    private int foodEaten;
 
-    public EatFoodPacket(int foodX, int foodY, int segments) {
+    public EatFoodPacket(int foodX, int foodY, int segments, int foodEaten) {
         this.newFoodX = foodX;
         this.newFoodY = foodY;
         this.newSnakeLength = segments;
+        this.foodEaten = foodEaten;
     }
 
     public EatFoodPacket(FriendlyByteBuf buffer) {
@@ -27,6 +29,7 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
         buffer.writeInt(newFoodX);
         buffer.writeInt(newFoodY);
         buffer.writeInt(newSnakeLength);
+        buffer.writeInt(foodEaten);
     }
 
     @Override
@@ -34,6 +37,7 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
         this.newFoodX = buffer.readInt();
         this.newFoodY = buffer.readInt();
         this.newSnakeLength = buffer.readInt();
+        this.foodEaten = buffer.readInt();
     }
 
     @Override
@@ -41,5 +45,6 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
         game.foodX = newFoodX;
         game.foodY = newFoodY;
         game.targetSnakeLength = newSnakeLength;
+        game.foodEaten = foodEaten;
     }
 }

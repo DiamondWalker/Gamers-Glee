@@ -30,7 +30,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     private float chickenMotion = 0.0f;
     protected long time = 0;
     private int pipesSpawned = 0; // used to ensure the same pipe isn't spawned twice, since wing flap packets can sometimes move the bird back and make another pair spawn
-    private long lastFlapTime = Long.MIN_VALUE;
+    private long lastFlapTime = Integer.MIN_VALUE;
     private long gameOverTime = 0;
     private float gameOverFallDirection = 0.0f;
 

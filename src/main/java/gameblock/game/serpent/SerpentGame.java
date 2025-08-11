@@ -31,6 +31,9 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
 
+    protected int foodEaten = 0;
+    private long endTime = Integer.MIN_VALUE;
+
     final GameInstance.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
     final GameInstance.KeyBinding right = registerKey(InputConstants.KEY_RIGHT, () -> setSnakeDirection(Direction2D.RIGHT));
     final GameInstance.KeyBinding up = registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP));
@@ -90,12 +93,13 @@ public class SerpentGame extends GameInstance<SerpentGame> {
             foodX = random.nextInt((tiles.maxX - tiles.minX) + 1) + tiles.minX;
             foodY = random.nextInt((tiles.maxY - tiles.minY) + 1) + tiles.minY;
         } while (isSnakeTile(foodX, foodY));
-        GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, targetSnakeLength));
+        GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten));
     }
 
     @Override
     protected void onGameLoss() {
         playSound(GameblockSounds.SNAKE_DEATH.get());
+        endTime = getGameTime();
     }
 
     @Override
@@ -124,9 +128,12 @@ public class SerpentGame extends GameInstance<SerpentGame> {
 
                 if (headX == foodX && headY == foodY && !isClientSide()) {
                     targetSnakeLength += SNAKE_LENGTH_INCREASE;
+                    foodEaten++;
                     randomFoodPosition();
                 }
             }
+        } else if (!isClientSide() && getGameTime() - endTime > 20 * 3) {
+            restart();
         }
     }
 
@@ -147,7 +154,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         drawRectangle(graphics, rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right
 
         float y = (75.0f - rectMaxY + 1) / 2 + rectMaxY;
-        drawText(graphics, 80.0f, y, 1.0f, new ColorF(1.0f), String.valueOf(targetSnakeLength)); // TODO: food count not snake length
+        drawText(graphics, 80.0f, y, 1.0f, new ColorF(1.0f), String.valueOf(foodEaten));
         drawTexture(graphics, SPRITE, 70.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
 
         tiles.forEach((Vec2i coords, Integer i) -> {

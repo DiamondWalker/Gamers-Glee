@@ -40,6 +40,7 @@ public class TileRevealPacket extends UpdateGamePacket<DefusalGame> {
             DefusalTile defusalTile = game.tiles.get(tile.coords.getX(), tile.coords.getY());
             defusalTile.adjacentBombs = tile.adjacentBombs;
             defusalTile.reveal();
+            game.lastRevealTime = game.getGameTime();
         }
     }
 

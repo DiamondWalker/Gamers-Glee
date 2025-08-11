@@ -62,6 +62,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, BombRevealPacket.class, BombRevealPacket::writeToBuffer, BombRevealPacket::new, BombRevealPacket::handle);
         INSTANCE.registerMessage(id++, TileStatePacket.class, TileStatePacket::writeToBuffer, TileStatePacket::new, TileStatePacket::handle);
         INSTANCE.registerMessage(id++, BombCountPacket.class, BombCountPacket::writeToBuffer, BombCountPacket::new, BombCountPacket::handle);
+        INSTANCE.registerMessage(id++, TimePacket.class, TimePacket::writeToBuffer, TimePacket::new, TimePacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

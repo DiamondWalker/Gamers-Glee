@@ -78,5 +78,13 @@
         "stream": false
       }
     ]
+  },
+  "defusal_timer": {
+    "sounds": [
+      {
+        "name": "gameblock:defusal_timer",
+        "stream": false
+      }
+    ]
   }
 }
