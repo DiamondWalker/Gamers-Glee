@@ -16,7 +16,9 @@ import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
@@ -42,6 +44,8 @@ public class GameblockMod
         GameblockLootModifiers.register(modEventBus);
 
         context.getModEventBus().addListener(GameblockMod::commonSetup);
+
+        context.registerConfig(ModConfig.Type.COMMON, GameblockConfig.SPEC);
     }
 
     @SubscribeEvent

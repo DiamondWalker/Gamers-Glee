@@ -1,7 +1,11 @@
 {
-  "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
+  "chat.gameblock.discord.message": "%s Join the %s for spoilers, news, and updates!",
+  "chat.gameblock.discord.link": "Gamer's Glee Discord server",
   "chat.gameblock.update.could_not_connect": "%s Could not connect to update checker.",
-  "chat.gameblock.update.out_of_date": "%s Gamer's Glee is out of date! Update for new features and fixes!",
+  "chat.gameblock.update.download": "Click here to download the latest features and fixes!",
+  "chat.gameblock.update.out_of_date": "%s Gamer's Glee is %s out of date! %s",
+  "chat.gameblock.update.out_of_date_singular": "%s version",
+  "chat.gameblock.update.out_of_date_multiple": "%s versions",
   "chat.gameblock.update.out_of_date_special_0": "%s update ur gamers glee bruh",
   "chat.gameblock.update.out_of_date_special_1": "%s Update or die.",
   "chat.gameblock.update.out_of_date_special_2": "%s Not updating your Minecraft mods is a federal offense punishable by life in prison without parole.",
@@ -10,6 +14,7 @@
   "chat.gameblock.update.out_of_date_special_5": "%s Update plz",
   "chat.gameblock.update.out_of_date_special_6": "%s Update me.",
   "chat.gameblock.update.out_of_date_special_7": "%s :(",
+  "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
 
   "item.gameblock.block_break": "Block Break Cartridge",
   "item.gameblock.defusal": "Defusal",
