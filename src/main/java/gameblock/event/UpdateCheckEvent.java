@@ -23,8 +23,11 @@ public class UpdateCheckEvent {
             VersionChecker.Status version = VersionChecker.getResult(ModList.get().getModContainerById(GameblockMod.MODID).get().getModInfo()).status();
             // TODO: localization
             if (version == VersionChecker.Status.OUTDATED) {
-                if (ticks >= CHECK_INTERVAL * 2 && new Random().nextInt(100) == 0) {
-                    event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("§e<Gamer's Glee> §4update ur gamers glee bruh"), false);
+                Random rand = new Random();
+                if (ticks >= CHECK_INTERVAL * 2 && rand.nextInt(100) == 0) {
+                    event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable(
+                            rand.nextInt(10) == 0 ? "§e<Gamer's Glee> §4Update or die." : "§e<Gamer's Glee> §4update ur gamers glee bruh"
+                    ), false);
                 } else {
                     event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("§e<Gamer's Glee> §4Gamer's Glee is out of date! Update for new features and fixes!"), false);
                 }
