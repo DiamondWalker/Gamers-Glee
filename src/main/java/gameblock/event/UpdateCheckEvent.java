@@ -8,6 +8,8 @@ import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
 
+import java.util.Random;
+
 @Mod.EventBusSubscriber
 public class UpdateCheckEvent {
     public static final long FIRST_CHECK_TIME = 20 * 5; // 5 seconds after server open
@@ -19,8 +21,9 @@ public class UpdateCheckEvent {
 
         if (event.phase == TickEvent.Phase.END && ticks % CHECK_INTERVAL == 0) {
             VersionChecker.Status version = VersionChecker.getResult(ModList.get().getModContainerById(GameblockMod.MODID).get().getModInfo()).status();
+            // TODO: localization
             if (version == VersionChecker.Status.OUTDATED) {
-                if (ticks >= CHECK_INTERVAL * 2 /*&& new Random().nextInt(100) == 0*/) {
+                if (ticks >= CHECK_INTERVAL * 2 && new Random().nextInt(100) == 0) {
                     event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("§e<Gamer's Glee> §4update ur gamers glee bruh"), false);
                 } else {
                     event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("§e<Gamer's Glee> §4Gamer's Glee is out of date! Update for new features and fixes!"), false);
