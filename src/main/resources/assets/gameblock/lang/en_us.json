@@ -1,4 +1,16 @@
 {
+  "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
+  "chat.gameblock.update.could_not_connect": "%s Could not connect to update checker.",
+  "chat.gameblock.update.out_of_date": "%s Gamer's Glee is out of date! Update for new features and fixes!",
+  "chat.gameblock.update.out_of_date_special_0": "%s update ur gamers glee bruh",
+  "chat.gameblock.update.out_of_date_special_1": "%s Update or die.",
+  "chat.gameblock.update.out_of_date_special_2": "%s Not updating your Minecraft mods is a federal offense punishable by life in prison without parole.",
+  "chat.gameblock.update.out_of_date_special_3": "%s Update Gamer's Glee. All the cool kids are doing it.",
+  "chat.gameblock.update.out_of_date_special_4": "%s Update Gamer's Glee or the man standing behind you will do it for you.",
+  "chat.gameblock.update.out_of_date_special_5": "%s Update plz",
+  "chat.gameblock.update.out_of_date_special_6": "%s Update me.",
+  "chat.gameblock.update.out_of_date_special_7": "%s :(",
+
   "item.gameblock.block_break": "Block Break Cartridge",
   "item.gameblock.defusal": "Defusal",
   "item.gameblock.flying_chicken": "Flying Chicken Cartridge",
