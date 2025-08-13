@@ -1,9 +1,11 @@
 package gameblock.util;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.Component;
 import org.w3c.dom.Text;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Stack;
 
 public class TextRenderingRules {
@@ -28,8 +30,15 @@ public class TextRenderingRules {
         return this;
     }
 
-    public String[] splitIntoLines(Font font, String text) {
-        if (font.width(text) <= maxWidth) return new String[]{text};
+    public Component[] splitIntoLines(Font font, Component textComponent) {
+        StringBuilder builder = new StringBuilder();
+        textComponent.visit((p_130673_) -> {
+            builder.append(p_130673_);
+            return Optional.empty();
+        });
+        String text = builder.toString();
+
+        if (font.width(text) <= maxWidth) return new Component[]{Component.literal(text)};
 
         String[] lines = new String[maxLines];
 
@@ -75,10 +84,10 @@ public class TextRenderingRules {
             }
         }
 
-        ArrayList<String> finalLines = new ArrayList<>();
+        ArrayList<Component> finalLines = new ArrayList<>();
         for (String line : lines) {
-            if (line != null && !line.isEmpty()) finalLines.add(line);
+            if (line != null && !line.isEmpty()) finalLines.add(Component.literal(line));
         }
-        return finalLines.toArray(new String[0]);
+        return finalLines.toArray(new Component[0]);
     }
 }

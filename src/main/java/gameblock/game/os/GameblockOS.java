@@ -15,6 +15,7 @@ import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
@@ -106,7 +107,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
                 for (OSIcon<?> icon : gameIcons) icon.render(graphics, partialTicks, iconTransparency);
             } else {
                 drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 0.5f), 0);
-                drawText(graphics, 0, 0, 1.0f, new ColorF(1.0f), "No cartridges detected.", "Find some in loot chests!");
+                drawText(graphics, 0, 0, 1.0f, new ColorF(1.0f), Component.literal("No cartridges detected."), Component.literal("Find some in loot chests!"));
             }
         } else { // loading screen
             for (int i = 0; i < 8; i++) {

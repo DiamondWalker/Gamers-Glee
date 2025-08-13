@@ -215,7 +215,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         playSound(event, 1.0f, 1.0f);
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, String txt, ColorF color) {
+    private void drawText(GuiGraphics graphics, float x, float y, float scale, Component txt, ColorF color) {
         Font font = Minecraft.getInstance().font;
         float width = font.width(txt);
         float height = font.lineHeight;
@@ -230,7 +230,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, String[] txt, ColorF colorF) {
+    private void drawText(GuiGraphics graphics, float x, float y, float scale, Component[] txt, ColorF colorF) {
         Font font = Minecraft.getInstance().font;
         float height = font.lineHeight * txt.length + 2 * (txt.length - 1);
 
@@ -246,12 +246,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             pose.translate(x, y + scale * (height / 2 - 1), 0);
             pose.scale(scale, -scale, 1.0f);
 
-            for (String line : txt) {
-                MutableComponent translatedLine = Component.translatable(line);
-                float width = font.width(translatedLine);
+            for (Component line : txt) {
+                float width = font.width(line);
                 pose.pushPose();
                 pose.translate(-width / 2 + 0.5f, 0.0f, 0.0f);
-                graphics.drawString(font, translatedLine, 0, 0, color, false);
+                graphics.drawString(font, line, 0, 0, color, false);
                 pose.popPose();
                 pose.translate(0.0f, font.lineHeight + 2, 0.0f);
             }
@@ -259,12 +258,12 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
     }
 
-    public final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, ColorF color, String txt) {
+    public final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
         TextRenderingRules rules = new TextRenderingRules().setMaxWidth(maxWidth).setMaxLines(maxLines);
         drawText(graphics, x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
     }
 
-    public final void drawText(GuiGraphics graphics, float x, float y, float scale, ColorF color, String... lines) {
+    public final void drawText(GuiGraphics graphics, float x, float y, float scale, ColorF color, Component... lines) {
         drawText(graphics, x, y, scale, lines, color);
     }
 

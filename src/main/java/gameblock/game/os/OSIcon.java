@@ -5,6 +5,7 @@ import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
 import gameblock.util.ColorF;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 
@@ -57,7 +58,7 @@ public class OSIcon<T extends GameInstance> {
         poseStack.scale(scale, scale, scale);
 
         os.drawTexture(graphics, game.logo, 0, 5.0f, 15.0f, 15.0f, 0, new ColorF(1.0f).withAlpha(transparency));
-        os.drawText(graphics, 0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), "game.gameblock." + game.gameID);
+        os.drawText(graphics, 0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), Component.translatable("game.gameblock." + game.gameID));
 
         poseStack.popPose();
     }

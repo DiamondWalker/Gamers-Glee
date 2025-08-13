@@ -6,6 +6,7 @@ import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
@@ -187,7 +188,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
                 drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.6f), 0);
                 //drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 29, 0, 6, 6, new ColorF(1.0f));
                 if (tile.adjacentBombs > 0 && !tile.isBomb()) {
-                    drawText(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, NUMBER_COLORS[tile.adjacentBombs - 1], String.valueOf(tile.adjacentBombs));
+                    drawText(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, NUMBER_COLORS[tile.adjacentBombs - 1], Component.literal(String.valueOf(tile.adjacentBombs)));
                 }
             } else {
                 //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.8f), 0);
@@ -214,12 +215,12 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         boolean panikTime = !isGameOver() && timeLeft < 20 * 60;
 
         drawRectangle(graphics, 70, 59.5f, 21, 10, new ColorF(0.0f), 0);
-        drawText(graphics, 70, 59.5f, 1.0f, new ColorF(1.0f, 0.0f, 0.0f), TextUtil.formatWithUnits(bombCount, 3));
+        drawText(graphics, 70, 59.5f, 1.0f, new ColorF(1.0f, 0.0f, 0.0f), Component.literal(TextUtil.formatWithUnits(bombCount, 3)));
 
         drawRectangle(graphics, -70, 59.5f, 21, 10, new ColorF(0.0f), 0);
         drawText(graphics, -70, 59.5f, 1.0f, panikTime && getGameTime() % 10 < 5?
                 new ColorF(1.0f, 0.0f, 0.0f) :
-                new ColorF(0.0f, 0.0f, 1.0f), TextUtil.getTimeString(timeLeft, false, false));
+                new ColorF(0.0f, 0.0f, 1.0f), Component.literal(TextUtil.getTimeString(timeLeft, false, false)));
 
         //drawRectangle(graphics, 0, 62.0f, 15, 15, new ColorF(1.0f), 0);
         int u = 0;

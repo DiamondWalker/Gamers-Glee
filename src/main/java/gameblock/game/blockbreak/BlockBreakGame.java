@@ -11,6 +11,7 @@ import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
@@ -348,36 +349,36 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
 
         if (!isGameOver()) {
-            drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), "Score: " + score);
-            drawText(graphics, 80.0f, 62.5f, 0.5f, new ColorF(1.0f), timeString);
+            drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.literal("Score: " + score));
+            drawText(graphics, 80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));
         } else {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
                 if (getGameState() == GameState.WIN) {
-                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), "YOU WIN!");
+                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), Component.literal("YOU WIN!"));
                 } else {
-                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), "GAME OVER!");
+                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), Component.literal("GAME OVER!"));
                 }
 
                 if (gameOverTime > 40) {
                     int percent = (int)(progress * 100);
-                    drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), "Blocks broken: " + bricksBroken + " (" + percent + "%)");
+                    drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), Component.literal("Blocks broken: " + bricksBroken + " (" + percent + "%)"));
 
                     if (gameOverTime > 60) {
-                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), "Time: " + timeString);
+                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), Component.literal("Time: " + timeString));
 
                         if (gameOverTime > 80) {
-                            drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), "Score: " + score);
+                            drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), Component.literal("Score: " + score));
 
                             if (gameOverTime > 100) {
                                 if (score > highScore) { // new high score!
-                                    drawText(graphics, 40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), "(New high score!)");
+                                    drawText(graphics, 40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), Component.literal("(New high score!)"));
 
                                     if (gameOverTime > 120) {
-                                        drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                                        drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.literal("Click to restart!"));
                                     }
                                 } else {
-                                    drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), "Click to restart!");
+                                    drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.literal("Click to restart!"));
                                 }
                             }
                         }
