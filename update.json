@@ -1,5 +1,5 @@
 {
-  "homepage": "https://modrinth.com/mod/the-gameblock-mod!",
+  "homepage": "https://modrinth.com/mod/the-gameblock-mod",
   "1.20.1": {
     "0.0": "Initial Release",
     "0.0.1": "-fixed bug in Flying Chicken where sometimes multiple pairs of pipes would spawn at once\n-in Flying Chicken, leaving the playing area now results in a loss\n-made Serpent movement smoother and (hopefully) fixed syncing issues\n-updated the graphics for Block Break",
