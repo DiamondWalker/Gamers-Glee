@@ -1,6 +1,7 @@
 package gameblock.game.defusal;
 
 import gameblock.packet.UpdateGamePacket;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -42,6 +43,7 @@ public class TileRevealPacket extends UpdateGamePacket<DefusalGame> {
             defusalTile.reveal();
             game.lastRevealTime = game.getGameTime();
         }
+        game.playSound(GameblockSounds.DEFUSAL_SELECT.get(), 1.0f, 0.5f);
     }
 
     public static class TileInfo {

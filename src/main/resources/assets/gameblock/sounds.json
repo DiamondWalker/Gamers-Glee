@@ -39,6 +39,14 @@
       }
     ]
   },
+  "serpent_eat": {
+    "sounds": [
+      {
+        "name": "gameblock:serpent_eat",
+        "stream": false
+      }
+    ]
+  },
   "snake_death": {
     "sounds": [
       {
@@ -71,10 +79,42 @@
       }
     ]
   },
+  "flying_chicken_flap": {
+    "sounds": [
+      {
+        "name": "gameblock:flap_1",
+        "stream": false
+      },
+      {
+        "name": "gameblock:flap_2",
+        "stream": false
+      },
+      {
+        "name": "gameblock:flap_3",
+        "stream": false
+      },
+      {
+        "name": "gameblock:flap_4",
+        "stream": false
+      },
+      {
+        "name": "gameblock:flap_5",
+        "stream": false
+      }
+    ]
+  },
   "gameblock_logon": {
     "sounds": [
       {
         "name": "gameblock:gameblock_logon",
+        "stream": false
+      }
+    ]
+  },
+  "defusal_select": {
+    "sounds": [
+      {
+        "name": "gameblock:defusal_select",
         "stream": false
       }
     ]

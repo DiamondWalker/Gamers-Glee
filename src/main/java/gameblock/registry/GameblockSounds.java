@@ -20,12 +20,19 @@ public class GameblockSounds {
     public static final RegistryObject<SoundEvent> FLYING_CHICKEN_MUSIC = registerSound("flying_chicken_music");
     public static final RegistryObject<SoundEvent> BLOCK_BREAK_MUSIC = registerSound("block_break_music");
 
-    public static final RegistryObject<SoundEvent> BALL_BOUNCE = registerSound("ball_bounce");
+    public static final RegistryObject<SoundEvent> SERPENT_EAT = registerSound("serpent_eat");
     public static final RegistryObject<SoundEvent> SNAKE_DEATH = registerSound("snake_death");
+
+    public static final RegistryObject<SoundEvent> BALL_BOUNCE = registerSound("ball_bounce");
     public static final RegistryObject<SoundEvent> BALL_BROKEN = registerSound("ball_broken");
     public static final RegistryObject<SoundEvent> BLOCK_BROKEN = registerSound("block_broken");
+
+    public static final RegistryObject<SoundEvent> FLYING_CHICKEN_FLAP = registerSound("flying_chicken_flap");
     public static final RegistryObject<SoundEvent> FLYING_CHICKEN_SCORE = registerSound("flying_chicken_score");
+
     public static final RegistryObject<SoundEvent> GAMEBLOCK_LOGON = registerSound("gameblock_logon");
+
+    public static final RegistryObject<SoundEvent> DEFUSAL_SELECT = registerSound("defusal_select");
     public static final RegistryObject<SoundEvent> DEFUSAL_TIMER = registerSound("defusal_timer");
 
 

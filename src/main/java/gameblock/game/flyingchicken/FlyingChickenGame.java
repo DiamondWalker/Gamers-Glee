@@ -50,7 +50,8 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
         if (isClientSide()) {
             GameblockPackets.sendToServer(new WingFlapPacket(time, chickenY));
             lastFlapTime = time;
-            playSound(SoundEvents.PHANTOM_FLAP, 1.0f, 350.0f);
+            playSound(GameblockSounds.FLYING_CHICKEN_FLAP.get(), 1.0f, 1.0f);
+            //playSound(SoundEvents.PHANTOM_FLAP, 1.0f, 350.0f);
         }
         chickenMotion = 2.56f;
     }

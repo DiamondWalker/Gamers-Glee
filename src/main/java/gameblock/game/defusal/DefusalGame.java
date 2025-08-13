@@ -9,6 +9,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
@@ -179,6 +180,12 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     }
 
     @Override
+    protected void onGameLoss() {
+        super.onGameLoss();
+        playSound(SoundEvents.GENERIC_EXPLODE);
+    }
+
+    @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0.8f), 0);
         drawRectangle(graphics, 0, -8, 168 + 8, 112 + 8, new ColorF(0.4f), 0);
@@ -192,18 +199,24 @@ public class DefusalGame extends GameInstance<DefusalGame> {
                 }
             } else {
                 //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.8f), 0);
-                drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 23, 0, 6, 6, new ColorF(1.0f));
+                drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 32, 0, 6, 6, new ColorF(1.0f));
+
+                if (getGameState() == GameState.LOSS && tile.isBomb()) {
+                    drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
+                    //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(1.0f, 0.0f, 0.0f), 0);
+                }
+
                 if (tile.getState() == DefusalTile.State.FLAGGED) {
-                    drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 7, 0, 7, 7, new ColorF(1.0f));
+                    if (getGameState() == GameState.LOSS && !tile.isBomb()) {
+                        drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
+                        drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 21, 0, 7, 7, new ColorF(1.0f));
+                    } else {
+                        drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 7, 0, 7, 7, new ColorF(1.0f));
+                    }
                 } else if (tile.getState() == DefusalTile.State.QUESTION) {
                     drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 14, 0, 7, 7, new ColorF(1.0f));
                     //drawText(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, new ColorF(1.0f), "?");
                 }
-            }
-
-            if (tile.isBomb()) {
-                drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
-                //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(1.0f, 0.0f, 0.0f), 0);
             }
         });
 

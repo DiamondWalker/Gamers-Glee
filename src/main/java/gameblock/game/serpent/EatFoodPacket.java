@@ -1,11 +1,13 @@
 package gameblock.game.serpent;
 
 import gameblock.packet.UpdateGamePacket;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.Direction2D;
 import net.minecraft.network.FriendlyByteBuf;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
     private int newFoodX;
@@ -46,5 +48,6 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
         game.foodY = newFoodY;
         game.targetSnakeLength = newSnakeLength;
         game.foodEaten = foodEaten;
+        if (foodEaten > 0) game.playSound(GameblockSounds.SERPENT_EAT.get(), 1.0f - new Random().nextFloat() * 0.2f, 1.0f);
     }
 }
