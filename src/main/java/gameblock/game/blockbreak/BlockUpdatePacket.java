@@ -1,17 +1,16 @@
 package gameblock.game.blockbreak;
 
 import gameblock.packet.UpdateGamePacket;
-import gameblock.registry.GameblockSounds;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class BrickUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
+public class BlockUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     private short brick;
 
-    public BrickUpdatePacket(int i) {
+    public BlockUpdatePacket(int i) {
         this.brick = (short) i;
     }
 
-    public BrickUpdatePacket(FriendlyByteBuf buffer) {
+    public BlockUpdatePacket(FriendlyByteBuf buffer) {
         super(buffer);
     }
 
@@ -27,13 +26,13 @@ public class BrickUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
 
     @Override
     public void handleGameUpdate(BlockBreakGame game) {
-        if (game.bricks.get(this.brick) != null) {
-            if (game.bricks.get(this.brick).breaking == 0) {
-                game.spawnBrickBreakParticles(game.bricks.get(this.brick));
+        if (game.blocks.get(this.brick) != null) {
+            if (game.blocks.get(this.brick).breaking == 0) {
+                game.spawnBrickBreakParticles(game.blocks.get(this.brick));
                 //game.playSound(GameblockSounds.BRICK_BREAK.get());
             }
-            game.bricks.set(this.brick, null);
-            game.bricksBroken++;
+            game.blocks.set(this.brick, null);
+            game.blocksBroken++;
         }
     }
 }

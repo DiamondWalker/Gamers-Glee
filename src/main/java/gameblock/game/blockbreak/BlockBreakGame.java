@@ -59,8 +59,8 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     boolean ballLaunched = false;
     long timeSinceLaunch = 0;
 
-    ArrayList<Brick> bricks = new ArrayList<>();
-    protected int bricksBroken = 0;
+    ArrayList<Block> blocks = new ArrayList<>();
+    protected int blocksBroken = 0;
 
     ArrayList<Particle> particles = null;
 
@@ -77,12 +77,12 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         for (int y = 6; y >= 3; y--) {
             if (y < 6) {
                 for (int x = -14; x <= 14; x += 2) {
-                    bricks.add(new Brick(x, y * 2 - 1 + 1, col));
+                    blocks.add(new Block(x, y * 2 - 1 + 1, col));
                 }
                 col++;
             }
             for (int x = -15; x <= 15; x += 2) {
-                bricks.add(new Brick(x, y * 2 - 1, col));
+                blocks.add(new Block(x, y * 2 - 1, col));
             }
             col++;
         }
@@ -94,7 +94,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     }
 
     private float calculateProgress() {
-        return (float) bricksBroken / bricks.size();
+        return (float) blocksBroken / blocks.size();
     }
 
     private float calculateBallSpeed() {
@@ -104,7 +104,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     private void recalculateScore() {
         if (!isClientSide()) {
             int oldScore = score;
-            score = (int) Math.max(0, bricksBroken - timeSinceLaunch / 100);
+            score = (int) Math.max(0, blocksBroken - timeSinceLaunch / 100);
             if (getGameState() == GameState.WIN) score += 100;
             if (score != oldScore || timeSinceLaunch % 20 == 0) GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20));
         }
@@ -193,16 +193,16 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                         }
                     }
 
-                    for (int i = 0; i < bricks.size(); i++) {
-                        Brick brick = bricks.get(i);
-                        if (brick == null) continue;
-                        if (brick.breaking > 0) {
-                            brick.breaking--;
+                    for (int i = 0; i < blocks.size(); i++) {
+                        Block block = blocks.get(i);
+                        if (block == null) continue;
+                        if (block.breaking > 0) {
+                            block.breaking--;
                             continue;
                         }
 
-                        float brickX = brick.x * 5;
-                        float brickY = brick.y * 5;
+                        float brickX = block.x * 5;
+                        float brickY = block.y * 5;
                         if (ballX >= brickX - (BALL_WIDTH + BRICK_WIDTH) / 2 && ballX <= brickX + (BALL_WIDTH + BRICK_WIDTH) / 2) {
                             if (ballY >= brickY - (BALL_WIDTH + BRICK_HEIGHT) / 2 && ballY <= brickY + (BALL_WIDTH + BRICK_HEIGHT) / 2) {
                                 float xComponent = (ballX - brickX) / BRICK_WIDTH;
@@ -218,13 +218,13 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
                                 ballMoveUpdate = true;
                                 if (!isClientSide()) {
-                                    bricks.set(i, null);
-                                    bricksBroken++;
-                                    if (bricksBroken == bricks.size()) setGameState(GameState.WIN);
-                                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BrickUpdatePacket(i));
+                                    blocks.set(i, null);
+                                    blocksBroken++;
+                                    if (blocksBroken == blocks.size()) setGameState(GameState.WIN);
+                                    GameblockPackets.sendToPlayer((ServerPlayer) player, new BlockUpdatePacket(i));
                                 } else {
-                                    bricks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
-                                    spawnBrickBreakParticles(bricks.get(i));
+                                    blocks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
+                                    spawnBrickBreakParticles(blocks.get(i));
                                     //playSound(GameblockSounds.BRICK_BREAK.get());
                                 }
                             }
@@ -259,15 +259,15 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         return (ballLaunched && !isGameOver()) ? GameblockMusic.BLOCK_BREAK : null;
     }
 
-    protected void spawnBrickBreakParticles(Brick brick) {
+    protected void spawnBrickBreakParticles(Block block) {
         Random random = new Random();
-        float x = brick.x * 5;
-        float y = brick.y * 5;
+        float x = block.x * 5;
+        float y = block.y * 5;
         int count = 10 + random.nextInt(8);
         for (int i = 0; i < count; i++) {
             float angle = random.nextFloat(Mth.TWO_PI);
             float magnitude = 0.9f + random.nextFloat(0.5f);
-            particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, brick.getColor()));
+            particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, block.getColor()));
         }
 
         playSound(GameblockSounds.BLOCK_BROKEN.get());
@@ -342,43 +342,42 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
         graphics.flush();
 
-        //TODO: localization
         String timeString = "XX:XX";
         if (ballLaunched) {
             timeString = TextUtil.getTimeString(timeSinceLaunch, false, true);
         }
 
         if (!isGameOver()) {
-            drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.literal("Score: " + score));
+            drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
             drawText(graphics, 80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));
         } else {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
                 if (getGameState() == GameState.WIN) {
-                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), Component.literal("YOU WIN!"));
+                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.win"));
                 } else {
-                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), Component.literal("GAME OVER!"));
+                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), Component.translatable("gui.gameblock.block_break.lose"));
                 }
 
                 if (gameOverTime > 40) {
                     int percent = (int)(progress * 100);
-                    drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), Component.literal("Blocks broken: " + bricksBroken + " (" + percent + "%)"));
+                    drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.blocks_broken", blocksBroken, percent));
 
                     if (gameOverTime > 60) {
-                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), Component.literal("Time: " + timeString));
+                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.time", timeString));
 
                         if (gameOverTime > 80) {
-                            drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), Component.literal("Score: " + score));
+                            drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
 
                             if (gameOverTime > 100) {
                                 if (score > highScore) { // new high score!
-                                    drawText(graphics, 40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), Component.literal("(New high score!)"));
+                                    drawText(graphics, 40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.highscore"));
 
                                     if (gameOverTime > 120) {
-                                        drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.literal("Click to restart!"));
+                                        drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
                                     }
                                 } else {
-                                    drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.literal("Click to restart!"));
+                                    drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
                                 }
                             }
                         }
@@ -416,13 +415,13 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                     oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, new ColorF(100, 100, 255), 0);
         }
 
-        for (Brick brick : bricks) {
-            if (brick == null) continue;
+        for (Block block : blocks) {
+            if (block == null) continue;
 
-            if (brick.breaking == 0) drawTexture(graphics, SPRITE, brick.x * 5, brick.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
+            if (block.breaking == 0) drawTexture(graphics, SPRITE, block.x * 5, block.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
                     0,
                     246,
-                    brick.color * 5,
+                    block.color * 5,
                     10,
                     5);
         }
@@ -440,12 +439,12 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
     }
 
-    protected class Brick {
+    protected class Block {
         protected int x, y;
         protected int breaking = 0;
         private final int color;
 
-        public Brick(int x, int y, int color) {
+        public Block(int x, int y, int color) {
             this.x = x;
             this.y = y;
             this.color = color % 7;

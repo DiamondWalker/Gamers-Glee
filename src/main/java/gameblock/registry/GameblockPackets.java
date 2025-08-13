@@ -42,7 +42,7 @@ public class GameblockPackets {
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
         INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
-        INSTANCE.registerMessage(id++, BrickUpdatePacket.class, BrickUpdatePacket::writeToBuffer, BrickUpdatePacket::new, BrickUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, BlockUpdatePacket.class, BlockUpdatePacket::writeToBuffer, BlockUpdatePacket::new, BlockUpdatePacket::handle);
         INSTANCE.registerMessage(id++, ScoreUpdatePacket.class, ScoreUpdatePacket::writeToBuffer, ScoreUpdatePacket::new, ScoreUpdatePacket::handle);
         INSTANCE.registerMessage(id++, BlockBreakHighScorePacket.class, BlockBreakHighScorePacket::writeToBuffer, BlockBreakHighScorePacket::new, BlockBreakHighScorePacket::handle);
 

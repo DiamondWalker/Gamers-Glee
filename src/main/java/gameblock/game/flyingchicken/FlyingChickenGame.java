@@ -153,7 +153,6 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                     0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
         }
 
-        // TODO: localize
         if (!isGameOver()) {
             ColorF col = score > highScore ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
             float time = (partialTicks + (getGameTime() - lastScoreTime)) / 15;
@@ -162,18 +161,18 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
             drawText(graphics, 0.0f, 55.0f, 1.5f, col, Component.literal(scoreString));
         } else {
             drawRectangle(graphics, 0.0f, 30.0f, 50.0f, 10.0f, new ColorF(1.0f, 0.5f, 0.0f), 0);
-            drawText(graphics, 0.0f, 30.0f, 0.7f, new ColorF(1.0f), Component.literal("Game Over"));
-            drawText(graphics, -40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.literal("Score: " + score));
-            drawText(graphics, 40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.literal("Best: " + highScore));
+            drawText(graphics, 0.0f, 30.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.game_over"));
+            drawText(graphics, -40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.score", score));
+            drawText(graphics, 40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.best", highScore));
             if (score > highScore) {
                 float time = partialTicks + getGameTime();
                 float expand = (time % 20) / 20;
                 ColorF col = new ColorF(1.0f, 1.0f, 0.0f).fadeTo(new ColorF(1.0f), 1.0f - expand);
-                drawText(graphics, 0.0f, 10.0f, 0.7f + expand * 0.2f, col.withAlpha(1.0f - expand), Component.literal("New Best!"));
-                drawText(graphics, 0.0f, 10.0f, 0.7f, col, Component.literal("New Best!"));
+                drawText(graphics, 0.0f, 10.0f, 0.7f + expand * 0.2f, col.withAlpha(1.0f - expand), Component.translatable("gui.gameblock.flying_chicken.new_best"));
+                drawText(graphics, 0.0f, 10.0f, 0.7f, col, Component.translatable("gui.gameblock.flying_chicken.new_best"));
             }
             ColorF col = overRetryButton(getMouseCoordinates()) ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
-            drawText(graphics, 0.0f, -20.0f, 0.9f, col, Component.literal("Retry?"));
+            drawText(graphics, 0.0f, -20.0f, 0.9f, col, Component.translatable("gui.gameblock.flying_chicken.retry"));
         }
 
 

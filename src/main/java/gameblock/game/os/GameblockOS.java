@@ -107,7 +107,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
                 for (OSIcon<?> icon : gameIcons) icon.render(graphics, partialTicks, iconTransparency);
             } else {
                 drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 0.5f), 0);
-                drawText(graphics, 0, 0, 1.0f, new ColorF(1.0f), Component.literal("No cartridges detected."), Component.literal("Find some in loot chests!"));
+                drawText(graphics, 0, 0, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.os.no_cartridges_1"), Component.translatable("gui.gameblock.os.no_cartridges_2"));
             }
         } else { // loading screen
             for (int i = 0; i < 8; i++) {

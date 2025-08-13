@@ -17,7 +17,7 @@
   "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
 
   "item.gameblock.block_break": "Block Break Cartridge",
-  "item.gameblock.defusal": "Defusal",
+  "item.gameblock.defusal": "Defusal Cartridge",
   "item.gameblock.flying_chicken": "Flying Chicken Cartridge",
   "item.gameblock.gameblock": "Gameblock",
   "item.gameblock.serpent": "Serpent Cartridge",
@@ -25,5 +25,22 @@
   "game.gameblock.block_break": "Block Break",
   "game.gameblock.defusal": "Defusal",
   "game.gameblock.flying_chicken": "Flying Chicken",
-  "game.gameblock.serpent": "Serpent"
+  "game.gameblock.serpent": "Serpent",
+
+  "gui.gameblock.os.no_cartridges_1": "No cartridges detected.",
+  "gui.gameblock.os.no_cartridges_2": "Find some in loot chests!",
+
+  "gui.gameblock.block_break.score": "Score: %s",
+  "gui.gameblock.block_break.time": "Time: %s",
+  "gui.gameblock.block_break.win": "YOU WIN!",
+  "gui.gameblock.block_break.lose": "GAME OVER!",
+  "gui.gameblock.block_break.blocks_broken": "Blocks broken: %s (%s%%)",
+  "gui.gameblock.block_break.highscore": "(New high score!)",
+  "gui.gameblock.block_break.restart": "Click to restart!",
+
+  "gui.gameblock.flying_chicken.game_over": "Game Over",
+  "gui.gameblock.flying_chicken.score": "Score: %s",
+  "gui.gameblock.flying_chicken.best": "Best: %s",
+  "gui.gameblock.flying_chicken.new_best": "New Best!",
+  "gui.gameblock.flying_chicken.retry": "Retry?"
 }
