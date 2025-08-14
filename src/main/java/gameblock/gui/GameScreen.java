@@ -83,6 +83,7 @@ public class GameScreen extends Screen {
         stack.translate((frameMinX + frameMaxX) / 2, (frameMinY + frameMaxY) / 2, 0.0);
         stack.scale(scale, -scale, 1.0f);
         game.render(graphics, partialTicks);
+        if (game.prompt != null) game.prompt.render(graphics, partialTicks);
         stack.popPose();
         super.render(graphics, p_281550_, p_282878_, partialTicks);
         graphics.disableScissor();
@@ -120,6 +121,7 @@ public class GameScreen extends Screen {
             case (InputConstants.MOUSE_BUTTON_MIDDLE) -> button = Direction1D.CENTER;
         }
 
+        if (game.prompt != null && game.prompt.click(gameCoords)) return true;
         game.click(gameCoords, button);
         return true;
     }
@@ -140,8 +142,15 @@ public class GameScreen extends Screen {
 
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (game.prompt != null && game.prompt.handleKeyPress(pKeyCode)) return true;
         if (game.pressKey(pKeyCode)) return true;
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+
+    @Override
+    public boolean charTyped(char pCodePoint, int pModifiers) {
+        if (game.prompt != null) game.prompt.handleCharTyped(pCodePoint);
+        return super.charTyped(pCodePoint, pModifiers);
     }
 
     @Override

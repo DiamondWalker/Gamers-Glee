@@ -8,16 +8,20 @@ import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.ScorePacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
+import gameblock.game.os.MultiplayerPromptPacket;
 import gameblock.game.os.SelectGamePacket;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.packet.GameClosePacket;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
+
+import java.lang.reflect.Method;
 
 public class GameblockPackets {
     private static int id = 0;
@@ -38,6 +42,7 @@ public class GameblockPackets {
 
         // OS
         INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
+        INSTANCE.registerMessage(id++, MultiplayerPromptPacket.class, MultiplayerPromptPacket::writeToBuffer, MultiplayerPromptPacket::new, MultiplayerPromptPacket::handle);
 
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);

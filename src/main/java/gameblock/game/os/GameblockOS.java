@@ -2,6 +2,7 @@ package gameblock.game.os;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
+import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
@@ -16,6 +17,7 @@ import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
@@ -33,7 +35,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     private static final int ICON_FADE_IN_DELAY = 20;
     private static final int ICON_FADE_IN_TIME = 80;
 
-    protected HashSet<OSIcon<?>> gameIcons = null;
+    protected HashSet<OSIcon> gameIcons = null;
 
     private GameblockLogoRenderer logoRenderer;
     private GameblockBackgroundRenderer bgRenderer;
@@ -48,24 +50,38 @@ public class GameblockOS extends GameInstance<GameblockOS> {
 
     @Override
     protected void tick() {
-        if (isClientSide()) {
-            if (gameIcons == null) {
-                gameIcons = new HashSet<>();
-                LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
-                int index = 0;
+        if (gameIcons == null) {
+            gameIcons = new HashSet<>();
+            LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
+            int index = 0;
 
-                Inventory playerInventory = player.getInventory();
-                for (int i = 0; i < playerInventory.getContainerSize(); i++) {
-                    ItemStack stack = playerInventory.getItem(i);
-                    if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                        if (!gamesFound.contains(cartridge.gameType)) {
-                            gamesFound.add(cartridge.gameType);
-                            gameIcons.add(new OSIcon<>(this, cartridge.gameType, index++));
-                        }
+            Inventory playerInventory = player.getInventory();
+            for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+                ItemStack stack = playerInventory.getItem(i);
+                if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                    if (!gamesFound.contains(cartridge.gameType)) {
+                        gamesFound.add(cartridge.gameType);
+                        gameIcons.add(new OSIcon(
+                                this,
+                                () -> selectGameAndSentToClient(cartridge.gameType),
+                                cartridge.gameType.logo,
+                                Component.translatable("icon.gameblock." + cartridge.gameType.gameID),
+                                index++
+                        ));
                     }
                 }
             }
 
+            gameIcons.add(new OSIcon(
+                    this,
+                    () -> GameblockPackets.sendToPlayer((ServerPlayer) player, new MultiplayerPromptPacket()),
+                    new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
+                    Component.translatable("icon.gameblock.multiplayer"),
+                    index++
+            ));
+        }
+
+        if (isClientSide()) {
             if (getGameTime() == 85) {
                 playSound(GameblockSounds.GAMEBLOCK_LOGON.get());
             }
@@ -75,7 +91,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
 
         if (isMenuInteractable() && gameIcons != null) {
             Vec2 mousePosition = getMouseCoordinates();
-            for (OSIcon<?> icon : gameIcons) {
+            for (OSIcon icon : gameIcons) {
                 icon.tick(mousePosition);
             }
         }
@@ -84,9 +100,9 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     @Override
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
         if (buttonPressed == Direction1D.LEFT && isMenuInteractable() && gameIcons != null) {
-            for (OSIcon<?> icon : gameIcons) {
+            for (OSIcon icon : gameIcons) {
                 if (icon.isOverIcon(clickCoordinates)) {
-                    GameblockPackets.sendToServer(new SelectGamePacket(icon.game));
+                    GameblockPackets.sendToServer(new SelectGamePacket(icon.index));
                     return;
                 }
             }
@@ -104,7 +120,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
 
             if (!gameIcons.isEmpty()) {
-                for (OSIcon<?> icon : gameIcons) icon.render(graphics, partialTicks, iconTransparency);
+                for (OSIcon icon : gameIcons) icon.render(graphics, partialTicks, iconTransparency);
             } else {
                 drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 0.5f), 0);
                 drawText(graphics, 0, 0, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.os.no_cartridges_1"), Component.translatable("gui.gameblock.os.no_cartridges_2"));

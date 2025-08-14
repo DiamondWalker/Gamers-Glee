@@ -5,10 +5,10 @@ import gameblock.registry.GameblockGames;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class SelectGamePacket extends UpdateGamePacket<GameblockOS> {
-    private GameblockGames.Game<?> game;
+    private int index;
 
-    public SelectGamePacket(GameblockGames.Game<?> game) {
-        this.game = game;
+    public SelectGamePacket(int index) {
+        this.index = index;
     }
 
     public SelectGamePacket(FriendlyByteBuf buffer) {
@@ -17,16 +17,20 @@ public class SelectGamePacket extends UpdateGamePacket<GameblockOS> {
 
     @Override
     public void writeToBuffer(FriendlyByteBuf buffer) {
-        buffer.writeUtf(game.gameID);
+        buffer.writeInt(index);
     }
 
     @Override
     public void readFromBuffer(FriendlyByteBuf buffer) {
-        game = GameblockGames.getGame(buffer.readUtf());
+        index = buffer.readInt();
     }
 
     @Override
     public void handleGameUpdate(GameblockOS game) {
-        game.selectGameAndSentToClient(this.game);
+        for (OSIcon icon : game.gameIcons) {
+            if (icon.index == index) {
+                icon.clickAction.run();
+            }
+        }
     }
 }

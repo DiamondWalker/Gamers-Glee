@@ -6,21 +6,26 @@ import gameblock.registry.GameblockGames;
 import gameblock.util.ColorF;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 
-public class OSIcon<T extends GameInstance> {
+public class OSIcon {
     public static final int SELECTION_TIME = 5;
 
     public final GameblockOS os;
-    public final GameblockGames.Game<T> game;
+    public final Runnable clickAction;
+    public final ResourceLocation icon;
+    public final Component translationKey;
     public final int index;
     private boolean selected = false;
     private int selectionTicks = 0;
 
-    public OSIcon(GameblockOS os, GameblockGames.Game<T> game, int index) {
+    public OSIcon(GameblockOS os, Runnable clickAction, ResourceLocation icon, Component translationKey, int index) {
         this.os = os;
-        this.game = game;
+        this.clickAction = clickAction;
+        this.icon = icon;
+        this.translationKey = translationKey;
         this.index = index;
     }
 
@@ -57,8 +62,8 @@ public class OSIcon<T extends GameInstance> {
         poseStack.translate(center.x, center.y, 0.0f);
         poseStack.scale(scale, scale, scale);
 
-        os.drawTexture(graphics, game.logo, 0, 5.0f, 15.0f, 15.0f, 0, new ColorF(1.0f).withAlpha(transparency));
-        os.drawText(graphics, 0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), Component.translatable("game.gameblock." + game.gameID));
+        os.drawTexture(graphics, icon, 0, 5.0f, 15.0f, 15.0f, 0, new ColorF(1.0f).withAlpha(transparency));
+        os.drawText(graphics, 0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), translationKey);
 
         poseStack.popPose();
     }

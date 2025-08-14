@@ -16,16 +16,16 @@
   "chat.gameblock.update.out_of_date_special_7": "%s :(",
   "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
 
+  "icon.gameblock.block_break": "Block Break",
+  "icon.gameblock.defusal": "Defusal",
+  "icon.gameblock.flying_chicken": "Flying Chicken",
+  "icon.gameblock.serpent": "Serpent",
+
   "item.gameblock.block_break": "Block Break Cartridge",
   "item.gameblock.defusal": "Defusal Cartridge",
   "item.gameblock.flying_chicken": "Flying Chicken Cartridge",
   "item.gameblock.gameblock": "Gameblock",
   "item.gameblock.serpent": "Serpent Cartridge",
-
-  "game.gameblock.block_break": "Block Break",
-  "game.gameblock.defusal": "Defusal",
-  "game.gameblock.flying_chicken": "Flying Chicken",
-  "game.gameblock.serpent": "Serpent",
 
   "gui.gameblock.os.no_cartridges_1": "No cartridges detected.",
   "gui.gameblock.os.no_cartridges_2": "Find some in loot chests!",

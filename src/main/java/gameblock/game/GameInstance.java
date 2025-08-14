@@ -48,6 +48,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private long gameTime = 0;
     private GameState gameState = GameState.ACTIVE;
 
+    public GamePrompt prompt = null;
+
     public final ArrayList<SimpleSoundInstance> sounds = new ArrayList<>();
 
     public GameInstance(Player player, GameblockGames.Game<T> gameType) {
@@ -180,6 +182,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     }
 
     public final void baseTick() {
+        if (prompt != null && prompt.shouldClose()) prompt = null;
+
         tick();
         gameTime++;
 
