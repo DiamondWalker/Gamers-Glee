@@ -171,7 +171,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         this.mouseCoordinates = coords;
     }
 
-    protected Vec2 getMouseCoordinates() {
+    public Vec2 getMouseCoordinates() {
         return mouseCoordinates;
     }
 
@@ -304,6 +304,70 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         vertexconsumer.vertex(matrix4f, pMinX, pMaxY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         vertexconsumer.vertex(matrix4f, pMaxX, pMaxY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
         vertexconsumer.vertex(matrix4f, pMaxX, pMinY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        graphics.flush();
+
+        pose.popPose();
+    }
+
+    public final void drawHollowRectangle(GuiGraphics graphics, float x, float y, float width, float height, float thickness, ColorF color, float angle) {
+        drawHollowRectangle(graphics, RenderType.gui(), x, y, width, height, thickness, color, angle);
+    }
+
+    public final void drawHollowRectangle(GuiGraphics graphics, RenderType type, float x, float y, float width, float height, float thickness, ColorF color,  float angle) {
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0.0f);
+        pose.mulPose(Axis.ZP.rotation(angle));
+        Matrix4f matrix4f = pose.last().pose();
+
+        float pMinOuterX = -width / 2;
+        float pMaxOuterX = width / 2;
+        float pMinOuterY = -height / 2;
+        float pMaxOuterY = height / 2;
+
+        if (pMinOuterX < pMaxOuterX) {
+            float i = pMinOuterX;
+            pMinOuterX = pMaxOuterX;
+            pMaxOuterX = i;
+        }
+
+        if (pMinOuterY < pMaxOuterY) {
+            float j = pMinOuterY;
+            pMinOuterY = pMaxOuterY;
+            pMaxOuterY = j;
+        }
+
+        float pMinInnerX = pMinOuterX + thickness;
+        float pMaxInnerX = pMaxOuterX - thickness;
+        float pMinInnerY = pMinOuterY + thickness;
+        float pMaxInnerY = pMaxOuterY - thickness;
+
+        VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(type);
+
+        // left
+        vertexconsumer.vertex(matrix4f, pMinOuterX, pMinOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinOuterX, pMaxOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinInnerX, pMaxInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinInnerX, pMinInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+        // top
+        vertexconsumer.vertex(matrix4f, pMinOuterX, pMaxOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxOuterX, pMaxOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxInnerX, pMaxInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinInnerX, pMaxInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+        // right
+        vertexconsumer.vertex(matrix4f, pMaxOuterX, pMaxOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxOuterX, pMinOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxInnerX, pMinInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxInnerX, pMaxInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+        // bottom
+        vertexconsumer.vertex(matrix4f, pMaxOuterX, pMinOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinOuterX, pMinOuterY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMinInnerX, pMinInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        vertexconsumer.vertex(matrix4f, pMaxInnerX, pMinInnerY, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
         graphics.flush();
 
         pose.popPose();

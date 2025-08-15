@@ -1,5 +1,6 @@
 package gameblock.game;
 
+import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.font.TextFieldHelper;
 import net.minecraft.world.phys.Vec2;
@@ -12,7 +13,7 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
     protected final T game;
 
     private final StringBuilder builder = new StringBuilder();
-    private int location = 0;
+    protected int location = 0;
 
     private boolean shouldClose = false;
 
@@ -21,6 +22,24 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
     }
 
     public boolean handleKeyPress(int key) {
+        if (key == InputConstants.KEY_ESCAPE) {
+            close();
+        } else if (key == InputConstants.KEY_LEFT) {
+            location = Math.max(location - 1, 0);
+        } else if (key == InputConstants.KEY_RIGHT) {
+            location = Math.min(location + 1, builder.length());
+        } else if (key == InputConstants.KEY_BACKSPACE) {
+            if (location > 0) {
+                builder.deleteCharAt(location - 1);
+                location--;
+            }
+        } else if (key == InputConstants.KEY_END) {
+            location = builder.length();
+        } else if (key == InputConstants.KEY_HOME) {
+            location = 0;
+        } else if (key == InputConstants.KEY_DELETE) {
+            if (location < builder.length()) builder.deleteCharAt(location);
+        }
         return true;
     }
 
