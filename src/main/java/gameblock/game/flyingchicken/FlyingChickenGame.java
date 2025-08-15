@@ -16,7 +16,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FastColor;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
@@ -82,7 +81,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                             if (!pipe.passed && chickenX > (pipe.x - 12)) {
                                 score++;
                                 pipe.passed = true;
-                                GameblockPackets.sendToPlayer((ServerPlayer) player, new ScorePacket(score));
+                                for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new ScorePacket(score));
                             }
                         }
                     });
@@ -93,7 +92,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                 float x = pipesSpawned * 60 * HORIZONTAL_MOVEMENT_PER_TICK + 120;
                 float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
                 pipes.enqueue(new Pipe(x, y));
-                GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));
+                for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));
 
                 pipesSpawned++;
             }
@@ -114,7 +113,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        GameblockPackets.sendToPlayer((ServerPlayer) player, new FlyingChickenHighScorePacket(highScore));
+        for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new FlyingChickenHighScorePacket(highScore));
     }
 
     @Override

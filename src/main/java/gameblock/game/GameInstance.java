@@ -20,7 +20,6 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
@@ -40,7 +39,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
-    protected final Player player;
+    protected final Player[] players;
+    private final boolean clientSide;
 
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
@@ -53,17 +53,29 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final ArrayList<SimpleSoundInstance> sounds = new ArrayList<>();
 
     public GameInstance(Player player, GameblockGames.Game<T> gameType) {
-        this.player = player;
+        clientSide = player.level().isClientSide();
+        this.players = new Player[clientSide ? 1 : getMaxPlayers()];
+        this.players[0] = player;
         this.gameType = gameType;
     }
 
     public boolean isClientSide() {
-        return player.level().isClientSide();
+        return clientSide;
+    }
+
+    public int getMaxPlayers() {
+        return 1;
+    }
+
+    public final Player getHostPlayer() {
+        return players[0];
     }
 
     protected final void setGameState(GameState state) {
         gameState = state;
-        if (!isClientSide()) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state));
+        if (!isClientSide()) {
+            for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state));
+        }
         if (state == GameState.WIN) {
             onGameWin();
         } else if (state == GameState.LOSS) {
@@ -74,7 +86,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final void save() {
         ItemStack gameblockItem = null;
         for (InteractionHand hand : InteractionHand.values()) {
-            gameblockItem = player.getItemInHand(hand);
+            gameblockItem = getHostPlayer().getItemInHand(hand);
             if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
                 break;
             } else {
@@ -83,7 +95,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
 
         if (gameblockItem != null) {
-            String playerName = player.getGameProfile().getName();
+            String playerName = getHostPlayer().getGameProfile().getName();
             String gameName = gameType.gameID;
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
@@ -103,7 +115,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final void load() {
         ItemStack gameblockItem = null;
         for (InteractionHand hand : InteractionHand.values()) {
-            gameblockItem = player.getItemInHand(hand);
+            gameblockItem = getHostPlayer().getItemInHand(hand);
             if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
                 break;
             } else {
@@ -112,7 +124,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
 
         if (gameblockItem != null) {
-            String playerName = player.getGameProfile().getName();
+            String playerName = getHostPlayer().getGameProfile().getName();
             String gameName = gameType.gameID;
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
@@ -142,9 +154,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public final void restart() {
         if (!isClientSide()) {
-            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null) {
-                cap.setGame(gameType, player);
+            for (Player player : players) {
+                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (cap != null) {
+                    cap.setGame(gameType, player);
+                }
             }
         } else {
             GameblockPackets.sendToServer(new GameRestartPacket());
@@ -181,20 +195,30 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return gameState != GameState.ACTIVE;
     }
 
-    public final void baseTick() {
+    public final void baseTick(Player player) {
         if (prompt != null && prompt.shouldClose()) prompt = null;
 
-        tick();
-        gameTime++;
+        if (player == getHostPlayer()) {
+            tick();
+            gameTime++;
+        }
 
-        if (
-                !isClientSide() &&
-                !player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) &&
-                !player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get())
-        ) {
-            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null && cap.isPlaying()) {
-                cap.setGame(null, player);
+        if (!isClientSide()) {
+            boolean stayOpen = true;
+            if ((!player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) && !player.getItemInHand(InteractionHand.OFF_HAND).is(GameblockItems.GAMEBLOCK.get()))) {
+                stayOpen = false;
+            } else if (getHostPlayer() == null || !getHostPlayer().isAlive()) {
+                stayOpen = false;
+            } else {
+                GameCapability hostCapability = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (hostCapability == null || !hostCapability.isPlaying()) stayOpen = false;
+            }
+
+            if (!stayOpen) {
+                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (cap != null && cap.isPlaying()) {
+                    cap.setGame(null, player);
+                }
             }
         }
     }

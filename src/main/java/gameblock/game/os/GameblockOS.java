@@ -1,7 +1,5 @@
 package gameblock.game.os;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
@@ -11,11 +9,9 @@ import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
-import gameblock.util.CircularStack;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -55,7 +51,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
             LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
             int index = 0;
 
-            Inventory playerInventory = player.getInventory();
+            Inventory playerInventory = getHostPlayer().getInventory();
             for (int i = 0; i < playerInventory.getContainerSize(); i++) {
                 ItemStack stack = playerInventory.getItem(i);
                 if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
@@ -74,7 +70,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
 
             gameIcons.add(new OSIcon(
                     this,
-                    () -> GameblockPackets.sendToPlayer((ServerPlayer) player, new MultiplayerPromptPacket()),
+                    () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer(), new MultiplayerPromptPacket()),
                     new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
                     Component.translatable("icon.gameblock.multiplayer"),
                     index++
@@ -146,14 +142,14 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     }
 
     protected void selectGameAndSentToClient(GameblockGames.Game<?> game) {
-        Inventory playerInventory = player.getInventory();
+        Inventory playerInventory = getHostPlayer().getInventory();
         for (int i = 0; i < playerInventory.getContainerSize(); i++) {
             ItemStack stack = playerInventory.getItem(i);
             if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
                 if (cartridge.gameType == game) {
-                    GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                    GameCapability cap = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap != null) {
-                        cap.setGame(game, player);
+                        cap.setGame(game, getHostPlayer());
                     }
                 }
             }

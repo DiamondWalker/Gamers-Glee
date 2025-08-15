@@ -16,7 +16,7 @@ public class PlayerTickHandler {
 
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
-                cap.getGame().baseTick();
+                cap.getGame().baseTick(player);
             }
         }
     }
