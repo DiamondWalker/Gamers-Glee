@@ -81,7 +81,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                             if (!pipe.passed && chickenX > (pipe.x - 12)) {
                                 score++;
                                 pipe.passed = true;
-                                for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new ScorePacket(score));
+                                forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new ScorePacket(score)));
                             }
                         }
                     });
@@ -92,7 +92,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                 float x = pipesSpawned * 60 * HORIZONTAL_MOVEMENT_PER_TICK + 120;
                 float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
                 pipes.enqueue(new Pipe(x, y));
-                for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y));
+                forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y)));
 
                 pipesSpawned++;
             }
@@ -113,7 +113,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new FlyingChickenHighScorePacket(highScore));
+        forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new FlyingChickenHighScorePacket(highScore)));
     }
 
     @Override

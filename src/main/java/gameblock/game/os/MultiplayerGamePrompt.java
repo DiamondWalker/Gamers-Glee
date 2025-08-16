@@ -16,7 +16,7 @@ public class MultiplayerGamePrompt extends GamePrompt<GameblockOS> {
 
     @Override
     public void handleCharTyped(char character) {
-        if (get().length() < 8 && Character.isLetterOrDigit(character)) super.handleCharTyped(character);
+        if (get().length() < 8 && Character.isLetterOrDigit(character)) super.handleCharTyped(Character.toUpperCase(character));
     }
 
     @Override

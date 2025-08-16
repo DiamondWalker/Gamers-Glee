@@ -8,6 +8,7 @@ import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
 import gameblock.game.flyingchicken.PipeSpawnPacket;
 import gameblock.game.flyingchicken.ScorePacket;
 import gameblock.game.flyingchicken.WingFlapPacket;
+import gameblock.game.os.JoinGamePacket;
 import gameblock.game.os.MultiplayerPromptPacket;
 import gameblock.game.os.SelectGamePacket;
 import gameblock.game.serpent.EatFoodPacket;
@@ -43,6 +44,7 @@ public class GameblockPackets {
         // OS
         INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
         INSTANCE.registerMessage(id++, MultiplayerPromptPacket.class, MultiplayerPromptPacket::writeToBuffer, MultiplayerPromptPacket::new, MultiplayerPromptPacket::handle);
+        INSTANCE.registerMessage(id++, JoinGamePacket.class, JoinGamePacket::writeToBuffer, JoinGamePacket::new, JoinGamePacket::handle);
 
         // block break
         INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);

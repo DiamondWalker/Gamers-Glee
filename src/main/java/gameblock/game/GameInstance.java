@@ -33,13 +33,14 @@ import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public abstract class GameInstance<T extends GameInstance<?>> {
     public final GameblockGames.Game<T> gameType;
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
-    protected final Player[] players;
+    private final Player[] players;
     private final boolean clientSide;
 
     public static final int MAX_X = 100;
@@ -69,6 +70,47 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public final Player getHostPlayer() {
         return players[0];
+    }
+
+    public final Player getPlayer(int i) {
+        return players[i];
+    }
+
+    public void forEachPlayer(Consumer<Player> action) {
+        for (Player player : players) {
+            if (player != null) action.accept(player);
+        }
+    }
+
+    public final boolean addPlayer(ServerPlayer player) {
+        GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+        if (cap != null) {
+            for (int i = 1; i < players.length; i++) {
+                if (players[i] == null) {
+                    players[i] = player;
+                    cap.setGame(gameType, player);
+                    onPlayerJoined(player);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected void onPlayerJoined(ServerPlayer player) {
+
+    }
+
+    public final int getPlayerCount() {
+        int count = 0;
+        for (int i = 0; i < players.length; i++) {
+            if (players[i] != null) count++;
+        }
+        return count;
+    }
+
+    public String getGameCode() {
+        return null;
     }
 
     protected final void setGameState(GameState state) {

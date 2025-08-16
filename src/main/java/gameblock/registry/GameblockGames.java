@@ -6,6 +6,7 @@ import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.game.defusal.DefusalGame;
 import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.game.os.GameblockOS;
+import gameblock.game.paddles.PaddlesGame;
 import gameblock.game.serpent.SerpentGame;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
@@ -22,6 +23,7 @@ public class GameblockGames {
     public static final Game<SerpentGame> SERPENT_GAME = registerGame("serpent", SerpentGame.class);
     public static final Game<FlyingChickenGame> FLYING_CHICKEN_GAME = registerGame("flying_chicken", FlyingChickenGame.class);
     public static final Game<DefusalGame> DEFUSAL_GAME = registerGame("defusal", DefusalGame.class);
+    public static final Game<PaddlesGame> PADDLES_GAME = registerGame("paddles", PaddlesGame.class);
 
     public static <T extends GameInstance> Game<T> registerGame(String name, Class<T> clazz) {
         Game<T> game = new Game<T>(clazz, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));

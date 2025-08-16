@@ -91,7 +91,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
             timeLeft--;
             int secondsAfter = timeLeft / 20;
             if (secondsBefore != secondsAfter) {
-                for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new TimePacket(timeLeft));
+                forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new TimePacket(timeLeft)));
             }
             if (timeLeft <= 0) setGameState(GameState.LOSS);
         }
@@ -118,16 +118,16 @@ public class DefusalGame extends GameInstance<DefusalGame> {
             tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
                 if (otherDefusalTile.isBomb()) bombs.add(coords);
             });
-            for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new BombRevealPacket(bombs.toArray(new Vec2i[]{})));
+            forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BombRevealPacket(bombs.toArray(new Vec2i[]{}))));
             setGameState(GameState.LOSS);
             return;
         }
         ArrayList<TileRevealPacket.TileInfo> tileInfos = new ArrayList<>();
         recursiveReveal(tile.getX(), tile.getY(), tileInfos);
-        for (Player player : players) {
+        forEachPlayer((Player player) -> {
             GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
             GameblockPackets.sendToPlayer((ServerPlayer) player, new TileRevealPacket(tileInfos.toArray(new TileRevealPacket.TileInfo[]{})));
-        }
+        });
 
         checkWin();
     }
@@ -153,10 +153,10 @@ public class DefusalGame extends GameInstance<DefusalGame> {
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount++;
             defusalTile.cycleState();
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount--;
-            for (Player player : players) {
+            forEachPlayer((Player player) -> {
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new TileStatePacket(tile, defusalTile.getState()));
-            }
+            });
 
             checkWin();
         }
