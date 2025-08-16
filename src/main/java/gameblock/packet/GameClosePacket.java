@@ -23,18 +23,6 @@ public class GameClosePacket {
     public void readFromBuffer(FriendlyByteBuf buffer) {}
 
     public void handle(Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            if (context.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-                Player player = context.get().getSender();
-                if (player != null) {
-                    GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                    if (cap != null) {
-                        cap.setGame(null, player);
-                    }
-                }
-            }
-
-            context.get().setPacketHandled(true);
-        });
+        context.get().enqueueWork(() -> PacketHandler.handleGameClosePacket(this, context));
     }
 }

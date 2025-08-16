@@ -1,11 +1,10 @@
 package gameblock.capability;
 
 import gameblock.game.GameInstance;
-import gameblock.gui.GameScreen;
+import gameblock.gui.GUIHandler;
 import gameblock.packet.GameChangePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
-import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
@@ -21,8 +20,7 @@ public class GameCapability {
     }
 
     public void setGame(GameblockGames.Game<?> gameType, Player player) {
-        try {
-            /*
+        /*
             Sometimes game constructors will send new packets. If this happens before the game change packet is sent it'll cause issues
             Therefore we must send the game change packet before the game instance is created.
              */
@@ -30,20 +28,25 @@ public class GameCapability {
                 GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(gameType));
                 if (game != null) game.save();
             }
-            this.game = gameType != null ? gameType.createInstance(player) : null;
+            if (gameType != null) {
+                try {
+                    game = gameType.createInstance(player);
+                } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            } else {
+                this.game = null;
+            }
 
             if (player.level().isClientSide()) {
                 if (game == null) {
-                    if (Minecraft.getInstance().screen instanceof GameScreen) Minecraft.getInstance().screen.onClose();
+                    GUIHandler.closeGameScreen();
                 } else {
-                    Minecraft.getInstance().setScreen(new GameScreen(game));
+                    GUIHandler.openGameScreen(game);
                 }
             } else {
                 if (game != null) game.load();
             }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
     }
 
     public GameInstance getGame() {

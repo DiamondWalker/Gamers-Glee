@@ -26,21 +26,7 @@ public abstract class UpdateGamePacket<T extends GameInstance> {
 
     public abstract void handleGameUpdate(T game);
 
-    public final void handle(Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            Player player = context.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT ? Minecraft.getInstance().player : context.get().getSender();
-            if (player != null) {
-                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null && cap.isPlaying()) {
-                    try {
-                        handleGameUpdate((T) cap.getGame());
-                    } catch (ClassCastException e) {
-                        // do nothing
-                    }
-                }
-            }
-
-            context.get().setPacketHandled(true);
-        });
+    public void handle(Supplier<NetworkEvent.Context> context) {
+        context.get().enqueueWork(() -> PacketHandler.handleUpdateGamePacket(this, context));
     }
 }

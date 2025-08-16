@@ -12,7 +12,7 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class GameChangePacket {
-    private GameblockGames.Game<?> game;
+    public GameblockGames.Game<?> game;
 
     public GameChangePacket(GameblockGames.Game<?> game) {
         this.game = game;
@@ -31,22 +31,6 @@ public class GameChangePacket {
     }
 
     public void handle(Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> {
-            if (context.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
-                Player player = Minecraft.getInstance().player;
-                if (player != null) {
-                    GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                    if (cap != null) {
-                        try {
-                            cap.setGame(game, player);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
-                    }
-                }
-            }
-
-            context.get().setPacketHandled(true);
-        });
+        context.get().enqueueWork(() -> PacketHandler.handleGameChangePacket(this, context));
     }
 }
