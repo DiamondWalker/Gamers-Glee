@@ -27,7 +27,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     protected int headX, headY;
     protected int targetSnakeLength = INITIAL_SNAKE_LENGTH;
     protected int snakeLength = targetSnakeLength;
-    protected int foodX = Integer.MAX_VALUE, foodY = Integer.MAX_VALUE; // these values are why outside the game area so it's like the food doesn't exist
+    protected int foodX = 10000, foodY = 10000; // these values are why outside the game area so it's like the food doesn't exist
 
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
@@ -44,7 +44,9 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         super(player, GameblockGames.SERPENT_GAME);
         tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
-        if (!isClientSide()) randomFoodPosition();
+        if (!isClientSide()) randomFoodPosition(); // FIXME: doesn't work?
+        System.out.println(foodY);
+        System.out.println(isClientSide());
     }
 
     protected void setSnakeDirection(Direction2D dir) {
@@ -172,6 +174,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         }*/
 
         drawRectangle(graphics, foodX * 2, foodY * 2 - 9, 2.0f, 2.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
+        //System.out.println(foodY);
     }
 
     @Override

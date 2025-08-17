@@ -1,11 +1,7 @@
 package gameblock.packet;
 
-import gameblock.capability.GameCapability;
-import gameblock.capability.GameCapabilityProvider;
 import gameblock.registry.GameblockGames;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -31,6 +27,9 @@ public class GameChangePacket {
     }
 
     public void handle(Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> PacketHandler.handleGameChangePacket(this, context));
+        if (context.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
+            context.get().enqueueWork(() -> ClientPacketHandler.handleGameChangePacket(this));
+        }
+        context.get().setPacketHandled(true);
     }
 }

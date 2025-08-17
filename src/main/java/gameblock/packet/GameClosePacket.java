@@ -1,11 +1,6 @@
 package gameblock.packet;
 
-import gameblock.capability.GameCapability;
-import gameblock.capability.GameCapabilityProvider;
-import gameblock.registry.GameblockGames;
-import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 
@@ -23,6 +18,9 @@ public class GameClosePacket {
     public void readFromBuffer(FriendlyByteBuf buffer) {}
 
     public void handle(Supplier<NetworkEvent.Context> context) {
-        context.get().enqueueWork(() -> PacketHandler.handleGameClosePacket(this, context));
+        if (context.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
+            context.get().enqueueWork(() -> ServerPacketHandler.handleGameClosePacket(this, context.get().getSender()));
+        }
+        context.get().setPacketHandled(true);
     }
 }

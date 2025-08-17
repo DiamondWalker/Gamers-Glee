@@ -8,10 +8,7 @@ import gameblock.capability.GameCapabilityProvider;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
-import gameblock.util.ColorF;
-import gameblock.util.Direction1D;
-import gameblock.util.GameState;
-import gameblock.util.TextRenderingRules;
+import gameblock.util.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -35,6 +32,7 @@ import org.joml.Matrix4f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public abstract class GameInstance<T extends GameInstance<?>> {
@@ -53,10 +51,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public GamePrompt prompt = null;
 
-    public final ArrayList<SimpleSoundInstance> sounds = new ArrayList<>();
+    public final GameblockSoundManager soundManager;
 
     public GameInstance(Player player, GameblockGames.Game<T> gameType) {
         clientSide = player.level().isClientSide();
+        soundManager = clientSide ? new GameblockSoundManager() : null;
         this.players = new Player[clientSide ? 1 : getMaxPlayers()];
         this.players[0] = player;
         this.gameType = gameType;
@@ -276,11 +275,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     }
 
     public final void playSound(SoundEvent event, float pitch, float volume) {
-        if (isClientSide()) {
-            SimpleSoundInstance sound = SimpleSoundInstance.forUI(event, pitch, volume);
-            Minecraft.getInstance().getSoundManager().play(sound);
-            sounds.add(sound);
-        }
+        if (soundManager != null) soundManager.play(event, pitch, volume);
     }
 
     public final void playSound(SoundEvent event) {

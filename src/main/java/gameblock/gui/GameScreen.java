@@ -52,17 +52,7 @@ public class GameScreen extends Screen {
                 if (cap.getGame() != null) return;
             }
         }
-        if (game.getGameTime() % 10 == 0) { // clear active sounds
-            SoundManager soundManager = minecraft.getSoundManager();
-            int i = 0;
-            while (i < game.sounds.size()) {
-                if (!soundManager.isActive(game.sounds.get(i))) {
-                    game.sounds.remove(i);
-                } else {
-                    i++;
-                }
-            }
-        }
+        game.soundManager.update();
         onClose();
     }
 
@@ -168,8 +158,7 @@ public class GameScreen extends Screen {
     public void onClose() {
         super.onClose();
         GameblockPackets.sendToServer(new GameClosePacket());
-        SoundManager soundManager = minecraft.getSoundManager();
-        for (SimpleSoundInstance sound : game.sounds) if (soundManager.isActive(sound)) soundManager.stop(sound);
+        game.soundManager.stopAll();
         if (currentMusic != null) minecraft.getMusicManager().stopPlaying(currentMusic);
     }
 }

@@ -48,6 +48,7 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
         game.foodY = newFoodY;
         game.targetSnakeLength = newSnakeLength;
         game.foodEaten = foodEaten;
+        System.out.println("Food Packet");
         if (foodEaten > 0) game.playSound(GameblockSounds.SERPENT_EAT.get(), 1.0f - new Random().nextFloat() * 0.2f, 1.0f);
     }
 }
