@@ -68,13 +68,13 @@ public class GameblockOS extends GameInstance<GameblockOS> {
                 }
             }
 
-            gameIcons.add(new OSIcon(
+            /*gameIcons.add(new OSIcon(
                     this,
                     () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer(), new MultiplayerPromptPacket()),
                     new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
                     Component.translatable("icon.gameblock.multiplayer"),
                     index++
-            ));
+            ));*/
         }
 
         if (isClientSide()) {

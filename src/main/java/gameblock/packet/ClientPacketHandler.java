@@ -19,7 +19,6 @@ public class ClientPacketHandler {
             if (cap != null) {
                 try {
                     cap.setGame(packet.game, player);
-                    System.out.println("Game packet");
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }

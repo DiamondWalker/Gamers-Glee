@@ -1,6 +1,7 @@
 package gameblock.game.os;
 
 import gameblock.game.GamePrompt;
+import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -17,6 +18,17 @@ public class MultiplayerGamePrompt extends GamePrompt<GameblockOS> {
     @Override
     public void handleCharTyped(char character) {
         if (get().length() < 8 && Character.isLetterOrDigit(character)) super.handleCharTyped(Character.toUpperCase(character));
+    }
+
+    @Override
+    public boolean click(Vec2 clickCoordinates) {
+        if (Math.abs(clickCoordinates.x) < 40 && Math.abs(clickCoordinates.y - -18) < 10) {
+            if (get().length() == 8) {
+                GameblockPackets.sendToServer(new JoinGamePacket(get()));
+            }
+            return true;
+        }
+        return false;
     }
 
     @Override

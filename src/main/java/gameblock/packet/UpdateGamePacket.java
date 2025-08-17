@@ -24,9 +24,9 @@ public abstract class UpdateGamePacket<T extends GameInstance> {
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         if (context.get().getDirection() == NetworkDirection.PLAY_TO_CLIENT) {
-            ClientPacketHandler.handleUpdateGamePacket(this);
+            context.get().enqueueWork(() -> ClientPacketHandler.handleUpdateGamePacket(this));
         } else {
-            ServerPacketHandler.handleUpdateGamePacket(this, context.get().getSender());
+            context.get().enqueueWork(() -> ServerPacketHandler.handleUpdateGamePacket(this, context.get().getSender()));
         }
         context.get().setPacketHandled(true);
     }
