@@ -31,7 +31,7 @@ public class TileStatePacket extends UpdateGamePacket<DefusalGame> {
     }
 
     @Override
-    public void handleGameUpdate(DefusalGame game) {
+    public void gameUpdateReceivedOnClient(DefusalGame game) {
         game.tiles.get(tile.getX(), tile.getY()).setState(state);
     }
 }

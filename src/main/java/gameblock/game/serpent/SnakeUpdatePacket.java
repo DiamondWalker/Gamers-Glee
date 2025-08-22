@@ -5,6 +5,7 @@ import gameblock.packet.UpdateGamePacket;
 import gameblock.util.Direction2D;
 import gameblock.util.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,7 @@ public class SnakeUpdatePacket extends UpdateGamePacket<SerpentGame> {
     }
 
     @Override
-    public void handleGameUpdate(SerpentGame game) {
+    public void gameUpdateReceivedOnServer(SerpentGame game, ServerPlayer sender) {
         game.setSnakeDirection(dir);
         game.tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         game.headX = coordinates.get(0).getX();

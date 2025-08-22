@@ -29,7 +29,7 @@ public class PipeSpawnPacket extends UpdateGamePacket<FlyingChickenGame> {
     }
 
     @Override
-    public void handleGameUpdate(FlyingChickenGame game) {
+    public void gameUpdateReceivedOnClient(FlyingChickenGame game) {
         game.pipes.enqueue(new FlyingChickenGame.Pipe(x, y));
     }
 }

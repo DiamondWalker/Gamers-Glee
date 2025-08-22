@@ -36,7 +36,7 @@ public class TileRevealPacket extends UpdateGamePacket<DefusalGame> {
     }
 
     @Override
-    public void handleGameUpdate(DefusalGame game) {
+    public void gameUpdateReceivedOnClient(DefusalGame game) {
         for (TileInfo tile : tiles) {
             DefusalTile defusalTile = game.tiles.get(tile.coords.getX(), tile.coords.getY());
             defusalTile.adjacentBombs = tile.adjacentBombs;

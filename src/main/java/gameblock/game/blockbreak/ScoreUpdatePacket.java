@@ -30,7 +30,7 @@ public class ScoreUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     }
 
     @Override
-    public void handleGameUpdate(BlockBreakGame game) {
+    public void gameUpdateReceivedOnClient(BlockBreakGame game) {
         game.score = score;
         game.timeSinceLaunch = seconds * 20;
     }

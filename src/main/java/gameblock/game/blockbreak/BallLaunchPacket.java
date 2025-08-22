@@ -2,6 +2,7 @@ package gameblock.game.blockbreak;
 
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class BallLaunchPacket extends UpdateGamePacket<BlockBreakGame> {
     float xPos;
@@ -30,7 +31,7 @@ public class BallLaunchPacket extends UpdateGamePacket<BlockBreakGame> {
     }
 
     @Override
-    public void handleGameUpdate(BlockBreakGame game) {
+    public void gameUpdateReceivedOnServer(BlockBreakGame game, ServerPlayer sender) {
         game.lastPacketTime = game.getGameTime();
         game.ballX = xPos;
         game.launchBall(xMotion);

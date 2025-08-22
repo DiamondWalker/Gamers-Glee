@@ -77,6 +77,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return players[i];
     }
 
+    public final int getPlayerIndex(Player player) {
+        for (int i = 0; i < players.length; i++) if (players[i] == player) return i;
+        throw new IllegalArgumentException("Player not found!");
+    }
+
     public void forEachPlayer(Consumer<Player> action) {
         for (Player player : players) {
             if (player != null) action.accept(player);
