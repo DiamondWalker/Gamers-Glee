@@ -11,6 +11,9 @@ import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.game.os.JoinGamePacket;
 import gameblock.game.os.MultiplayerPromptPacket;
 import gameblock.game.os.SelectGamePacket;
+import gameblock.game.paddles.ClientToServerPaddleUpdatePacket;
+import gameblock.game.paddles.GameStartPacket;
+import gameblock.game.paddles.ServerToClientPaddleUpdatePacket;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
 import gameblock.packet.GameChangePacket;
@@ -70,6 +73,11 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, TileStatePacket.class, TileStatePacket::writeToBuffer, TileStatePacket::new, TileStatePacket::handle);
         INSTANCE.registerMessage(id++, BombCountPacket.class, BombCountPacket::writeToBuffer, BombCountPacket::new, BombCountPacket::handle);
         INSTANCE.registerMessage(id++, TimePacket.class, TimePacket::writeToBuffer, TimePacket::new, TimePacket::handle);
+
+        // paddles
+        INSTANCE.registerMessage(id++, GameStartPacket.class, GameStartPacket::writeToBuffer, GameStartPacket::new, GameStartPacket::handle);
+        INSTANCE.registerMessage(id++, ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::writeToBuffer, ClientToServerPaddleUpdatePacket::new, ClientToServerPaddleUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::writeToBuffer, ServerToClientPaddleUpdatePacket::new, ServerToClientPaddleUpdatePacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

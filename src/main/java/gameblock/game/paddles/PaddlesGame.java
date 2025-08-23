@@ -2,6 +2,7 @@ package gameblock.game.paddles;
 
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
+import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
@@ -13,10 +14,12 @@ import net.minecraft.world.phys.Vec2;
 public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     // COMMON DATA
-    Paddle leftPaddle;
-    Paddle rightPaddle;
-    Vec2 ballPos;
-    Vec2 ballOldPos;
+    boolean gameStarted = false;
+
+    Paddle leftPaddle = new Paddle();
+    Paddle rightPaddle = new Paddle();
+    Vec2 ballPos = new Vec2(0.0f, 0.0f);
+    Vec2 ballOldPos = new Vec2(0.0f, 0.0f);
 
     // SERVER DATA
     final static Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
@@ -55,21 +58,35 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     @Override
     public String getGameCode() {
         if (getPlayerCount() == getMaxPlayers()) return null;
-        return "TESTTEST";
+        return "TESTTEST"; // TODO: implement proper game code prompt
     }
 
     @Override
     protected void tick() {
-
+        if (!gameStarted) {
+            if (!isClientSide() && getPlayerCount() == getMaxPlayers()) {
+                gameStarted = true;
+                forEachPlayer((Player player) -> {
+                    ServerPlayer serverPlayer = (ServerPlayer) player;
+                    GameblockPackets.sendToPlayer(serverPlayer, new GameStartPacket(getDirectionFromPlayer(serverPlayer)));
+                });
+            }
+        } else {
+            if (isClientSide()) {
+                Paddle paddle = getMyPaddle();
+                paddle.oldPos = paddle.pos;
+                paddle.pos = getMouseCoordinates().y;
+            }
+        }
     }
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
-        if (getPlayerCount() == getMaxPlayers()) {
-            drawRectangle(graphics, -80.0f, leftPaddle.pos, 5.0f, 15.0f, new ColorF(1.0f), 0);
-            drawRectangle(graphics, 80.0f, rightPaddle.pos, 5.0f, 15.0f, new ColorF(1.0f), 0);
+        if (gameStarted) {
+            drawRectangle(graphics, -80.0f, leftPaddle.pos, 5.0f, 25.0f, new ColorF(1.0f), 0);
+            drawRectangle(graphics, 80.0f, rightPaddle.pos, 5.0f, 25.0f, new ColorF(1.0f), 0);
 
-            drawRectangle(graphics, ballPos.x, ballPos.y, 1.0f, 1.0f, new ColorF(1.0f), 0);
+            drawRectangle(graphics, ballPos.x, ballPos.y, 3.0f, 3.0f, new ColorF(1.0f), 0);
         } else {
             drawText(graphics, 0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
         }
