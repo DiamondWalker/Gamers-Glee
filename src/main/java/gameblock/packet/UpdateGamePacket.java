@@ -9,7 +9,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public abstract class UpdateGamePacket<T extends GameInstance> {
+public abstract class UpdateGamePacket<T extends GameInstance> implements IPacket {
     public UpdateGamePacket() {
 
     }

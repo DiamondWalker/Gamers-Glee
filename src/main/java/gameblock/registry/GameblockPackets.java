@@ -19,6 +19,7 @@ import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.packet.GameClosePacket;
+import gameblock.packet.IPacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,7 +27,7 @@ import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
 
-import java.lang.reflect.Method;
+import java.util.function.Function;
 
 public class GameblockPackets {
     private static int id = 0;
@@ -40,46 +41,56 @@ public class GameblockPackets {
     );
 
     public static void registerPackets() {
-        INSTANCE.registerMessage(id++, GameChangePacket.class, GameChangePacket::writeToBuffer, GameChangePacket::new, GameChangePacket::handle);
-        INSTANCE.registerMessage(id++, GameStatePacket.class, GameStatePacket::writeToBuffer, GameStatePacket::new, GameStatePacket::handle);
-        INSTANCE.registerMessage(id++, GameClosePacket.class, GameClosePacket::writeToBuffer, GameClosePacket::new, GameClosePacket::handle);
-        INSTANCE.registerMessage(id++, GameRestartPacket.class, GameRestartPacket::writeToBuffer, GameRestartPacket::new, GameRestartPacket::handle);
+        register(GameChangePacket.class, GameChangePacket::new);
+        register(GameStatePacket.class, GameStatePacket::new);
+        register(GameClosePacket.class, GameClosePacket::new);
+        register(GameRestartPacket.class, GameRestartPacket::new);
 
         // OS
-        INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
-        INSTANCE.registerMessage(id++, MultiplayerPromptPacket.class, MultiplayerPromptPacket::writeToBuffer, MultiplayerPromptPacket::new, MultiplayerPromptPacket::handle);
-        INSTANCE.registerMessage(id++, JoinGamePacket.class, JoinGamePacket::writeToBuffer, JoinGamePacket::new, JoinGamePacket::handle);
+        register(SelectGamePacket.class, SelectGamePacket::new);
+        register(MultiplayerPromptPacket.class, MultiplayerPromptPacket::new);
+        register(JoinGamePacket.class, JoinGamePacket::new);
 
         // block break
-        INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
-        INSTANCE.registerMessage(id++, BlockUpdatePacket.class, BlockUpdatePacket::writeToBuffer, BlockUpdatePacket::new, BlockUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, ScoreUpdatePacket.class, ScoreUpdatePacket::writeToBuffer, ScoreUpdatePacket::new, ScoreUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, BlockBreakHighScorePacket.class, BlockBreakHighScorePacket::writeToBuffer, BlockBreakHighScorePacket::new, BlockBreakHighScorePacket::handle);
+        register(BallUpdatePacket.class, BallUpdatePacket::new);
+        register(BallLaunchPacket.class, BallLaunchPacket::new);
+        register(BlockUpdatePacket.class, BlockUpdatePacket::new);
+        register(ScoreUpdatePacket.class, ScoreUpdatePacket::new);
+        register(BlockBreakHighScorePacket.class, BlockBreakHighScorePacket::new);
 
         // serpent
-        INSTANCE.registerMessage(id++, SnakeUpdatePacket.class, SnakeUpdatePacket::writeToBuffer, SnakeUpdatePacket::new, SnakeUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, EatFoodPacket.class, EatFoodPacket::writeToBuffer, EatFoodPacket::new, EatFoodPacket::handle);
+        register(SnakeUpdatePacket.class, SnakeUpdatePacket::new);
+        register(EatFoodPacket.class, EatFoodPacket::new);
 
         // flying chicken
-        INSTANCE.registerMessage(id++, WingFlapPacket.class, WingFlapPacket::writeToBuffer, WingFlapPacket::new, WingFlapPacket::handle);
-        INSTANCE.registerMessage(id++, PipeSpawnPacket.class, PipeSpawnPacket::writeToBuffer, PipeSpawnPacket::new, PipeSpawnPacket::handle);
-        INSTANCE.registerMessage(id++, ScorePacket.class, ScorePacket::writeToBuffer, ScorePacket::new, ScorePacket::handle);
-        INSTANCE.registerMessage(id++, FlyingChickenHighScorePacket.class, FlyingChickenHighScorePacket::writeToBuffer, FlyingChickenHighScorePacket::new, FlyingChickenHighScorePacket::handle);
+        register(WingFlapPacket.class, WingFlapPacket::new);
+        register(PipeSpawnPacket.class, PipeSpawnPacket::new);
+        register(ScorePacket.class, ScorePacket::new);
+        register(FlyingChickenHighScorePacket.class, FlyingChickenHighScorePacket::new);
 
         // defusal
-        INSTANCE.registerMessage(id++, TileClickPacket.class, TileClickPacket::writeToBuffer, TileClickPacket::new, TileClickPacket::handle);
-        INSTANCE.registerMessage(id++, TileRevealPacket.class, TileRevealPacket::writeToBuffer, TileRevealPacket::new, TileRevealPacket::handle);
-        INSTANCE.registerMessage(id++, BombRevealPacket.class, BombRevealPacket::writeToBuffer, BombRevealPacket::new, BombRevealPacket::handle);
-        INSTANCE.registerMessage(id++, TileStatePacket.class, TileStatePacket::writeToBuffer, TileStatePacket::new, TileStatePacket::handle);
-        INSTANCE.registerMessage(id++, BombCountPacket.class, BombCountPacket::writeToBuffer, BombCountPacket::new, BombCountPacket::handle);
-        INSTANCE.registerMessage(id++, TimePacket.class, TimePacket::writeToBuffer, TimePacket::new, TimePacket::handle);
+        register(TileClickPacket.class, TileClickPacket::new);
+        register(TileRevealPacket.class, TileRevealPacket::new);
+        register(BombRevealPacket.class, BombRevealPacket::new);
+        register(TileStatePacket.class, TileStatePacket::new);
+        register(BombCountPacket.class, BombCountPacket::new);
+        register(TimePacket.class, TimePacket::new);
 
         // paddles
-        INSTANCE.registerMessage(id++, GameStartPacket.class, GameStartPacket::writeToBuffer, GameStartPacket::new, GameStartPacket::handle);
-        INSTANCE.registerMessage(id++, ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::writeToBuffer, ClientToServerPaddleUpdatePacket::new, ClientToServerPaddleUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::writeToBuffer, ServerToClientPaddleUpdatePacket::new, ServerToClientPaddleUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, PaddleGameCodeSelectionPacket.class, PaddleGameCodeSelectionPacket::writeToBuffer, PaddleGameCodeSelectionPacket::new, PaddleGameCodeSelectionPacket::handle);
+        register(GameStartPacket.class, GameStartPacket::new);
+        register(ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::new);
+        register(ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::new);
+        register(PaddleGameCodeSelectionPacket.class, PaddleGameCodeSelectionPacket::new);
+    }
+
+    private static <MSG extends IPacket> void register(Class<MSG> clazz, Function<FriendlyByteBuf, MSG> constructor) {
+        INSTANCE.registerMessage(
+                id++,
+                clazz,
+                MSG::writeToBuffer,
+                constructor,
+                MSG::handle
+        );
     }
 
     public static <MSG> void sendToServer(MSG packet) {
