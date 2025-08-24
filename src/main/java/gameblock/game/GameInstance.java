@@ -88,13 +88,19 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
     }
 
+    public void forEachPlayerExcluding(Consumer<Player> action, Player excluded) {
+        for (Player player : players) {
+            if (player != null && player != excluded) action.accept(player);
+        }
+    }
+
     public final boolean addPlayer(ServerPlayer player) {
         GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
         if (cap != null) {
             for (int i = 1; i < players.length; i++) {
                 if (players[i] == null) {
                     players[i] = player;
-                    cap.setGame(gameType, player);
+                    cap.setGameInstance(this, player);
                     onPlayerJoined(player);
                     return true;
                 }

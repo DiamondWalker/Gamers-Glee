@@ -13,6 +13,7 @@ import gameblock.game.os.MultiplayerPromptPacket;
 import gameblock.game.os.SelectGamePacket;
 import gameblock.game.paddles.ClientToServerPaddleUpdatePacket;
 import gameblock.game.paddles.GameStartPacket;
+import gameblock.game.paddles.PaddleGameCodeSelectionPacket;
 import gameblock.game.paddles.ServerToClientPaddleUpdatePacket;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
@@ -78,6 +79,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, GameStartPacket.class, GameStartPacket::writeToBuffer, GameStartPacket::new, GameStartPacket::handle);
         INSTANCE.registerMessage(id++, ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::writeToBuffer, ClientToServerPaddleUpdatePacket::new, ClientToServerPaddleUpdatePacket::handle);
         INSTANCE.registerMessage(id++, ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::writeToBuffer, ServerToClientPaddleUpdatePacket::new, ServerToClientPaddleUpdatePacket::handle);
+        INSTANCE.registerMessage(id++, PaddleGameCodeSelectionPacket.class, PaddleGameCodeSelectionPacket::writeToBuffer, PaddleGameCodeSelectionPacket::new, PaddleGameCodeSelectionPacket::handle);
     }
 
     public static <MSG> void sendToServer(MSG packet) {

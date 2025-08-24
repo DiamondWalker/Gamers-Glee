@@ -15,11 +15,14 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     // COMMON DATA
     boolean gameStarted = false;
+    String gameCode = null;
 
     Paddle leftPaddle = new Paddle();
     Paddle rightPaddle = new Paddle();
+
     Vec2 ballPos = new Vec2(0.0f, 0.0f);
     Vec2 ballOldPos = new Vec2(0.0f, 0.0f);
+    Vec2 ballMotion = new Vec2(0.0f, 0.0f);
 
     // SERVER DATA
     final static Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
@@ -58,13 +61,15 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     @Override
     public String getGameCode() {
         if (getPlayerCount() == getMaxPlayers()) return null;
-        return "TESTTEST"; // TODO: implement proper game code prompt
+        return gameCode;
     }
 
     @Override
     protected void tick() {
         if (!gameStarted) {
-            if (!isClientSide() && getPlayerCount() == getMaxPlayers()) {
+            if (isClientSide()) {
+                if (gameCode == null && prompt == null) prompt = new PaddleGameCodePrompt(this);
+            } else if (getPlayerCount() == getMaxPlayers()) {
                 gameStarted = true;
                 forEachPlayer((Player player) -> {
                     ServerPlayer serverPlayer = (ServerPlayer) player;
@@ -73,9 +78,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             }
         } else {
             if (isClientSide()) {
-                Paddle paddle = getMyPaddle();
+                if (prompt != null) prompt.close();
+
+                Paddle paddle = getMyPaddle(); // TODO: figure out how to update oldPos for the other paddle
                 paddle.oldPos = paddle.pos;
                 paddle.pos = getMouseCoordinates().y;
+                if (paddle.pos != paddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(paddle.pos));
             }
         }
     }
@@ -83,11 +91,11 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         if (gameStarted) {
-            drawRectangle(graphics, -80.0f, leftPaddle.pos, 5.0f, 25.0f, new ColorF(1.0f), 0);
-            drawRectangle(graphics, 80.0f, rightPaddle.pos, 5.0f, 25.0f, new ColorF(1.0f), 0);
+            drawRectangle(graphics, -80.0f, leftPaddle.oldPos + partialTicks * (leftPaddle.pos - leftPaddle.oldPos), 5.0f, 25.0f, new ColorF(1.0f), 0);
+            drawRectangle(graphics, 80.0f, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), 5.0f, 25.0f, new ColorF(1.0f), 0);
 
-            drawRectangle(graphics, ballPos.x, ballPos.y, 3.0f, 3.0f, new ColorF(1.0f), 0);
-        } else {
+            drawRectangle(graphics, ballOldPos.x + partialTicks * (ballPos.x - ballOldPos.x), ballOldPos.y + partialTicks * (ballPos.y - ballOldPos.y), 3.0f, 3.0f, new ColorF(1.0f), 0);
+        } else if (prompt == null) {
             drawText(graphics, 0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
         }
     }

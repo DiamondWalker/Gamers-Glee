@@ -65,4 +65,15 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
     }
 
     public abstract void render(GuiGraphics graphics, float partialTicks);
+
+    public abstract static class GameCodePrompt<T extends GameInstance<?>> extends GamePrompt<T> {
+        public GameCodePrompt(T game) {
+            super(game);
+        }
+
+        @Override
+        public void handleCharTyped(char character) {
+            if (get().length() < 8 && Character.isLetterOrDigit(character)) super.handleCharTyped(Character.toUpperCase(character));
+        }
+    }
 }

@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 
 @AutoRegisterCapability
@@ -17,6 +18,12 @@ public class GameCapability {
 
     public boolean isPlaying() {
         return game != null;
+    }
+
+    public void setGameInstance(@Nonnull GameInstance<?> instance, ServerPlayer player) {
+        GameblockPackets.sendToPlayer(player, new GameChangePacket(instance.gameType));
+        if (game != null) game.save();
+        this.game = instance;
     }
 
     public void setGame(GameblockGames.Game<?> gameType, Player player) {
