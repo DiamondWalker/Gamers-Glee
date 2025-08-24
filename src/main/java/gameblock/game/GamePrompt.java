@@ -23,7 +23,11 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
 
     public boolean handleKeyPress(int key) {
         if (key == InputConstants.KEY_ESCAPE) {
-            close();
+            if (shouldCloseOnEsc()) {
+                close();
+            } else {
+                return false; // the game screen should close
+            }
         } else if (key == InputConstants.KEY_LEFT) {
             location = Math.max(location - 1, 0);
         } else if (key == InputConstants.KEY_RIGHT) {
@@ -48,12 +52,21 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
         location++;
     }
 
+    public void clear() {
+        builder.delete(0, builder.length());
+        location = 0;
+    }
+
     public boolean click(Vec2 clickCoordinates) {
         return true;
     }
 
     public void close() {
         shouldClose = true;
+    }
+
+    public boolean shouldCloseOnEsc() {
+        return true;
     }
 
     public boolean shouldClose() {

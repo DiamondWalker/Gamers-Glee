@@ -4,6 +4,7 @@ import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
 import gameblock.packet.UpdateGamePacket;
+import gameblock.util.MultiplayerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -31,14 +32,9 @@ public class JoinGamePacket extends UpdateGamePacket<GameblockOS> {
 
     @Override
     public void gameUpdateReceivedOnServer(GameblockOS game, ServerPlayer sender) {
-        for (ServerPlayer player : sender.getServer().getPlayerList().getPlayers()) {
-            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null && cap.isPlaying()) {
-                GameInstance<?> joinGame = cap.getGame();
-                if (joinGame.getGameCode().matches(gameCode)) {
-                    if (joinGame.addPlayer(sender)) return;
-                }
-            }
+        GameInstance<?> joinGame = MultiplayerHelper.findGameWithGameCode(sender.getServer(), gameCode);
+        if (joinGame != null) {
+            if (joinGame.addPlayer(sender)) return;
         }
     }
 }

@@ -1,8 +1,12 @@
 package gameblock.game.paddles;
 
 import gameblock.packet.UpdateGamePacket;
+import gameblock.registry.GameblockPackets;
+import gameblock.util.CompletionStatus;
+import gameblock.util.MultiplayerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 
 public class PaddleGameCodeSelectionPacket extends UpdateGamePacket<PaddlesGame> {
     String gameCode;
@@ -27,6 +31,14 @@ public class PaddleGameCodeSelectionPacket extends UpdateGamePacket<PaddlesGame>
 
     @Override
     public void gameUpdateReceivedOnServer(PaddlesGame game, ServerPlayer sender) {
-        game.gameCode = gameCode;
+        CompletionStatus result;
+        if (MultiplayerHelper.findGameWithGameCode(sender.getServer(), gameCode) == null) {
+            game.gameCode = gameCode;
+            result = CompletionStatus.SUCCESS;
+        } else {
+            result = CompletionStatus.FAIL;
+        }
+
+        GameblockPackets.sendToPlayer(sender, new PaddleGameCreationResultPacket(result));
     }
 }

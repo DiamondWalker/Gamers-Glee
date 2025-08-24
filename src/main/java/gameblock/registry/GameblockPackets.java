@@ -11,10 +11,7 @@ import gameblock.game.flyingchicken.WingFlapPacket;
 import gameblock.game.os.JoinGamePacket;
 import gameblock.game.os.MultiplayerPromptPacket;
 import gameblock.game.os.SelectGamePacket;
-import gameblock.game.paddles.ClientToServerPaddleUpdatePacket;
-import gameblock.game.paddles.GameStartPacket;
-import gameblock.game.paddles.PaddleGameCodeSelectionPacket;
-import gameblock.game.paddles.ServerToClientPaddleUpdatePacket;
+import gameblock.game.paddles.*;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
 import gameblock.packet.GameChangePacket;
@@ -81,6 +78,7 @@ public class GameblockPackets {
         register(ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::new);
         register(ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::new);
         register(PaddleGameCodeSelectionPacket.class, PaddleGameCodeSelectionPacket::new);
+        register(PaddleGameCreationResultPacket.class, PaddleGameCreationResultPacket::new);
     }
 
     private static <MSG extends IPacket> void register(Class<MSG> clazz, Function<FriendlyByteBuf, MSG> constructor) {
