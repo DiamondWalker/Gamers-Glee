@@ -17,12 +17,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     boolean gameStarted = false;
     String gameCode = null;
 
-    Paddle leftPaddle = new Paddle();
-    Paddle rightPaddle = new Paddle();
+    Paddle leftPaddle;
+    Paddle rightPaddle;
 
-    Vec2 ballPos = new Vec2(0.0f, 0.0f);
-    Vec2 ballOldPos = new Vec2(0.0f, 0.0f);
-    Vec2 ballMotion = new Vec2(0.0f, 0.0f);
+    Vec2 ballPos;
+    Vec2 ballOldPos;
+    Vec2 ballMotion;
 
     // SERVER DATA
     final static Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
@@ -32,6 +32,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     public PaddlesGame(Player player) {
         super(player, GameblockGames.PADDLES_GAME);
+        initializeGame();
     }
 
     public Direction1D getDirectionFromPlayer(ServerPlayer player) {
@@ -64,18 +65,42 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         return gameCode;
     }
 
+    protected void initializeGame() {
+        leftPaddle = new Paddle();
+        rightPaddle = new Paddle();
+
+        ballPos = Vec2.ZERO;
+        ballOldPos = Vec2.ZERO;
+        ballMotion = Vec2.ZERO;
+    }
+
+    @Override
+    protected void onPlayerJoined(int index, ServerPlayer serverPlayer) {
+        if (!gameStarted && getPlayerCount() == getMaxPlayers()) {
+            gameStarted = true;
+            initializeGame();
+            forEachPlayer((Player p) -> {
+                ServerPlayer sp = (ServerPlayer) p;
+                GameblockPackets.sendToPlayer(sp, new PaddleGameStatePacket(getDirectionFromPlayer(sp)));
+            });
+        }
+    }
+
+    @Override
+    protected void onPlayerDisconnected(int index, ServerPlayer player) {
+        if (gameStarted) {
+            gameStarted = false;
+            forEachPlayer((Player p) -> {
+                ServerPlayer sp = (ServerPlayer) p;
+                GameblockPackets.sendToPlayer(sp, new PaddleGameStatePacket(Direction1D.CENTER)); // value of center means unassigned
+            });
+        }
+    }
+
     @Override
     protected void tick() {
         if (!gameStarted) {
-            if (isClientSide()) {
-                if (gameCode == null && prompt == null) prompt = new PaddleGameCodePrompt(this);
-            } else if (getPlayerCount() == getMaxPlayers()) {
-                gameStarted = true;
-                forEachPlayer((Player player) -> {
-                    ServerPlayer serverPlayer = (ServerPlayer) player;
-                    GameblockPackets.sendToPlayer(serverPlayer, new GameStartPacket(getDirectionFromPlayer(serverPlayer)));
-                });
-            }
+            if (isClientSide() && gameCode == null && prompt == null) prompt = new PaddleGameCodePrompt(this);
         } else {
             if (isClientSide()) {
                 if (prompt != null) prompt.close();

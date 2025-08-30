@@ -74,7 +74,7 @@ public class GameblockPackets {
         register(TimePacket.class, TimePacket::new);
 
         // paddles
-        register(GameStartPacket.class, GameStartPacket::new);
+        register(PaddleGameStatePacket.class, PaddleGameStatePacket::new);
         register(ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::new);
         register(ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::new);
         register(PaddleGameCodeSelectionPacket.class, PaddleGameCodeSelectionPacket::new);

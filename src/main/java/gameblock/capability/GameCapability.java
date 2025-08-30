@@ -22,7 +22,7 @@ public class GameCapability {
 
     public void setGameInstance(@Nonnull GameInstance<?> instance, ServerPlayer player) {
         GameblockPackets.sendToPlayer(player, new GameChangePacket(instance.gameType));
-        if (game != null) game.save();
+        if (game != null) game.removePlayer(player);
         this.game = instance;
     }
 
@@ -33,7 +33,7 @@ public class GameCapability {
              */
             if (player instanceof ServerPlayer serverPlayer) {
                 GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(gameType));
-                if (game != null) game.save();
+                if (game != null) game.removePlayer(serverPlayer);
             }
             if (gameType != null) {
                 try {

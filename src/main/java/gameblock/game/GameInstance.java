@@ -101,7 +101,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                 if (players[i] == null) {
                     players[i] = player;
                     cap.setGameInstance(this, player);
-                    onPlayerJoined(player);
+                    onPlayerJoined(i, player);
                     return true;
                 }
             }
@@ -109,7 +109,34 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return false;
     }
 
-    protected void onPlayerJoined(ServerPlayer player) {
+    public final void removePlayer(ServerPlayer player) {
+        if (player == getHostPlayer()) {
+            for (int i = 1; i < players.length; i++) {
+                if (players[i] != null) removePlayer((ServerPlayer) players[i]);
+            }
+
+            save();
+            return;
+        }
+
+        for (int i = 1; i < players.length; i++) {
+            if (players[i] == player) {
+                players[i] = null;
+                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (cap != null && cap.isPlaying()) {
+                    cap.setGame(null, player);
+                }
+                onPlayerDisconnected(i, player);
+                return;
+            }
+        }
+    }
+
+    protected void onPlayerJoined(int index, ServerPlayer player) {
+
+    }
+
+    protected void onPlayerDisconnected(int index, ServerPlayer player) {
 
     }
 

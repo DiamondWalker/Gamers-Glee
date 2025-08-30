@@ -4,14 +4,14 @@ import gameblock.packet.UpdateGamePacket;
 import gameblock.util.Direction1D;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class GameStartPacket extends UpdateGamePacket<PaddlesGame> {
+public class PaddleGameStatePacket extends UpdateGamePacket<PaddlesGame> {
     Direction1D thisIsYourPaddle;
 
-    public GameStartPacket(Direction1D playerPaddle) {
+    public PaddleGameStatePacket(Direction1D playerPaddle) { // a value of center means unassigned
         thisIsYourPaddle = playerPaddle;
     }
 
-    public GameStartPacket(FriendlyByteBuf buffer) {
+    public PaddleGameStatePacket(FriendlyByteBuf buffer) {
         super(buffer);
     }
 
@@ -27,7 +27,13 @@ public class GameStartPacket extends UpdateGamePacket<PaddlesGame> {
 
     @Override
     public void gameUpdateReceivedOnClient(PaddlesGame game) {
-        game.gameStarted = true;
-        game.whichPaddleAmI = thisIsYourPaddle;
+        if (thisIsYourPaddle != Direction1D.CENTER) {
+            game.gameStarted = true;
+            game.whichPaddleAmI = thisIsYourPaddle;
+            game.initializeGame();
+        } else {
+            game.gameStarted = false;
+            game.whichPaddleAmI = null;
+        }
     }
 }
