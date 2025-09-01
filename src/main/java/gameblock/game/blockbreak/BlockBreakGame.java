@@ -178,7 +178,8 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
                     // platform collision (this is handled on the client)
                     if (isClientSide() && ballMoveY < 0.0f) {
-                        if (ballX >= platformPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
+                        float platformCurrentPos = oldPlatformPos + ((float) (ticks + 1) / UPDATES_PER_TICK) * (platformPos - oldPlatformPos);
+                        if (ballX >= platformCurrentPos - (PLATFORM_WIDTH + BALL_WIDTH) / 2 && ballX <= platformCurrentPos + (PLATFORM_WIDTH + BALL_WIDTH) / 2) {
                             if (ballY <= PLATFORM_Y + (PLATFORM_HEIGHT + BALL_WIDTH) / 2 && ballY >= PLATFORM_Y - (PLATFORM_HEIGHT + BALL_WIDTH) / 2) {
                                 //ballMoveX += PLATFORM_SPEED / UPDATES_PER_TICK / 4 * moveDir.getComponent();
                                 ballMoveX += (platformPos - oldPlatformPos) / UPDATES_PER_TICK / 2;
