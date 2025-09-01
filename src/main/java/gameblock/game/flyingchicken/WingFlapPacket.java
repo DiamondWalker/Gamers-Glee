@@ -2,6 +2,7 @@ package gameblock.game.flyingchicken;
 
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class WingFlapPacket extends UpdateGamePacket<FlyingChickenGame> {
     long time;
@@ -29,7 +30,7 @@ public class WingFlapPacket extends UpdateGamePacket<FlyingChickenGame> {
     }
 
     @Override
-    public void handleGameUpdate(FlyingChickenGame game) {
+    public void gameUpdateReceivedOnServer(FlyingChickenGame game, ServerPlayer sender) {
         game.chickenY = y;
         game.time = time;
         game.flap();

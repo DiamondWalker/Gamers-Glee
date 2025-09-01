@@ -4,6 +4,7 @@ import gameblock.packet.UpdateGamePacket;
 import gameblock.util.Direction1D;
 import gameblock.util.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class TileClickPacket extends UpdateGamePacket<DefusalGame> {
     private Direction1D mouseClick;
@@ -32,7 +33,7 @@ public class TileClickPacket extends UpdateGamePacket<DefusalGame> {
     }
 
     @Override
-    public void handleGameUpdate(DefusalGame game) {
+    public void gameUpdateReceivedOnServer(DefusalGame game, ServerPlayer sender) {
         if (mouseClick == Direction1D.LEFT) {
             game.reveal(tileClicked);
         } else if (mouseClick == Direction1D.RIGHT) {

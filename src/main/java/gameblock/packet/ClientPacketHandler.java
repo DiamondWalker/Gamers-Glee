@@ -32,7 +32,7 @@ public class ClientPacketHandler {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
                 try {
-                    packet.handleGameUpdate((T) cap.getGame());
+                    packet.gameUpdateReceivedOnClient((T) cap.getGame());
                 } catch (ClassCastException e) {
                     GameblockMod.LOGGER.warn("Could not handle UpdateGamePacket as game was not found.");
                 }

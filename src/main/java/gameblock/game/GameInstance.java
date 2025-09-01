@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.checkerframework.checker.units.qual.A;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
+    private final ArrayList<ServerPlayer> spectators = new ArrayList<>(); // TODO: code spectator system
+
     private final boolean clientSide;
 
     public static final int MAX_X = 100;
@@ -77,9 +80,20 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return players[i];
     }
 
+    public final int getPlayerIndex(Player player) {
+        for (int i = 0; i < players.length; i++) if (players[i] == player) return i;
+        throw new IllegalArgumentException("Player not found!");
+    }
+
     public void forEachPlayer(Consumer<Player> action) {
         for (Player player : players) {
             if (player != null) action.accept(player);
+        }
+    }
+
+    public void forEachPlayerExcluding(Consumer<Player> action, Player excluded) {
+        for (Player player : players) {
+            if (player != null && player != excluded) action.accept(player);
         }
     }
 
@@ -89,8 +103,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             for (int i = 1; i < players.length; i++) {
                 if (players[i] == null) {
                     players[i] = player;
-                    cap.setGame(gameType, player);
-                    onPlayerJoined(player);
+                    cap.setGameInstance(this, player);
+                    onPlayerJoined(i, player);
                     return true;
                 }
             }
@@ -98,7 +112,34 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return false;
     }
 
-    protected void onPlayerJoined(ServerPlayer player) {
+    public final void removePlayer(ServerPlayer player) {
+        if (player == getHostPlayer()) {
+            for (int i = 1; i < players.length; i++) {
+                if (players[i] != null) removePlayer((ServerPlayer) players[i]);
+            }
+
+            save();
+            return;
+        }
+
+        for (int i = 1; i < players.length; i++) {
+            if (players[i] == player) {
+                players[i] = null;
+                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                if (cap != null && cap.isPlaying()) {
+                    cap.setGame(null, player);
+                }
+                onPlayerDisconnected(i, player);
+                return;
+            }
+        }
+    }
+
+    protected void onPlayerJoined(int index, ServerPlayer player) {
+
+    }
+
+    protected void onPlayerDisconnected(int index, ServerPlayer player) {
 
     }
 

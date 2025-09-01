@@ -25,7 +25,7 @@ public class BombCountPacket extends UpdateGamePacket<DefusalGame> {
     }
 
     @Override
-    public void handleGameUpdate(DefusalGame game) {
+    public void gameUpdateReceivedOnClient(DefusalGame game) {
         game.bombCount = bombCount;
     }
 }

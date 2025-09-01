@@ -43,7 +43,7 @@ public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {
     }
 
     @Override
-    public void handleGameUpdate(SerpentGame game) {
+    public void gameUpdateReceivedOnClient(SerpentGame game) {
         game.foodX = newFoodX;
         game.foodY = newFoodY;
         game.targetSnakeLength = newSnakeLength;

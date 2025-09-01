@@ -3,6 +3,7 @@ package gameblock.game.os;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockGames;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class SelectGamePacket extends UpdateGamePacket<GameblockOS> {
     private int index;
@@ -26,7 +27,7 @@ public class SelectGamePacket extends UpdateGamePacket<GameblockOS> {
     }
 
     @Override
-    public void handleGameUpdate(GameblockOS game) {
+    public void gameUpdateReceivedOnServer(GameblockOS game, ServerPlayer sender) {
         for (OSIcon icon : game.gameIcons) {
             if (icon.index == index) {
                 icon.clickAction.run();

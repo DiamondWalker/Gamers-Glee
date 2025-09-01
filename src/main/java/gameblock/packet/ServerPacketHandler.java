@@ -26,7 +26,7 @@ public class ServerPacketHandler {
             GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
                 try {
-                    packet.handleGameUpdate((T) cap.getGame());
+                    packet.gameUpdateReceivedOnServer((T) cap.getGame(), sender);
                 } catch (ClassCastException e) {
                     // do nothing
                 }

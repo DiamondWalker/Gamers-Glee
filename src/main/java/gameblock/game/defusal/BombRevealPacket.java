@@ -33,7 +33,7 @@ public class BombRevealPacket extends UpdateGamePacket<DefusalGame> {
     }
 
     @Override
-    public void handleGameUpdate(DefusalGame game) {
+    public void gameUpdateReceivedOnClient(DefusalGame game) {
         for (Vec2i bomb : bombs) {
             game.tiles.get(bomb.getX(), bomb.getY()).setBomb();
         }

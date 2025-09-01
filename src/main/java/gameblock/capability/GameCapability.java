@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.InvocationTargetException;
 
 @AutoRegisterCapability
@@ -19,6 +20,12 @@ public class GameCapability {
         return game != null;
     }
 
+    public void setGameInstance(@Nonnull GameInstance<?> instance, ServerPlayer player) {
+        GameblockPackets.sendToPlayer(player, new GameChangePacket(instance.gameType));
+        if (game != null) game.removePlayer(player);
+        this.game = instance;
+    }
+
     public void setGame(GameblockGames.Game<?> gameType, Player player) {
         /*
             Sometimes game constructors will send new packets. If this happens before the game change packet is sent it'll cause issues
@@ -26,7 +33,7 @@ public class GameCapability {
              */
             if (player instanceof ServerPlayer serverPlayer) {
                 GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(gameType));
-                if (game != null) game.save();
+                if (game != null) game.removePlayer(serverPlayer);
             }
             if (gameType != null) {
                 try {

@@ -26,7 +26,7 @@ public class TimePacket extends UpdateGamePacket<DefusalGame> {
     }
 
     @Override
-    public void handleGameUpdate(DefusalGame game) {
+    public void gameUpdateReceivedOnClient(DefusalGame game) {
         game.timeLeft = seconds * 20;
         game.playSound(GameblockSounds.DEFUSAL_TIMER.get());
     }

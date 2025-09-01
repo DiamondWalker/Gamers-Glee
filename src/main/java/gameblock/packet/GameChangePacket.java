@@ -7,7 +7,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class GameChangePacket {
+public class GameChangePacket implements IPacket {
     public GameblockGames.Game<?> game;
 
     public GameChangePacket(GameblockGames.Game<?> game) {

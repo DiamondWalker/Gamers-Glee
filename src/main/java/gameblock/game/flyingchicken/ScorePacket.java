@@ -26,7 +26,7 @@ public class ScorePacket extends UpdateGamePacket<FlyingChickenGame> {
     }
 
     @Override
-    public void handleGameUpdate(FlyingChickenGame game) {
+    public void gameUpdateReceivedOnClient(FlyingChickenGame game) {
         game.score = score;
         game.lastScoreTime = game.getGameTime();
         game.playSound(GameblockSounds.FLYING_CHICKEN_SCORE.get());

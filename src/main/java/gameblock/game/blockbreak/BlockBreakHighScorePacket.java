@@ -25,7 +25,7 @@ public class BlockBreakHighScorePacket extends UpdateGamePacket<BlockBreakGame> 
     }
 
     @Override
-    public void handleGameUpdate(BlockBreakGame game) {
+    public void gameUpdateReceivedOnClient(BlockBreakGame game) {
         game.highScore = highScore;
     }
 }

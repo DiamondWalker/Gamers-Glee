@@ -19,7 +19,7 @@ public class MultiplayerPromptPacket extends UpdateGamePacket<GameblockOS> {
     public void readFromBuffer(FriendlyByteBuf buffer) {}
 
     @Override
-    public void handleGameUpdate(GameblockOS game) {
+    public void gameUpdateReceivedOnClient(GameblockOS game) {
         game.prompt = new MultiplayerGamePrompt(game);
     }
 }

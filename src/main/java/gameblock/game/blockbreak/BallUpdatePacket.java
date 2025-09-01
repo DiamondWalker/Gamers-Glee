@@ -3,6 +3,7 @@ package gameblock.game.blockbreak;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockSounds;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 
 public class BallUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     float xPos, yPos, xMotion, yMotion;
@@ -38,12 +39,20 @@ public class BallUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     }
 
     @Override
-    public void handleGameUpdate(BlockBreakGame game) {
-        if (!game.isClientSide()) {
-            game.lastPacketTime = game.getGameTime();
-        } else {
-            if (game.getGameTime() - game.clientToPacketBallUpdateTime < 4) return;
-        }
+    public void gameUpdateReceivedOnClient(BlockBreakGame game) {
+        if (game.getGameTime() - game.clientToPacketBallUpdateTime < 4) return;
+
+        game.ballX = xPos;
+        game.ballY = yPos;
+        game.ballMoveX = xMotion;
+        game.ballMoveY = yMotion;
+        if (playSound && game.isClientSide()) game.playSound(GameblockSounds.BALL_BOUNCE.get());
+    }
+
+    @Override
+    public void gameUpdateReceivedOnServer(BlockBreakGame game, ServerPlayer sender) {
+        game.lastPacketTime = game.getGameTime();
+
         game.ballX = xPos;
         game.ballY = yPos;
         game.ballMoveX = xMotion;

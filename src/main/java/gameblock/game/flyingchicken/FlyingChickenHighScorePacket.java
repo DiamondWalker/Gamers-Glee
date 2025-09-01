@@ -25,7 +25,7 @@ public class FlyingChickenHighScorePacket extends UpdateGamePacket<FlyingChicken
     }
 
     @Override
-    public void handleGameUpdate(FlyingChickenGame game) {
+    public void gameUpdateReceivedOnClient(FlyingChickenGame game) {
         game.highScore = highScore;
     }
 }
