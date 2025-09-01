@@ -36,11 +36,7 @@ public class GameCapability {
                 if (game != null) game.removePlayer(serverPlayer);
             }
             if (gameType != null) {
-                try {
-                    game = gameType.createInstance(player);
-                } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+                game = gameType.createInstance(player);
             } else {
                 this.game = null;
             }
