@@ -161,6 +161,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
             drawText(graphics, 0.0f, 55.0f, 1.5f, col, Component.literal(scoreString));
         } else {
             drawRectangle(graphics, 0.0f, 30.0f, 50.0f, 10.0f, new ColorF(1.0f, 0.5f, 0.0f), 0);
+            drawHollowRectangle(graphics, 0.0f, 30.0f, 50.0f, 10.0f, 1.0f, new ColorF(1.0f), 0);
             drawText(graphics, 0.0f, 30.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.game_over"));
             drawText(graphics, -40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.score", score));
             drawText(graphics, 40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.best", highScore));

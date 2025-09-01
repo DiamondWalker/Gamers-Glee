@@ -114,11 +114,6 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     protected void reveal(Vec2i tile) {
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
         if (defusalTile != null && defusalTile.getState() == DefusalTile.State.HIDDEN && defusalTile.isBomb()) {
-            ArrayList<Vec2i> bombs = new ArrayList<>();
-            tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
-                if (otherDefusalTile.isBomb()) bombs.add(coords);
-            });
-            forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BombRevealPacket(bombs.toArray(new Vec2i[]{}))));
             setGameState(GameState.LOSS);
             return;
         }
@@ -185,6 +180,11 @@ public class DefusalGame extends GameInstance<DefusalGame> {
 
     @Override
     protected void onGameLoss() {
+        ArrayList<Vec2i> bombs = new ArrayList<>();
+        tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
+            if (otherDefusalTile.isBomb()) bombs.add(coords);
+        });
+        forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BombRevealPacket(bombs.toArray(new Vec2i[]{}))));
         super.onGameLoss();
         playSound(SoundEvents.GENERIC_EXPLODE);
     }
