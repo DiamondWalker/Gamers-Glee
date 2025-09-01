@@ -28,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.checkerframework.checker.units.qual.A;
 import org.joml.Matrix4f;
 
 import java.util.ArrayList;
@@ -41,6 +42,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
+    private final ArrayList<ServerPlayer> spectators = new ArrayList<>(); // TODO: code spectator system
+
     private final boolean clientSide;
 
     public static final int MAX_X = 100;
