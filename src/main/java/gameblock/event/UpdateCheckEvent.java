@@ -35,7 +35,7 @@ public class UpdateCheckEvent {
             if (version.status() == VersionChecker.Status.OUTDATED) {
                 if (firstCheck || GameblockConfig.REPEAT_UPDATE_NOTIFICATION.get()) {
                     Random rand = new Random();
-                    if (ticks >= CHECK_INTERVAL * 2 && rand.nextInt(10) == 0) {
+                    if (!firstCheck && rand.nextInt(5) == 0) {
                         updateMsg = Component.translatable("chat.gameblock.update.out_of_date_special_" + rand.nextInt(8), modName)
                                 .withStyle(ChatFormatting.DARK_RED);
                     } else {
