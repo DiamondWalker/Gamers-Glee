@@ -8,6 +8,7 @@ import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
@@ -61,7 +62,6 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     @Override
     public String getGameCode() {
-        if (getPlayerCount() == getMaxPlayers()) return null;
         return gameCode;
     }
 
@@ -76,7 +76,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     @Override
     protected void onPlayerJoined(int index, ServerPlayer serverPlayer) {
-        if (!gameStarted && getPlayerCount() == getMaxPlayers()) {
+        if (!gameStarted && index != SPECTATOR_INDEX && getPlayerCount() == getMaxPlayers()) {
             gameStarted = true;
             initializeGame();
             forEachPlayer((Player p) -> {
@@ -87,8 +87,17 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     }
 
     @Override
+    public void setSpectatorMode(boolean mode) {
+        super.setSpectatorMode(mode);
+        if (mode) {
+            gameStarted = true;
+            whichPaddleAmI = null;
+        }
+    }
+
+    @Override
     protected void onPlayerDisconnected(int index, ServerPlayer player) {
-        if (gameStarted) {
+        if (gameStarted && index != SPECTATOR_INDEX) {
             gameStarted = false;
             forEachPlayer((Player p) -> {
                 ServerPlayer sp = (ServerPlayer) p;
@@ -105,10 +114,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             if (isClientSide()) {
                 if (prompt != null) prompt.close();
 
-                Paddle paddle = getMyPaddle(); // TODO: figure out how to update oldPos for the other paddle
-                paddle.oldPos = paddle.pos;
-                paddle.pos = getMouseCoordinates().y;
-                if (paddle.pos != paddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(paddle.pos));
+                if (!isSpectator()) {
+                    Paddle paddle = getMyPaddle(); // TODO: figure out how to update oldPos for the other paddle
+                    paddle.oldPos = paddle.pos;
+                    paddle.pos = getMouseCoordinates().y;
+                    if (paddle.pos != paddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(paddle.pos));
+                }
             }
         }
     }
@@ -120,6 +131,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             drawRectangle(graphics, 80.0f, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), 5.0f, 25.0f, new ColorF(1.0f), 0);
 
             drawRectangle(graphics, ballOldPos.x + partialTicks * (ballPos.x - ballOldPos.x), ballOldPos.y + partialTicks * (ballPos.y - ballOldPos.y), 3.0f, 3.0f, new ColorF(1.0f), 0);
+
+            if (isSpectator()) {
+                float glow = Mth.cos((partialTicks + getGameTime()) / 8);
+                glow = 1.0f - (glow / 2 + 0.5f);
+                drawText(graphics, 50.0f, 50.0f, 1.5f, new ColorF(1.0f).withAlpha(glow), Component.literal("SPECTATING..."));
+            }
         } else if (prompt == null) {
             drawText(graphics, 0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
             drawText(graphics, 0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));

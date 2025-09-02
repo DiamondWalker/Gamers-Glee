@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
+import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
@@ -14,7 +15,6 @@ import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,14 +26,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import org.checkerframework.checker.units.qual.A;
 import org.joml.Matrix4f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class GameInstance<T extends GameInstance<?>> {
@@ -42,9 +37,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
-    private final ArrayList<ServerPlayer> spectators = new ArrayList<>(); // TODO: code spectator system
+    private final Queue<ServerPlayer> spectators = new LinkedList<>(); // TODO: code spectator system
+    public static final int SPECTATOR_INDEX = -1;
 
     private final boolean clientSide;
+    private boolean spectator = false;
 
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
@@ -85,19 +82,27 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         throw new IllegalArgumentException("Player not found!");
     }
 
+    public void sendToAllPlayers(UpdateGamePacket<?> packet, ServerPlayer exception) {
+        if (clientSide) throw new IllegalStateException("Cannot send a packet to the clients if already on a client!");
+        for (Player player : players) {
+            if (player != null && player != exception) GameblockPackets.sendToPlayer((ServerPlayer) player, packet);
+        }
+        for (ServerPlayer player : spectators) {
+            GameblockPackets.sendToPlayer(player, packet);
+        }
+    }
+
     public void forEachPlayer(Consumer<Player> action) {
         for (Player player : players) {
             if (player != null) action.accept(player);
         }
     }
 
-    public void forEachPlayerExcluding(Consumer<Player> action, Player excluded) {
-        for (Player player : players) {
-            if (player != null && player != excluded) action.accept(player);
-        }
+    public final boolean addPlayer(ServerPlayer player) {
+        return addPlayer(player, true);
     }
 
-    public final boolean addPlayer(ServerPlayer player) {
+    public final boolean addPlayer(ServerPlayer player, boolean allowSpectaotrs) {
         GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
         if (cap != null) {
             for (int i = 1; i < players.length; i++) {
@@ -107,6 +112,14 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                     onPlayerJoined(i, player);
                     return true;
                 }
+            }
+
+            // if couldn't add player to players list, try to add it to spectators list
+            if (allowSpectaotrs && spectators.add(player)) {
+                cap.setGameInstance(this, player);
+                GameblockPackets.sendToPlayer(player, new SpectatorModePacket(true));
+                onPlayerJoined(SPECTATOR_INDEX, player);
+                return true;
             }
         }
         return false;
@@ -130,9 +143,38 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                     cap.setGame(null, player);
                 }
                 onPlayerDisconnected(i, player);
+
+                // attempt to replace with a player in the spectator list
+                // TODO: this doesn't seem to work
+                while (!spectators.isEmpty()) {
+                    ServerPlayer newPlayer = spectators.remove();
+                    if (addPlayer(newPlayer, false)) {
+                        GameblockPackets.sendToPlayer(newPlayer, new SpectatorModePacket(false));
+                        break;
+                    }
+                }
+
                 return;
             }
         }
+
+        // if not found in players list, remove from spectator
+        if (spectators.remove(player)) {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null && cap.isPlaying()) {
+                cap.setGame(null, player);
+            }
+            onPlayerDisconnected(SPECTATOR_INDEX, player);
+        }
+    }
+
+    public void setSpectatorMode(boolean mode) {
+        if (!clientSide) throw new IllegalStateException("Method should only be called on client!");
+        spectator = mode;
+    }
+
+    public final boolean isSpectator() {
+        return spectator;
     }
 
     protected void onPlayerJoined(int index, ServerPlayer player) {
@@ -158,7 +200,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     protected final void setGameState(GameState state) {
         gameState = state;
         if (!isClientSide()) {
-            for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state));
+            sendToAllPlayers(new GameStatePacket(state), null);
         }
         if (state == GameState.WIN) {
             onGameWin();

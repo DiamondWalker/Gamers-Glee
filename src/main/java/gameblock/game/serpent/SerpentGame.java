@@ -11,7 +11,6 @@ import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.player.Player;
 
@@ -96,7 +95,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
             foodX = random.nextInt((tiles.maxX - tiles.minX) + 1) + tiles.minX;
             foodY = random.nextInt((tiles.maxY - tiles.minY) + 1) + tiles.minY;
         } while (isSnakeTile(foodX, foodY));
-        forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten)));
+        sendToAllPlayers(new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten), null);
     }
 
     @Override
