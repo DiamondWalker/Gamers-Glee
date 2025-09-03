@@ -37,7 +37,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
-    private final Queue<ServerPlayer> spectators = new LinkedList<>(); // TODO: code spectator system
+    private final Queue<ServerPlayer> spectators = new LinkedList<>();
     public static final int SPECTATOR_INDEX = -1;
 
     private final boolean clientSide;
@@ -90,6 +90,13 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         for (ServerPlayer player : spectators) {
             GameblockPackets.sendToPlayer(player, packet);
         }
+    }
+
+    /**
+     * Obtains a list of packets such that, if all are sent to a player, said player will then be synced to the server
+     */
+    public UpdateGamePacket<T>[] getSyncPackets() {
+        return null;
     }
 
     public void forEachPlayer(Consumer<Player> action) {
