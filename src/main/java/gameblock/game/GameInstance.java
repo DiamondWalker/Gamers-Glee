@@ -99,7 +99,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     }
 
     public final boolean addPlayer(ServerPlayer player) {
-        return addPlayer(player, true);
+        return addPlayer(player, false); // TODO: when I revisit the spectator system, this needs to be changed to true
     }
 
     public final boolean addPlayer(ServerPlayer player, boolean allowSpectaotrs) {
