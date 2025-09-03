@@ -16,6 +16,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -93,10 +94,17 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     }
 
     /**
-     * Obtains a list of packets such that, if all are sent to a player, said player will then be synced to the server
+     * Writes all the extra game data that has to be sent to a new player
      */
-    public UpdateGamePacket<T>[] getSyncPackets() {
-        return null;
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+
+    }
+
+    /**
+     * Writes all the extra game data that was sent to a new player
+     */
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+
     }
 
     public void forEachPlayer(Consumer<Player> action) {
@@ -115,7 +123,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             for (int i = 1; i < players.length; i++) {
                 if (players[i] == null) {
                     players[i] = player;
-                    cap.setGameInstance(this, player);
+                    cap.setGame(this);
                     onPlayerJoined(i, player);
                     return true;
                 }
@@ -123,7 +131,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
             // if couldn't add player to players list, try to add it to spectators list
             if (allowSpectaotrs && spectators.add(player)) {
-                cap.setGameInstance(this, player);
+                cap.setGame(this);
                 GameblockPackets.sendToPlayer(player, new SpectatorModePacket(true));
                 onPlayerJoined(SPECTATOR_INDEX, player);
                 return true;
@@ -147,7 +155,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                 players[i] = null;
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null && cap.isPlaying()) {
-                    cap.setGame(null, player);
+                    cap.setGame(null);
                 }
                 onPlayerDisconnected(i, player);
 
@@ -169,7 +177,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         if (spectators.remove(player)) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
-                cap.setGame(null, player);
+                cap.setGame(null);
             }
             onPlayerDisconnected(SPECTATOR_INDEX, player);
         }
@@ -290,7 +298,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             for (Player player : players) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null) {
-                    cap.setGame(gameType, player);
+                    cap.setGame(gameType.createInstance(player));
                 }
             }
         } else {
@@ -350,7 +358,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             if (!stayOpen) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null && cap.isPlaying()) {
-                    cap.setGame(null, player);
+                    cap.setGame(null);
                 }
             }
         }

@@ -14,32 +14,28 @@ import java.lang.reflect.InvocationTargetException;
 
 @AutoRegisterCapability
 public class GameCapability {
-    private GameInstance game = null;
+    private final Player player;
+    private GameInstance<? extends GameInstance<?>> game = null;
+
+    protected GameCapability(Player player) {
+        this.player = player;
+    }
 
     public boolean isPlaying() {
         return game != null;
     }
 
-    public void setGameInstance(@Nonnull GameInstance<?> instance, ServerPlayer player) {
-        GameblockPackets.sendToPlayer(player, new GameChangePacket(instance.gameType));
-        if (game != null) game.removePlayer(player);
-        this.game = instance;
-    }
-
-    public void setGame(GameblockGames.Game<?> gameType, Player player) {
+    public void setGame(GameInstance<?> newGame) {
         /*
             Sometimes game constructors will send new packets. If this happens before the game change packet is sent it'll cause issues
             Therefore we must send the game change packet before the game instance is created.
              */
             if (player instanceof ServerPlayer serverPlayer) {
-                GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(gameType));
+                GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(newGame));
                 if (game != null) game.removePlayer(serverPlayer);
             }
-            if (gameType != null) {
-                game = gameType.createInstance(player);
-            } else {
-                this.game = null;
-            }
+
+            game = newGame;
 
             if (player.level().isClientSide()) {
                 if (game == null) {
@@ -52,7 +48,7 @@ public class GameCapability {
             }
     }
 
-    public GameInstance getGame() {
+    public GameInstance<? extends GameInstance<?>> getGame() {
         return game;
     }
 }

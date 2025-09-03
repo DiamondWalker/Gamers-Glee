@@ -149,7 +149,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
                 if (cartridge.gameType == game) {
                     GameCapability cap = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap != null) {
-                        cap.setGame(game, getHostPlayer());
+                        cap.setGame(game.createInstance(getHostPlayer()));
                     }
                 }
             }

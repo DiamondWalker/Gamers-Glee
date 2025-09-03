@@ -17,11 +17,7 @@ public class ClientPacketHandler {
         if (player != null) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
-                try {
-                    cap.setGame(packet.game, player);
-                } catch (Exception e) {
-                    throw new RuntimeException(e);
-                }
+                cap.setGame(packet.game);
             }
         }
     }
@@ -34,7 +30,7 @@ public class ClientPacketHandler {
                 try {
                     packet.gameUpdateReceivedOnClient((T) cap.getGame());
                 } catch (ClassCastException e) {
-                    GameblockMod.LOGGER.warn("Could not handle UpdateGamePacket as game was not found.");
+                    throw new IllegalStateException("Could not handle UpdateGamePacket as game was not found.", e);
                 }
             }
         }
