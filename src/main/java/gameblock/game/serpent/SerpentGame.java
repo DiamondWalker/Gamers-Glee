@@ -43,9 +43,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         super(player, GameblockGames.SERPENT_GAME);
         tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
-        if (!isClientSide()) randomFoodPosition(); // FIXME: doesn't work?
-        System.out.println(foodY);
-        System.out.println(isClientSide());
+        if (!isClientSide()) randomFoodPosition();
     }
 
     protected void setSnakeDirection(Direction2D dir) {
