@@ -11,6 +11,7 @@ import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
@@ -59,7 +60,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     long timeSinceLaunch = 0;
 
     ArrayList<Block> blocks = new ArrayList<>();
-    protected int blocksBroken = 0;
+    protected int blocksBroken;
 
     ArrayList<Particle> particles = null;
 
@@ -73,17 +74,19 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public BlockBreakGame(Player player) {
         super(player, GameblockGames.BLOCK_BREAK_GAME);
         int col = 0;
-        for (int y = 6; y >= 3; y--) {
-            if (y < 6) {
-                for (int x = -14; x <= 14; x += 2) {
-                    blocks.add(new Block(x, y * 2 - 1 + 1, col));
+        if (!isClientSide()) {
+            for (int y = 6; y >= 3; y--) {
+                if (y < 6) {
+                    for (int x = -14; x <= 14; x += 2) {
+                        blocks.add(new Block(x, y * 2 - 1 + 1, col));
+                    }
+                    col++;
+                }
+                for (int x = -15; x <= 15; x += 2) {
+                    blocks.add(new Block(x, y * 2 - 1, col));
                 }
                 col++;
             }
-            for (int x = -15; x <= 15; x += 2) {
-                blocks.add(new Block(x, y * 2 - 1, col));
-            }
-            col++;
         }
 
         if (isClientSide()) {
@@ -92,8 +95,32 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
     }
 
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeShort(blocks.size());
+        for (Block block : blocks) {
+            buffer.writeByte(block.x);
+            buffer.writeByte(block.y);
+            buffer.writeByte(block.color);
+        }
+
+        buffer.writeShort(highScore);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        int size = buffer.readShort();
+        for (int i = 0; i < size; i++) {
+            blocks.add(new Block(buffer.readByte(), buffer.readByte(), buffer.readByte()));
+        }
+
+        highScore = buffer.readShort();
+    }
+
     private float calculateProgress() {
-        return (float) blocksBroken / blocks.size();
+        return (float) blocksBroken/ blocks.size();
     }
 
     private float calculateBallSpeed() {
@@ -103,8 +130,9 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     private void recalculateScore() {
         if (!isClientSide()) {
             int oldScore = score;
-            score = (int) Math.max(0, blocksBroken - timeSinceLaunch / 100);
-            if (getGameState() == GameState.WIN) score += 100;
+            score = (int) (blocksBroken - timeSinceLaunch / 100);
+            if (getGameState() == GameState.WIN) score += 50;
+            score = Math.max(score, 0);
             if (score != oldScore || timeSinceLaunch % 20 == 0) {
                 sendToAllPlayers(new ScoreUpdatePacket(score, timeSinceLaunch / 20), null);
             }
@@ -220,11 +248,10 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
                                 ballMoveUpdate = true;
                                 if (!isClientSide()) {
-                                    blocks.set(i, null);
                                     blocksBroken++;
-                                    if (blocksBroken == blocks.size()) setGameState(GameState.WIN);
-                                    int finalI = i;
-                                    sendToAllPlayers(new BlockUpdatePacket(finalI), null);
+                                    blocks.set(i, null);//blocks.set(i, null);
+                                    if (blocksBroken >= blocks.size()) setGameState(GameState.WIN);
+                                    sendToAllPlayers(new BlockUpdatePacket(i), null);
                                 } else {
                                     blocks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
                                     spawnBrickBreakParticles(blocks.get(i));
@@ -315,7 +342,6 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        sendToAllPlayers(new BlockBreakHighScorePacket(highScore), null);
     }
 
     @Override

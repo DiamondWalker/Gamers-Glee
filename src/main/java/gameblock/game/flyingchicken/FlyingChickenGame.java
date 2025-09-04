@@ -10,6 +10,7 @@ import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
@@ -42,6 +43,18 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
 
     public FlyingChickenGame(Player player) {
         super(player, GameblockGames.FLYING_CHICKEN_GAME);
+    }
+
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeShort(highScore);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        highScore = buffer.readShort();
     }
 
     protected void flap() {
@@ -112,7 +125,6 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        sendToAllPlayers(new FlyingChickenHighScorePacket(highScore), null);
     }
 
     @Override

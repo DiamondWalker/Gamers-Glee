@@ -26,26 +26,19 @@ public class GameCapability {
     }
 
     public void setGame(GameInstance<?> newGame) {
-        /*
-            Sometimes game constructors will send new packets. If this happens before the game change packet is sent it'll cause issues
-            Therefore we must send the game change packet before the game instance is created.
-             */
-            if (player instanceof ServerPlayer serverPlayer) {
-                GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(newGame));
-                if (game != null) game.removePlayer(serverPlayer);
-            }
-
+        if (player instanceof ServerPlayer serverPlayer) {
+            if (game != null) game.removePlayer(serverPlayer);
             game = newGame;
-
-            if (player.level().isClientSide()) {
-                if (game == null) {
-                    GUIHandler.closeGameScreen();
-                } else {
-                    GUIHandler.openGameScreen(game);
-                }
+            game.load();
+            GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(newGame));
+        } else {
+            game = newGame;
+            if (game == null) {
+                GUIHandler.closeGameScreen();
             } else {
-                if (game != null) game.load();
+                GUIHandler.openGameScreen(game);
             }
+        }
     }
 
     public GameInstance<? extends GameInstance<?>> getGame() {

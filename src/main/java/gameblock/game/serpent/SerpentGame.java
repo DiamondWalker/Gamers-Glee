@@ -9,6 +9,7 @@ import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
@@ -26,7 +27,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     protected int headX, headY;
     protected int targetSnakeLength = INITIAL_SNAKE_LENGTH;
     protected int snakeLength = targetSnakeLength;
-    protected int foodX = 10000, foodY = 10000; // these values are why outside the game area so it's like the food doesn't exist
+    protected int foodX, foodY;
 
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
@@ -44,6 +45,20 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         if (!isClientSide()) randomFoodPosition();
+    }
+
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeByte(foodX);
+        buffer.writeByte(foodY);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        foodX = buffer.readByte();
+        foodY = buffer.readByte();
     }
 
     protected void setSnakeDirection(Direction2D dir) {
@@ -93,7 +108,6 @@ public class SerpentGame extends GameInstance<SerpentGame> {
             foodX = random.nextInt((tiles.maxX - tiles.minX) + 1) + tiles.minX;
             foodY = random.nextInt((tiles.maxY - tiles.minY) + 1) + tiles.minY;
         } while (isSnakeTile(foodX, foodY));
-        sendToAllPlayers(new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten), null);
     }
 
     @Override
@@ -130,6 +144,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
                     targetSnakeLength += SNAKE_LENGTH_INCREASE;
                     foodEaten++;
                     randomFoodPosition();
+                    sendToAllPlayers(new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten), null);
                 }
             }
         } else if (!isClientSide() && getGameTime() - endTime > 20 * 3) {

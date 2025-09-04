@@ -29,10 +29,9 @@ public class BlockUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
         if (game.blocks.get(this.brick) != null) {
             if (game.blocks.get(this.brick).breaking == 0) {
                 game.spawnBrickBreakParticles(game.blocks.get(this.brick));
-                //game.playSound(GameblockSounds.BRICK_BREAK.get());
             }
-            game.blocks.set(this.brick, null);
             game.blocksBroken++;
+            game.blocks.set(this.brick, null);
         }
     }
 }

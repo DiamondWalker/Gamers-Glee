@@ -6,6 +6,7 @@ import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.*;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
@@ -52,12 +53,23 @@ public class DefusalGame extends GameInstance<DefusalGame> {
                 int randY = tiles.minY + rand.nextInt((tiles.maxY - tiles.minY) + 1);
                 if (setBomb(randX, randY)) bombCount++;
             }
-
-            sendToAllPlayers(new TimePacket(timeLeft), null);
-            sendToAllPlayers(new BombCountPacket(bombCount), null);
         } else {
             sweatDrops = new ArrayList<>();
         }
+    }
+
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeInt(timeLeft);
+        buffer.writeShort(bombCount);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        timeLeft = buffer.readInt();
+        bombCount = buffer.readShort();
     }
 
     private boolean setBomb(int x, int y) {
