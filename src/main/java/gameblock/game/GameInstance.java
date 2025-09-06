@@ -38,11 +38,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
-    private final Queue<ServerPlayer> spectators = new LinkedList<>();
-    public static final int SPECTATOR_INDEX = -1;
 
     private final boolean clientSide;
-    private boolean spectator = false;
 
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
@@ -88,9 +85,6 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         for (Player player : players) {
             if (player != null && player != exception) GameblockPackets.sendToPlayer((ServerPlayer) player, packet);
         }
-        for (ServerPlayer player : spectators) {
-            GameblockPackets.sendToPlayer(player, packet);
-        }
     }
 
     /**
@@ -114,10 +108,6 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     }
 
     public final boolean addPlayer(ServerPlayer player) {
-        return addPlayer(player, false); // TODO: when I revisit the spectator system, this needs to be changed to true
-    }
-
-    public final boolean addPlayer(ServerPlayer player, boolean allowSpectaotrs) {
         GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
         if (cap != null) {
             for (int i = 1; i < players.length; i++) {
@@ -127,14 +117,6 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                     onPlayerJoined(i, player);
                     return true;
                 }
-            }
-
-            // if couldn't add player to players list, try to add it to spectators list
-            if (allowSpectaotrs && spectators.add(player)) {
-                cap.setGame(this);
-                GameblockPackets.sendToPlayer(player, new SpectatorModePacket(true));
-                onPlayerJoined(SPECTATOR_INDEX, player);
-                return true;
             }
         }
         return false;
@@ -158,38 +140,9 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                     cap.setGame(null);
                 }
                 onPlayerDisconnected(i, player);
-
-                // attempt to replace with a player in the spectator list
-                // TODO: this doesn't seem to work
-                while (!spectators.isEmpty()) {
-                    ServerPlayer newPlayer = spectators.remove();
-                    if (addPlayer(newPlayer, false)) {
-                        GameblockPackets.sendToPlayer(newPlayer, new SpectatorModePacket(false));
-                        break;
-                    }
-                }
-
                 return;
             }
         }
-
-        // if not found in players list, remove from spectator
-        if (spectators.remove(player)) {
-            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null && cap.isPlaying()) {
-                cap.setGame(null);
-            }
-            onPlayerDisconnected(SPECTATOR_INDEX, player);
-        }
-    }
-
-    public void setSpectatorMode(boolean mode) {
-        if (!clientSide) throw new IllegalStateException("Method should only be called on client!");
-        spectator = mode;
-    }
-
-    public final boolean isSpectator() {
-        return spectator;
     }
 
     protected void onPlayerJoined(int index, ServerPlayer player) {
