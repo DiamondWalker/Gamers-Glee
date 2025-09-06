@@ -2,7 +2,6 @@ package gameblock.registry;
 
 import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
-import gameblock.game.SpectatorModePacket;
 import gameblock.game.blockbreak.*;
 import gameblock.game.defusal.*;
 import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
@@ -43,7 +42,6 @@ public class GameblockPackets {
         register(GameStatePacket.class, GameStatePacket::new);
         register(GameClosePacket.class, GameClosePacket::new);
         register(GameRestartPacket.class, GameRestartPacket::new);
-        register(SpectatorModePacket.class, SpectatorModePacket::new);
 
         // OS
         register(SelectGamePacket.class, SelectGamePacket::new);

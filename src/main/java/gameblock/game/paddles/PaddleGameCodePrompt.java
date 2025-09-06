@@ -32,7 +32,7 @@ public class PaddleGameCodePrompt extends GamePrompt.GameCodePrompt<PaddlesGame>
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         // TODO: translate
-        game.drawText(graphics, 0.0f, 15.0f, 1.0f, new ColorF(1.0f), Component.literal("Ender an 8-digit game code:")); // TODO: translate
+        game.drawText(graphics, 0.0f, 15.0f, 1.0f, new ColorF(1.0f), Component.literal("Enter an 8-digit game code:")); // TODO: translate
         game.drawText(graphics, 0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal(get()));
         if (isCodeTaken) {
             if (!get().isEmpty()) {

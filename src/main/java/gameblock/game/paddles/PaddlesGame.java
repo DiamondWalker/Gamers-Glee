@@ -60,6 +60,11 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     }
 
     @Override
+    public boolean canJoin() {
+        return super.canJoin() && !gameStarted;
+    }
+
+    @Override
     public String getGameCode() {
         return gameCode;
     }

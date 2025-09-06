@@ -107,19 +107,24 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
     }
 
-    public final boolean addPlayer(ServerPlayer player) {
-        GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-        if (cap != null) {
-            for (int i = 1; i < players.length; i++) {
-                if (players[i] == null) {
-                    players[i] = player;
-                    cap.setGame(this);
-                    onPlayerJoined(i, player);
-                    return true;
-                }
+    public final boolean isPlaying(ServerPlayer player) {
+        for (int i = 0; i < players.length; i++) if (players[i] == player) return true;
+        return false;
+    }
+
+    public boolean canJoin() {
+        return getPlayerCount() < getMaxPlayers();
+    }
+
+    public final void addPlayer(ServerPlayer player) {
+        for (int i = 1; i < players.length; i++) {
+            if (players[i] == null) {
+                players[i] = player;
+                onPlayerJoined(i, player);
+                return;
             }
         }
-        return false;
+        throw new IllegalStateException("Attempted to add new players when there is no more room for players!");
     }
 
     public final void removePlayer(ServerPlayer player) {
@@ -135,10 +140,6 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         for (int i = 1; i < players.length; i++) {
             if (players[i] == player) {
                 players[i] = null;
-                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null && cap.isPlaying()) {
-                    cap.setGame(null);
-                }
                 onPlayerDisconnected(i, player);
                 return;
             }
@@ -293,6 +294,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         if (prompt != null && prompt.shouldClose()) prompt = null;
 
         if (player == getHostPlayer()) {
+            if (!isClientSide()) {
+                // ensure players that, for example, left the game, are removed
+                for (int i = 0; i < players.length; i++) {
+                    ServerPlayer serverPlayer = (ServerPlayer) players[i];
+                    GameCapability cap = null;
+                    if (serverPlayer != null) cap = serverPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                    if (cap == null || cap.getGame() != this || serverPlayer.isDeadOrDying()) removePlayer(serverPlayer);
+                }
+            }
+
             tick();
             gameTime++;
         }

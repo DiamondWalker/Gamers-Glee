@@ -34,7 +34,8 @@ public class JoinGamePacket extends UpdateGamePacket<GameblockOS> {
     public void gameUpdateReceivedOnServer(GameblockOS game, ServerPlayer sender) {
         GameInstance<?> joinGame = MultiplayerHelper.findGameWithGameCode(sender.getServer(), gameCode);
         if (joinGame != null) {
-            if (joinGame.addPlayer(sender)) return;
+            GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null) cap.attemptToJoinGame(joinGame);
         }
     }
 }

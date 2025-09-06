@@ -29,7 +29,7 @@ public class GameCapability {
         if (player instanceof ServerPlayer serverPlayer) {
             if (game != null) game.removePlayer(serverPlayer);
             game = newGame;
-            game.load();
+            if (game.getHostPlayer() == player) game.load();
             GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(newGame));
         } else {
             game = newGame;
@@ -39,6 +39,17 @@ public class GameCapability {
                 GUIHandler.openGameScreen(game);
             }
         }
+    }
+
+    public void attemptToJoinGame(GameInstance<?> newGame) {
+        if (player instanceof ServerPlayer serverPlayer) {
+            if (!newGame.isPlaying(serverPlayer)) {
+                setGame(newGame);
+                newGame.addPlayer(serverPlayer);
+            }
+            throw new IllegalStateException(player.getName().getString() + " attempted to join game they're already in is already in!");
+        }
+        throw new IllegalStateException("Attempted to join multiplayer game from the client!");
     }
 
     public GameInstance<? extends GameInstance<?>> getGame() {
