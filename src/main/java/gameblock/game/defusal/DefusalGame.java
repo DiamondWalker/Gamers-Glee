@@ -34,6 +34,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
 
     protected TileGrid2D<DefusalTile> tiles;
     protected int bombCount;
+    private boolean bombsSpawned = false;
     protected int timeLeft = 20 * 60 * 4 + 19;
 
     protected long lastRevealTime = Integer.MIN_VALUE;
@@ -47,12 +48,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         tiles.setAll((DefusalTile t) -> new DefusalTile());
 
         if (!isClientSide()) {
-            Random rand = new Random();
-            while (bombCount < 30) {
-                int randX = tiles.minX + rand.nextInt((tiles.maxX - tiles.minX) + 1);
-                int randY = tiles.minY + rand.nextInt((tiles.maxY - tiles.minY) + 1);
-                if (setBomb(randX, randY)) bombCount++;
-            }
+            bombCount = 30;
         } else {
             sweatDrops = new ArrayList<>();
         }
@@ -104,7 +100,10 @@ public class DefusalGame extends GameInstance<DefusalGame> {
             if (secondsBefore != secondsAfter) {
                 sendToAllPlayers(new TimePacket(timeLeft), null);
             }
-            if (timeLeft <= 0) setGameState(GameState.LOSS);
+            if (timeLeft <= 0) {
+                generateBombsIfTheyHaventBeenGeneratedYet(null);
+                setGameState(GameState.LOSS);
+            }
         }
     }
 
@@ -122,7 +121,26 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         if (isWon.get()) setGameState(GameState.WIN);
     }
 
+    private void generateBombsIfTheyHaventBeenGeneratedYet(Vec2i safeTile) {
+        if (!bombsSpawned) {
+            Random rand = new Random();
+            int count = 0;
+            while (count < bombCount) {
+                int randX = tiles.minX + rand.nextInt((tiles.maxX - tiles.minX) + 1);
+                int randY = tiles.minY + rand.nextInt((tiles.maxY - tiles.minY) + 1);
+                if (safeTile == null || (Math.abs(safeTile.getX() - randX) > 1 && Math.abs(safeTile.getY() - randY) > 1)) {
+                    if (setBomb(randX, randY)) {
+                        count++;
+                    }
+                }
+            }
+            bombsSpawned = true;
+        }
+    }
+
     protected void reveal(Vec2i tile) {
+        generateBombsIfTheyHaventBeenGeneratedYet(tile);
+
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
         if (defusalTile != null && defusalTile.getState() == DefusalTile.State.HIDDEN && defusalTile.isBomb()) {
             setGameState(GameState.LOSS);
