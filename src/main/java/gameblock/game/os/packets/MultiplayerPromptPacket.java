@@ -1,5 +1,7 @@
-package gameblock.game.os;
+package gameblock.game.os.packets;
 
+import gameblock.game.os.GameblockOS;
+import gameblock.game.os.MultiplayerGamePrompt;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 

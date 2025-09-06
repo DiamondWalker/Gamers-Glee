@@ -3,6 +3,10 @@ package gameblock.game.blockbreak;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.blockbreak.packets.BallLaunchPacket;
+import gameblock.game.blockbreak.packets.BallUpdatePacket;
+import gameblock.game.blockbreak.packets.BlockUpdatePacket;
+import gameblock.game.blockbreak.packets.ScoreUpdatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
@@ -50,26 +54,26 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     float platformPos = 0.0f;
     float oldPlatformPos = platformPos;
 
-    float ballX = 0.0f, ballY = BALL_START_Y;
-    float oldBallX = ballX, oldBallY = ballY;
-    float ballMoveX, ballMoveY;
+    public float ballX = 0.0f, ballY = BALL_START_Y;
+    public float oldBallX = ballX, oldBallY = ballY;
+    public float ballMoveX, ballMoveY;
 
     CircularStack<Vector2f> ballPath = null;
 
     boolean ballLaunched = false;
-    long timeSinceLaunch = 0;
+    public long timeSinceLaunch = 0;
 
-    ArrayList<Block> blocks = new ArrayList<>();
-    protected int blocksBroken;
+    public final ArrayList<Block> blocks = new ArrayList<>();
+    public int blocksBroken;
 
     ArrayList<Particle> particles = null;
 
-    protected long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
+    public long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
 
-    protected int score = 0;
-    protected int highScore = 0;
+    public int score = 0;
+    public int highScore = 0;
 
-    protected long clientToPacketBallUpdateTime = -1;
+    public long clientToPacketBallUpdateTime = -1;
 
     public BlockBreakGame(Player player) {
         super(player, GameblockGames.BLOCK_BREAK_GAME);
@@ -139,7 +143,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
     }
 
-    protected void launchBall(float xMotion) {
+    public void launchBall(float xMotion) {
         ballMoveX = xMotion / 2;
         ballMoveY = INITIAL_BALL_SPEED / UPDATES_PER_TICK;
 
@@ -290,7 +294,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         return (ballLaunched && !isGameOver()) ? GameblockMusic.BLOCK_BREAK : null;
     }
 
-    protected void spawnBrickBreakParticles(Block block) {
+    public void spawnBrickBreakParticles(Block block) {
         Random random = new Random();
         float x = block.x * 5;
         float y = block.y * 5;
@@ -469,10 +473,10 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
     }
 
-    protected class Block {
-        protected int x, y;
-        protected int breaking = 0;
-        private final int color;
+    public class Block {
+        public int x, y;
+        public int breaking = 0;
+        public final int color;
 
         public Block(int x, int y, int color) {
             this.x = x;
@@ -480,7 +484,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
             this.color = color % 7;
         }
 
-        private ColorF getColor() {
+        public ColorF getColor() {
             return switch (color) {
                 case 0 -> new ColorF(0, 255, 0);
                 case 1 -> new ColorF(0, 0, 255);
@@ -494,7 +498,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
     }
 
-    private class Particle {
+    public class Particle {
         private float x, y;
         private float oldX, oldY;
         private float motionX, motionY;

@@ -1,8 +1,9 @@
-package gameblock.game.os;
+package gameblock.game.os.packets;
 
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
+import gameblock.game.os.GameblockOS;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.util.MultiplayerHelper;
 import net.minecraft.network.FriendlyByteBuf;

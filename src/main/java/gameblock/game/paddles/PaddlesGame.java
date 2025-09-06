@@ -1,6 +1,8 @@
 package gameblock.game.paddles;
 
 import gameblock.game.GameInstance;
+import gameblock.game.paddles.packets.ClientToServerPaddleUpdatePacket;
+import gameblock.game.paddles.packets.PaddleGameStatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
@@ -8,27 +10,26 @@ import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
 public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     // COMMON DATA
-    boolean gameStarted = false;
-    String gameCode = null;
+    private boolean gameStarted = false;
+    public String gameCode = null;
 
-    Paddle leftPaddle;
-    Paddle rightPaddle;
+    public Paddle leftPaddle;
+    public Paddle rightPaddle;
 
-    PaddlesBall ball;
+    public PaddlesBall ball;
 
     // SERVER DATA
-    final static Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
+    public static final Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
 
     // CLIENT DATA
-    Direction1D whichPaddleAmI;
-    float otherPaddleUpdatePos = 0.0f;
+    public Direction1D whichPaddleAmI;
+    public float otherPaddleUpdatePos = 0.0f;
 
     public PaddlesGame(Player player) {
         super(player, GameblockGames.PADDLES_GAME);
@@ -63,17 +64,22 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         return gameCode;
     }
 
-    protected void initializeGame() {
+    public void initializeGame() {
+        gameStarted = true;
         leftPaddle = new Paddle();
         rightPaddle = new Paddle();
         ball = new PaddlesBall();
         ball.motion = new Vec2(-1, 0).scale(ball.speed);
     }
 
+    public void stopGame() {
+        gameStarted = false;
+        whichPaddleAmI = null;
+    }
+
     @Override
     protected void onPlayerJoined(int index, ServerPlayer serverPlayer) {
         if (!gameStarted && getPlayerCount() == getMaxPlayers()) {
-            gameStarted = true;
             initializeGame();
             forEachPlayer((Player p) -> {
                 ServerPlayer sp = (ServerPlayer) p;

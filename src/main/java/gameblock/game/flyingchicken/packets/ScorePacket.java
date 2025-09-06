@@ -1,5 +1,6 @@
-package gameblock.game.flyingchicken;
+package gameblock.game.flyingchicken.packets;
 
+import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockSounds;
 import net.minecraft.network.FriendlyByteBuf;

@@ -1,5 +1,6 @@
-package gameblock.game.defusal;
+package gameblock.game.defusal.packets;
 
+import gameblock.game.defusal.DefusalGame;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 

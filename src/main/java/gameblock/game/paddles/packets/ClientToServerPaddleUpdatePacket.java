@@ -1,5 +1,6 @@
-package gameblock.game.paddles;
+package gameblock.game.paddles.packets;
 
+import gameblock.game.paddles.PaddlesGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.util.Direction1D;
 import net.minecraft.network.FriendlyByteBuf;

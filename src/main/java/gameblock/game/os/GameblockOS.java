@@ -4,6 +4,8 @@ import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
+import gameblock.game.os.packets.MultiplayerPromptPacket;
+import gameblock.game.os.packets.SelectGamePacket;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
@@ -42,6 +44,10 @@ public class GameblockOS extends GameInstance<GameblockOS> {
             logoRenderer = new GameblockLogoRenderer(this);
             bgRenderer = new GameblockBackgroundRenderer(this);
         }
+    }
+
+    public OSIcon[] getIcons() {
+        return gameIcons.toArray(new OSIcon[0]);
     }
 
     @Override

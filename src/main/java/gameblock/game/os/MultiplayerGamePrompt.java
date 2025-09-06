@@ -1,9 +1,9 @@
 package gameblock.game.os;
 
 import gameblock.game.GamePrompt;
+import gameblock.game.os.packets.JoinGamePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.ColorF;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

@@ -1,5 +1,6 @@
-package gameblock.game.flyingchicken;
+package gameblock.game.flyingchicken.packets;
 
+import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 
@@ -30,6 +31,6 @@ public class PipeSpawnPacket extends UpdateGamePacket<FlyingChickenGame> {
 
     @Override
     public void gameUpdateReceivedOnClient(FlyingChickenGame game) {
-        game.pipes.enqueue(new FlyingChickenGame.Pipe(x, y));
+        game.addPipe(x, y);
     }
 }

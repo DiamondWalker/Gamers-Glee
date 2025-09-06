@@ -1,5 +1,6 @@
-package gameblock.game.paddles;
+package gameblock.game.paddles.packets;
 
+import gameblock.game.paddles.PaddlesGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.util.Direction1D;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,12 +29,10 @@ public class PaddleGameStatePacket extends UpdateGamePacket<PaddlesGame> {
     @Override
     public void gameUpdateReceivedOnClient(PaddlesGame game) {
         if (thisIsYourPaddle != Direction1D.CENTER) {
-            game.gameStarted = true;
             game.whichPaddleAmI = thisIsYourPaddle;
             game.initializeGame();
         } else {
-            game.gameStarted = false;
-            game.whichPaddleAmI = null;
+            game.stopGame();
         }
     }
 }

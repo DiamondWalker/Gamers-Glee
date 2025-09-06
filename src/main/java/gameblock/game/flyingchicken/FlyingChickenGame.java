@@ -3,6 +3,9 @@ package gameblock.game.flyingchicken;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.flyingchicken.packets.PipeSpawnPacket;
+import gameblock.game.flyingchicken.packets.ScorePacket;
+import gameblock.game.flyingchicken.packets.WingFlapPacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
@@ -26,17 +29,17 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     private static final float HORIZONTAL_MOVEMENT_PER_TICK = 1.5f;
     private static final float SPACE_BETWEEN_PIPES = 30.0f;
 
-    protected float chickenY = 0.0f;
-    private float chickenMotion = 0.0f;
-    protected long time = 0;
+    public float chickenY = 0.0f;
+    public float chickenMotion = 0.0f;
+    public long time = 0;
     private int pipesSpawned = 0; // used to ensure the same pipe isn't spawned twice, since wing flap packets can sometimes move the bird back and make another pair spawn
     private long lastFlapTime = Integer.MIN_VALUE;
     private long gameOverTime = 0;
     private float gameOverFallDirection = 0.0f;
 
-    protected int score = 0;
-    protected int highScore = 0;
-    protected long lastScoreTime = 0;
+    public int score = 0;
+    public int highScore = 0;
+    public long lastScoreTime = 0;
 
     final GameInstance.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
@@ -57,7 +60,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
         highScore = buffer.readShort();
     }
 
-    protected void flap() {
+    public void flap() {
         if (isClientSide()) {
             GameblockPackets.sendToServer(new WingFlapPacket(time, chickenY));
             lastFlapTime = time;
@@ -65,6 +68,10 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
             //playSound(SoundEvents.PHANTOM_FLAP, 1.0f, 350.0f);
         }
         chickenMotion = 2.56f;
+    }
+
+    public void addPipe(float x, float y) {
+        pipes.enqueue(new FlyingChickenGame.Pipe(x, y));
     }
 
     @Override

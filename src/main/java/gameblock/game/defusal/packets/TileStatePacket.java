@@ -1,5 +1,7 @@
-package gameblock.game.defusal;
+package gameblock.game.defusal.packets;
 
+import gameblock.game.defusal.DefusalGame;
+import gameblock.game.defusal.DefusalTile;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.util.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;

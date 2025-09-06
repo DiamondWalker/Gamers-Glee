@@ -1,5 +1,6 @@
-package gameblock.game.flyingchicken;
+package gameblock.game.flyingchicken.packets;
 
+import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;

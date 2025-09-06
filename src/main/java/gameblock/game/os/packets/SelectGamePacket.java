@@ -1,5 +1,7 @@
-package gameblock.game.os;
+package gameblock.game.os.packets;
 
+import gameblock.game.os.GameblockOS;
+import gameblock.game.os.OSIcon;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockGames;
 import net.minecraft.network.FriendlyByteBuf;
@@ -28,7 +30,7 @@ public class SelectGamePacket extends UpdateGamePacket<GameblockOS> {
 
     @Override
     public void gameUpdateReceivedOnServer(GameblockOS game, ServerPlayer sender) {
-        for (OSIcon icon : game.gameIcons) {
+        for (OSIcon icon : game.getIcons()) {
             if (icon.index == index) {
                 icon.clickAction.run();
             }

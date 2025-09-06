@@ -1,5 +1,6 @@
-package gameblock.game.blockbreak;
+package gameblock.game.blockbreak.packets;
 
+import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockSounds;
 import net.minecraft.network.FriendlyByteBuf;

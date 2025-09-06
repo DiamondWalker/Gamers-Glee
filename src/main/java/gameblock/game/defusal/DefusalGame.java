@@ -2,6 +2,7 @@ package gameblock.game.defusal;
 
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.defusal.packets.*;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.*;
@@ -32,12 +33,12 @@ public class DefusalGame extends GameInstance<DefusalGame> {
             new ColorF(0.0f, 0.0f, 0.0f), // 8
     };
 
-    protected TileGrid2D<DefusalTile> tiles;
-    protected int bombCount;
+    public final TileGrid2D<DefusalTile> tiles;
+    public int bombCount;
     private boolean bombsSpawned = false;
-    protected int timeLeft = 20 * 60 * 4 + 19;
+    public int timeLeft = 20 * 60 * 4 + 19;
 
-    protected long lastRevealTime = Integer.MIN_VALUE;
+    public long lastRevealTime = Integer.MIN_VALUE;
 
     private ArrayList<SweatDrop> sweatDrops;
 
@@ -138,7 +139,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         }
     }
 
-    protected void reveal(Vec2i tile) {
+    public void reveal(Vec2i tile) {
         generateBombsIfTheyHaventBeenGeneratedYet(tile);
 
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
@@ -169,7 +170,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         }
     }
 
-    protected void cycle(Vec2i tile) {
+    public void cycle(Vec2i tile) {
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
         if (defusalTile != null && defusalTile.getState() != DefusalTile.State.REVEALED) {
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount++;

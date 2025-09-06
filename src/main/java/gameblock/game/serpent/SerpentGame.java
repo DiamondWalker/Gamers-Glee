@@ -3,6 +3,8 @@ package gameblock.game.serpent;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.serpent.packets.EatFoodPacket;
+import gameblock.game.serpent.packets.SnakeUpdatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
@@ -22,17 +24,17 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/serpent.png");
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
-    protected final TileGrid2D<Integer> tiles;
+    public final TileGrid2D<Integer> tiles;
 
-    protected int headX, headY;
-    protected int targetSnakeLength = INITIAL_SNAKE_LENGTH;
-    protected int snakeLength = targetSnakeLength;
-    protected int foodX, foodY;
+    public int headX, headY;
+    public int targetSnakeLength = INITIAL_SNAKE_LENGTH;
+    public int snakeLength = targetSnakeLength;
+    public int foodX, foodY;
 
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
 
-    protected int foodEaten = 0;
+    public int foodEaten = 0;
     private long endTime = Integer.MIN_VALUE;
 
     final GameInstance.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
@@ -61,7 +63,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         foodY = buffer.readByte();
     }
 
-    protected void setSnakeDirection(Direction2D dir) {
+    public void setSnakeDirection(Direction2D dir) {
         if (dir == snakeDirection || dir == snakeDirection.getOpposite() || snakeDirectionChanged) return;
         snakeDirection = dir;
 

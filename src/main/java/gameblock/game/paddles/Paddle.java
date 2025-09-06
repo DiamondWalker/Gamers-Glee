@@ -9,6 +9,6 @@ public class Paddle {
     public static final float WIDTH = 15.0f;
     public static final float DEPTH = 5.0f;
 
-    float pos = 0.0f;
-    float oldPos = 0.0f;
+    public float pos = 0.0f;
+    public float oldPos = 0.0f;
 }

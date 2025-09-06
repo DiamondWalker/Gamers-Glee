@@ -2,18 +2,17 @@ package gameblock.registry;
 
 import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
-import gameblock.game.blockbreak.*;
-import gameblock.game.defusal.*;
-import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
-import gameblock.game.flyingchicken.PipeSpawnPacket;
-import gameblock.game.flyingchicken.ScorePacket;
-import gameblock.game.flyingchicken.WingFlapPacket;
-import gameblock.game.os.JoinGamePacket;
-import gameblock.game.os.MultiplayerPromptPacket;
-import gameblock.game.os.SelectGamePacket;
-import gameblock.game.paddles.*;
-import gameblock.game.serpent.EatFoodPacket;
-import gameblock.game.serpent.SnakeUpdatePacket;
+import gameblock.game.blockbreak.packets.*;
+import gameblock.game.defusal.packets.*;
+import gameblock.game.flyingchicken.packets.PipeSpawnPacket;
+import gameblock.game.flyingchicken.packets.ScorePacket;
+import gameblock.game.flyingchicken.packets.WingFlapPacket;
+import gameblock.game.os.packets.JoinGamePacket;
+import gameblock.game.os.packets.MultiplayerPromptPacket;
+import gameblock.game.os.packets.SelectGamePacket;
+import gameblock.game.paddles.packets.*;
+import gameblock.game.serpent.packets.EatFoodPacket;
+import gameblock.game.serpent.packets.SnakeUpdatePacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.packet.GameClosePacket;
 import gameblock.packet.IPacket;
@@ -53,7 +52,6 @@ public class GameblockPackets {
         register(BallLaunchPacket.class, BallLaunchPacket::new);
         register(BlockUpdatePacket.class, BlockUpdatePacket::new);
         register(ScoreUpdatePacket.class, ScoreUpdatePacket::new);
-        register(BlockBreakHighScorePacket.class, BlockBreakHighScorePacket::new);
 
         // serpent
         register(SnakeUpdatePacket.class, SnakeUpdatePacket::new);
@@ -63,7 +61,6 @@ public class GameblockPackets {
         register(WingFlapPacket.class, WingFlapPacket::new);
         register(PipeSpawnPacket.class, PipeSpawnPacket::new);
         register(ScorePacket.class, ScorePacket::new);
-        register(FlyingChickenHighScorePacket.class, FlyingChickenHighScorePacket::new);
 
         // defusal
         register(TileClickPacket.class, TileClickPacket::new);

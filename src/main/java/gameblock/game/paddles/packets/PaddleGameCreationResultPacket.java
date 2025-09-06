@@ -1,5 +1,7 @@
-package gameblock.game.paddles;
+package gameblock.game.paddles.packets;
 
+import gameblock.game.paddles.PaddleGameCodePrompt;
+import gameblock.game.paddles.PaddlesGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.util.CompletionStatus;
 import net.minecraft.network.FriendlyByteBuf;

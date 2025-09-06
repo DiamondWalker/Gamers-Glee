@@ -1,12 +1,12 @@
-package gameblock.game.paddles;
+package gameblock.game.paddles.packets;
 
+import gameblock.game.paddles.PaddlesGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.CompletionStatus;
 import gameblock.util.MultiplayerHelper;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionResult;
 
 public class PaddleGameCodeSelectionPacket extends UpdateGamePacket<PaddlesGame> {
     String gameCode;

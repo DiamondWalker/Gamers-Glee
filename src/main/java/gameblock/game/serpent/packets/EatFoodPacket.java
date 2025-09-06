@@ -1,5 +1,6 @@
-package gameblock.game.serpent;
+package gameblock.game.serpent.packets;
 
+import gameblock.game.serpent.SerpentGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.Direction2D;
