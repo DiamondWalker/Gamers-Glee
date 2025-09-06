@@ -14,4 +14,10 @@ public enum Direction1D {
     public int getComponent() {
         return component;
     }
+
+    public Direction1D getOpposite() {
+        if (this == LEFT) return RIGHT;
+        if (this == RIGHT) return LEFT;
+        return CENTER;
+    }
 }

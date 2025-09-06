@@ -8,7 +8,6 @@ import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
@@ -30,6 +29,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     // CLIENT DATA
     Direction1D whichPaddleAmI;
+    float otherPaddleUpdatePos = 0.0f;
 
     public PaddlesGame(Player player) {
         super(player, GameblockGames.PADDLES_GAME);
@@ -47,11 +47,6 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         if (direction == Direction1D.LEFT) return leftPaddle;
         if (direction == Direction1D.RIGHT) return rightPaddle;
         throw new IllegalArgumentException("Attempted to get paddle with invalid direction " + direction);
-    }
-
-    public Paddle getMyPaddle() {
-        if (!isClientSide()) throw new IllegalStateException("Attempted to call getMyPaddle on server side");
-        return getPaddleFromDirection(whichPaddleAmI);
     }
 
     @Override
@@ -109,10 +104,16 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             if (isClientSide()) {
                 if (prompt != null) prompt.close();
 
-                Paddle paddle = getMyPaddle(); // TODO: figure out how to update oldPos for the other paddle
-                paddle.oldPos = paddle.pos;
-                paddle.pos = getMouseCoordinates().y;
-                if (paddle.pos != paddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(paddle.pos));
+                Paddle myPaddle = getPaddleFromDirection(whichPaddleAmI);
+                Paddle opponentPaddle = getPaddleFromDirection(whichPaddleAmI.getOpposite());
+
+                myPaddle.oldPos = myPaddle.pos;
+                myPaddle.pos = getMouseCoordinates().y;
+
+                opponentPaddle.oldPos = opponentPaddle.pos;
+                opponentPaddle.pos = otherPaddleUpdatePos;
+
+                if (myPaddle.pos != myPaddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(myPaddle.pos));
             }
         }
     }
