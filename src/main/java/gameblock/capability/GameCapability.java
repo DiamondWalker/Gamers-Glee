@@ -29,7 +29,7 @@ public class GameCapability {
         if (player instanceof ServerPlayer serverPlayer) {
             if (game != null) game.removePlayer(serverPlayer);
             game = newGame;
-            if (game.getHostPlayer() == player) game.load();
+            if (game != null && game.getHostPlayer() == player) game.load();
             GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(newGame));
         } else {
             game = newGame;

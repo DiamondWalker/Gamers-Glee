@@ -8,6 +8,7 @@ import gameblock.util.Direction1D;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
@@ -20,9 +21,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     Paddle leftPaddle;
     Paddle rightPaddle;
 
-    Vec2 ballPos;
-    Vec2 ballOldPos;
-    Vec2 ballMotion;
+    PaddlesBall ball;
 
     // SERVER DATA
     final static Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
@@ -67,10 +66,8 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     protected void initializeGame() {
         leftPaddle = new Paddle();
         rightPaddle = new Paddle();
-
-        ballPos = Vec2.ZERO;
-        ballOldPos = Vec2.ZERO;
-        ballMotion = Vec2.ZERO;
+        ball = new PaddlesBall();
+        ball.motion = new Vec2(-1, 0).scale(ball.speed);
     }
 
     @Override
@@ -115,16 +112,42 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
                 if (myPaddle.pos != myPaddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(myPaddle.pos));
             }
+
+            ball.oldPos = ball.pos;
+            ball.pos = ball.pos.add(ball.motion);
+
+            if (Math.abs(ball.pos.y + PaddlesBall.SIZE / 2) >= 75) {
+                if (Math.round(Math.signum(ball.pos.y)) == Math.round(Math.signum(ball.motion.y))) { // make sure it's still moving out of the screen
+                    ball.motion = new Vec2(ball.motion.x, ball.motion.y * -1);
+                }
+            }
+            if (Math.abs(Math.abs(ball.pos.x) - Paddle.POSITION) <= (Paddle.DEPTH + PaddlesBall.SIZE) / 2) { // is ball at the correct x range to hit a paddle?
+                if (Math.round(Math.signum(ball.pos.x)) == Math.round(Math.signum(ball.motion.x))) { // make sure ball is moving towards the paddles and not bouncing off
+                    Direction1D side = ball.pos.x > 0 ? Direction1D.RIGHT : Direction1D.LEFT;
+                    Paddle hitPaddle = getPaddleFromDirection(side);
+
+                    float yComponent = (ball.pos.y - hitPaddle.pos) / ((PaddlesBall.SIZE + Paddle.WIDTH) / 2); // if the ball hits the very corner, this will be 1 or -1. If the ball hits the center, it'll be 0
+                    if (Math.abs(yComponent) <= 1.0f) { // ball is at the correct y range (hit paddle)
+                        ball.speed *= 1.2f;
+                        ball.motion = new Vec2(side.getOpposite().getComponent(), yComponent).scale(ball.speed);
+                    }
+                }
+            }
         }
     }
 
     @Override
     public void render(GuiGraphics graphics, float partialTicks) {
         if (gameStarted) {
-            drawRectangle(graphics, -80.0f, leftPaddle.oldPos + partialTicks * (leftPaddle.pos - leftPaddle.oldPos), 5.0f, 25.0f, new ColorF(1.0f), 0);
-            drawRectangle(graphics, 80.0f, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), 5.0f, 25.0f, new ColorF(1.0f), 0);
+            // draw the dividing line
+            for (int i = -30; i <= 30; i++) {
+                drawRectangle(graphics, 0, i * 5, 1, 3, new ColorF(1.0f), 0);
+            }
 
-            drawRectangle(graphics, ballOldPos.x + partialTicks * (ballPos.x - ballOldPos.x), ballOldPos.y + partialTicks * (ballPos.y - ballOldPos.y), 3.0f, 3.0f, new ColorF(1.0f), 0);
+            drawRectangle(graphics, -Paddle.POSITION, leftPaddle.oldPos + partialTicks * (leftPaddle.pos - leftPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            drawRectangle(graphics, Paddle.POSITION, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+
+            drawRectangle(graphics, ball.oldPos.x + partialTicks * (ball.pos.x - ball.oldPos.x), ball.oldPos.y + partialTicks * (ball.pos.y - ball.oldPos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
         } else if (prompt == null) {
             drawText(graphics, 0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
             drawText(graphics, 0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));
