@@ -216,35 +216,35 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
-        drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0.8f), 0);
-        drawRectangle(graphics, 0, -8, 168 + 8, 112 + 8, new ColorF(0.4f), 0);
+    public void render() {
+        drawRectangle(0, 0, 200, 200, new ColorF(0.8f), 0);
+        drawRectangle(0, -8, 168 + 8, 112 + 8, new ColorF(0.4f), 0);
 
         tiles.forEach((Vec2i coords, DefusalTile tile) -> {
             if (tile.getState() == DefusalTile.State.REVEALED) {
-                drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.6f), 0);
+                drawRectangle(coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.6f), 0);
                 //drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 29, 0, 6, 6, new ColorF(1.0f));
                 if (tile.adjacentBombs > 0 && !tile.isBomb()) {
-                    drawText(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, NUMBER_COLORS[tile.adjacentBombs - 1], Component.literal(String.valueOf(tile.adjacentBombs)));
+                    drawText(coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, NUMBER_COLORS[tile.adjacentBombs - 1], Component.literal(String.valueOf(tile.adjacentBombs)));
                 }
             } else {
                 //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.8f), 0);
-                drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 32, 0, 6, 6, new ColorF(1.0f));
+                drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 32, 0, 6, 6, new ColorF(1.0f));
 
                 if (getGameState() == GameState.LOSS && tile.isBomb()) {
-                    drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
+                    drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
                     //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(1.0f, 0.0f, 0.0f), 0);
                 }
 
                 if (tile.getState() == DefusalTile.State.FLAGGED) {
                     if (getGameState() == GameState.LOSS && !tile.isBomb()) {
-                        drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
-                        drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 21, 0, 7, 7, new ColorF(1.0f));
+                        drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, new ColorF(1.0f));
+                        drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 21, 0, 7, 7, new ColorF(1.0f));
                     } else {
-                        drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 7, 0, 7, 7, new ColorF(1.0f));
+                        drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 7, 0, 7, 7, new ColorF(1.0f));
                     }
                 } else if (tile.getState() == DefusalTile.State.QUESTION) {
-                    drawTexture(graphics, SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 14, 0, 7, 7, new ColorF(1.0f));
+                    drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 14, 0, 7, 7, new ColorF(1.0f));
                     //drawText(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 0.7f, new ColorF(1.0f), "?");
                 }
             }
@@ -252,16 +252,16 @@ public class DefusalGame extends GameInstance<DefusalGame> {
 
         Vec2i tileCoords = getTile(getMouseCoordinates());
         if (!isGameOver() && tileCoords != null && tiles.get(tileCoords.getX(), tileCoords.getY()) != null && tiles.get(tileCoords.getX(), tileCoords.getY()).getState() != DefusalTile.State.REVEALED) {
-            drawRectangle(graphics, tileCoords.getX() * 7, tileCoords.getY() * 7 - 8, 6, 6, new ColorF(1.0f).withAlpha(1.0f), 0);
+            drawRectangle(tileCoords.getX() * 7, tileCoords.getY() * 7 - 8, 6, 6, new ColorF(1.0f).withAlpha(1.0f), 0);
         }
 
         boolean panikTime = !isGameOver() && timeLeft < 20 * 60;
 
-        drawRectangle(graphics, 70, 59.5f, 21, 10, new ColorF(0.0f), 0);
-        drawText(graphics, 70, 59.5f, 1.0f, new ColorF(1.0f, 0.0f, 0.0f), Component.literal(TextUtil.formatWithUnits(bombCount, 3)));
+        drawRectangle(70, 59.5f, 21, 10, new ColorF(0.0f), 0);
+        drawText(70, 59.5f, 1.0f, new ColorF(1.0f, 0.0f, 0.0f), Component.literal(TextUtil.formatWithUnits(bombCount, 3)));
 
-        drawRectangle(graphics, -70, 59.5f, 21, 10, new ColorF(0.0f), 0);
-        drawText(graphics, -70, 59.5f, 1.0f, panikTime && getGameTime() % 10 < 5?
+        drawRectangle(-70, 59.5f, 21, 10, new ColorF(0.0f), 0);
+        drawText(-70, 59.5f, 1.0f, panikTime && getGameTime() % 10 < 5?
                 new ColorF(1.0f, 0.0f, 0.0f) :
                 new ColorF(0.0f, 0.0f, 1.0f), Component.literal(TextUtil.getTimeString(timeLeft, false, false)));
 
@@ -276,15 +276,15 @@ public class DefusalGame extends GameInstance<DefusalGame> {
         }
         float x = 0;
         if (panikTime) {
-            x += Mth.sin(partialTicks + getGameTime());
+            x += Mth.sin(getPartialTicks() + getGameTime());
             Random rand = new Random();
             if (rand.nextInt(80) == 0) {
                 sweatDrops.add(new SweatDrop(x + rand.nextFloat(15) - 7.5f, 62.0f + rand.nextFloat(15) - 7.5f));
             }
         }
-        drawTexture(graphics, SPRITE, x, 62.0f, 15, 15, 0, u, 7, 8, 8, new ColorF(1.0f));
+        drawTexture(SPRITE, x, 62.0f, 15, 15, 0, u, 7, 8, 8, new ColorF(1.0f));
         for (int i = 0; i < sweatDrops.size();) {
-            if (sweatDrops.get(i).render(graphics, partialTicks)) {
+            if (sweatDrops.get(i).render()) {
                 i++;
             } else {
                 sweatDrops.remove(i);
@@ -303,8 +303,8 @@ public class DefusalGame extends GameInstance<DefusalGame> {
             start = getGameTime();
         }
 
-        private boolean render(GuiGraphics graphics, float partialTicks) {
-            float time = partialTicks + (getGameTime() - start);
+        private boolean render() {
+            float time = getPartialTicks() + (getGameTime() - start);
 
             float alpha = 1.0f;
             if (time < 10) {
@@ -315,7 +315,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
 
             time /= 20;
 
-            drawRectangle(graphics, x, y - time * time * time, 1.0f, 2.0f, new ColorF(0.0f, 0.7f, 1.0f).withAlpha(alpha), 0);
+            drawRectangle(x, y - time * time * time, 1.0f, 2.0f, new ColorF(0.0f, 0.7f, 1.0f).withAlpha(alpha), 0);
             //drawTexture(graphics, SPRITE, x, y - time * time * time, 2.5f, 3, 0, 32, 9, 5, 6, new ColorF(1.0f).withAlpha(alpha));
             return true;
             //return alpha < 0;

@@ -77,7 +77,7 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
         return builder.toString();
     }
 
-    public abstract void render(GuiGraphics graphics, float partialTicks);
+    public abstract void render();
 
     public abstract static class GameCodePrompt<T extends GameInstance<?>> extends GamePrompt<T> {
         public GameCodePrompt(T game) {

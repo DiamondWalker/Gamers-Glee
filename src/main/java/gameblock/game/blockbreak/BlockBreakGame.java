@@ -54,6 +54,8 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     float platformPos = 0.0f;
     float oldPlatformPos = platformPos;
 
+    final BlockBreakParticleManager particleManager = isClientSide() ? new BlockBreakParticleManager(this) : null;
+
     public float ballX = 0.0f, ballY = BALL_START_Y;
     public float oldBallX = ballX, oldBallY = ballY;
     public float ballMoveX, ballMoveY;
@@ -65,8 +67,6 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
     public final ArrayList<Block> blocks = new ArrayList<>();
     public int blocksBroken;
-
-    ArrayList<Particle> particles = null;
 
     public long lastPacketTime = 0; // every so often packets should be sent to ensure everything is synced
 
@@ -91,11 +91,8 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                 }
                 col++;
             }
-        }
-
-        if (isClientSide()) {
+        } else {
             ballPath = new CircularStack<>(5);
-            particles = new ArrayList<>();
         }
     }
 
@@ -278,15 +275,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
             }
         }
 
-        if (particles != null) {
-            for (int i = 0; i < particles.size();) {
-                if (particles.get(i).update()) {
-                    i++;
-                } else {
-                    particles.remove(i);
-                }
-            }
-        }
+        if (particleManager != null) particleManager.tick();
     }
 
     @Override
@@ -302,7 +291,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         for (int i = 0; i < count; i++) {
             float angle = random.nextFloat(Mth.TWO_PI);
             float magnitude = 0.9f + random.nextFloat(0.5f);
-            particles.add(new Particle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, block.getColor()));
+            particleManager.addParticle(x, y, magnitude * Mth.cos(angle), magnitude * Mth.sin(angle), 20, block.getColor());
         }
 
         playSound(GameblockSounds.BLOCK_BROKEN.get());
@@ -321,14 +310,14 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
     @Override
     protected void onGameLoss() {
-        if (particles != null) {
+        if (particleManager != null) {
             Random random = new Random();
             for (int i = 0; i < 25; i++) {
                 float x = random.nextFloat(10.0f) - 5.0f;
-                particles.add(new Particle(ballX + x, -75.0f,
+                particleManager.addParticle(ballX + x, -75.0f,
                         0.0f, 1.2f + random.nextFloat(3.0f),
                         40,
-                        new ColorF(random.nextInt(256), 255, 255)));
+                        new ColorF(random.nextInt(256), 255, 255));
             }
 
             playSound(GameblockSounds.BALL_BROKEN.get());
@@ -349,9 +338,10 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render() {
         float progress = calculateProgress();
 
+        GuiGraphics graphics = getGraphicsInstance();
         Matrix4f matrix = graphics.pose().last().pose();
         VertexConsumer vertexconsumer = graphics.bufferSource().getBuffer(RenderType.gui());
 
@@ -359,7 +349,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         ColorF col1 = new ColorF(0.0f, 1.0f, 1.0f, 0.3f)
                 .fadeTo(new ColorF(1.0f, 0.0f, 0.0f, 0.6f), progress);
         ColorF col2 = col1.withAlpha(0.0f);
-        float offset = Mth.sin((partialTicks + getGameTime()) / 10) * 10.0f;
+        float offset = Mth.sin((getPartialTicks() + getGameTime()) / 10) * 10.0f;
         vertexconsumer.vertex(matrix, -100.0f, -30.0f + offset, 0.0f).color(col2.getRed(), col2.getGreen(), col2.getBlue(), col2.getAlpha()).endVertex();
         vertexconsumer.vertex(matrix, -100.0f, 75.0f, 0.0f).color(col1.getRed(), col1.getGreen(), col1.getBlue(), col1.getAlpha()).endVertex();
         vertexconsumer.vertex(matrix, 100.0f, 75.0f, 0.0f).color(col1.getRed(), col1.getGreen(), col1.getBlue(), col1.getAlpha()).endVertex();
@@ -381,37 +371,38 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
             timeString = TextUtil.getTimeString(timeSinceLaunch, false, true);
         }
 
+        float partialTicks = getPartialTicks();
         if (!isGameOver()) {
-            drawText(graphics, 80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
-            drawText(graphics, 80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));
+            drawText(80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
+            drawText(80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));
         } else {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
                 if (getGameState() == GameState.WIN) {
-                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.win"));
+                    drawText(0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.win"));
                 } else {
-                    drawText(graphics, 0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), Component.translatable("gui.gameblock.block_break.lose"));
+                    drawText(0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), Component.translatable("gui.gameblock.block_break.lose"));
                 }
 
                 if (gameOverTime > 40) {
                     int percent = (int)(progress * 100);
-                    drawText(graphics, 0.0f, 8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.blocks_broken", blocksBroken, percent));
+                    drawText(0.0f, 8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.blocks_broken", blocksBroken, percent));
 
                     if (gameOverTime > 60) {
-                        drawText(graphics, 0.0f, 0.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.time", timeString));
+                        drawText(0.0f, 0.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.time", timeString));
 
                         if (gameOverTime > 80) {
-                            drawText(graphics, 0.0f, -8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
+                            drawText(0.0f, -8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
 
                             if (gameOverTime > 100) {
                                 if (score > highScore) { // new high score!
-                                    drawText(graphics, 40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.highscore"));
+                                    drawText(40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.highscore"));
 
                                     if (gameOverTime > 120) {
-                                        drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
+                                        drawText(0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
                                     }
                                 } else {
-                                    drawText(graphics, 0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
+                                    drawText(0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
                                 }
                             }
                         }
@@ -422,7 +413,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
             partialTicks = 0.0f; // fix vibration when game ends
         }
 
-        drawTexture(graphics, SPRITE,
+        drawTexture(SPRITE,
                 oldPlatformPos + (platformPos - oldPlatformPos) * partialTicks,
                 PLATFORM_Y,
                 PLATFORM_WIDTH, PLATFORM_HEIGHT, 0, 0, 0, 20, 3);
@@ -436,7 +427,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
             ballPath.forEach((Vector2f vect) -> {
                 float f = (i.getAndIncrement() + finalPartialTicks) / 5;
                 f = 1.0f - f;
-                drawRectangle(graphics,
+                drawRectangle(
                         vect.x,
                         vect.y, BALL_WIDTH * f, BALL_WIDTH * f, new ColorF(100).withAlpha(1.0f - f), 0);
             });
@@ -444,7 +435,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                 drawX,
                 drawY,
                 BALL_WIDTH, BALL_WIDTH, 0, 20, 0, 4, 4);*/
-            drawRectangle(graphics,
+            drawRectangle(
                     oldBallX + (ballX - oldBallX) * partialTicks,
                     oldBallY + (ballY - oldBallY) * partialTicks, BALL_WIDTH, BALL_WIDTH, new ColorF(100, 100, 255), 0);
         }
@@ -452,7 +443,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         for (Block block : blocks) {
             if (block == null) continue;
 
-            if (block.breaking == 0) drawTexture(graphics, SPRITE, block.x * 5, block.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
+            if (block.breaking == 0) drawTexture(SPRITE, block.x * 5, block.y * 5, BRICK_WIDTH, BRICK_HEIGHT,
                     0,
                     246,
                     block.color * 5,
@@ -460,17 +451,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                     5);
         }
 
-        for (Particle particle : particles) {
-            float f = particle.time < 10 ? (float) particle.time / 10 : 1.0f;
-            float glowiness = Mth.sin(-partialTicks + particle.time) / 2 + 0.5f;
-            glowiness = glowiness * 0.4f + 0.6f;
-
-            ColorF col = particle.color.multiply(new ColorF(glowiness)).withAlpha(f);
-            drawRectangle(graphics,
-                    particle.oldX + (particle.x - particle.oldX) * partialTicks,
-                    particle.oldY + (particle.y - particle.oldY) * partialTicks, 1.0f, 1.0f,
-                    col, 0);
-        }
+        particleManager.render();
     }
 
     public class Block {
@@ -495,36 +476,6 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                 case 6 -> new ColorF(255, 168, 0);
                 default -> null;
             };
-        }
-    }
-
-    public class Particle {
-        private float x, y;
-        private float oldX, oldY;
-        private float motionX, motionY;
-        private ColorF color;
-        private int time;
-
-        private Particle(float x, float y, float motionX, float motionY, int time, ColorF color) {
-            this.x = this.oldX = x;
-            this.y = this.oldY = y;
-            this.motionX = motionX;
-            this.motionY = motionY;
-            this.time = time;
-            this.color = color;
-        }
-
-        private boolean update() {
-            this.oldX = x;
-            this.oldY = y;
-
-            x += motionX;
-            y += motionY;
-
-            motionX *= 0.95f;
-            motionY *= 0.95f;
-
-            return time-- > 0;
         }
     }
 }

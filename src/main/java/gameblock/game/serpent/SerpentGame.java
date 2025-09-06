@@ -155,7 +155,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render() {
         int rectMinX = tiles.minX * 3 ;
         int rectMaxX = tiles.maxX * 3 ;
         int rectMinY = tiles.minY * 3 - 9;
@@ -165,30 +165,30 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         int sideWidth = rectMaxX - rectMinX;
         int sideHeight = rectMaxY - rectMinY;
 
-        drawHollowRectangle(graphics, midX, midY, sideWidth + 3, sideHeight + 3, 3.0f, new ColorF(1.0f), 0);
-        /*drawRectangle(graphics, midX, rectMaxY, sideWidth, 2, new ColorF(1.0f), 0); // top
-        drawRectangle(graphics, midX, rectMinY, sideWidth, 2, new ColorF(1.0f), 0); // bottom
-        drawRectangle(graphics, rectMinX, midY, 2, sideHeight, new ColorF(1.0f), 0); // left
-        drawRectangle(graphics, rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right*/
+        drawHollowRectangle(midX, midY, sideWidth + 3, sideHeight + 3, 3.0f, new ColorF(1.0f), 0);
+        /*drawRectangle(midX, rectMaxY, sideWidth, 2, new ColorF(1.0f), 0); // top
+        drawRectangle(midX, rectMinY, sideWidth, 2, new ColorF(1.0f), 0); // bottom
+        drawRectangle(rectMinX, midY, 2, sideHeight, new ColorF(1.0f), 0); // left
+        drawRectangle(rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right*/
 
         float y = (75.0f - rectMaxY + 1) / 2 + rectMaxY;
-        drawText(graphics, 60.0f, y, 1.0f, new ColorF(1.0f), Component.literal(String.valueOf(foodEaten)));
-        drawTexture(graphics, SPRITE, 50.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
+        drawText(60.0f, y, 1.0f, new ColorF(1.0f), Component.literal(String.valueOf(foodEaten)));
+        drawTexture(SPRITE, 50.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
 
         tiles.forEach((Vec2i coords, Integer i) -> {
             if (isSnakeTile(coords.getX(), coords.getY())) {
-                drawRectangle(graphics, coords.getX() * 3, coords.getY() * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f), 0);
+                drawRectangle(coords.getX() * 3, coords.getY() * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f), 0);
             }
         });
         /*for (int x = tiles.minX; x <= tiles.maxX; x++) {
             for (int y = tiles.minY; y <= tiles.maxY; y++) {
                 //if (isSnakeTile(x, y)) {
-                    drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
+                    drawRectangle(x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
                 //}
             }
         }*/
 
-        drawRectangle(graphics, foodX * 3, foodY * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
+        drawRectangle(foodX * 3, foodY * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
         //System.out.println(foodY);
     }
 

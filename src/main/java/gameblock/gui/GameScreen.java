@@ -73,8 +73,10 @@ public class GameScreen extends Screen {
         float scale = (float)frameWidth / 200;
         stack.translate((frameMinX + frameMaxX) / 2, (frameMinY + frameMaxY) / 2, 0.0);
         stack.scale(scale, -scale, 1.0f);
-        game.render(graphics, partialTicks);
-        if (game.prompt != null) game.prompt.render(graphics, partialTicks);
+        game.startFrame(graphics, partialTicks);
+        game.render();
+        if (game.prompt != null) game.prompt.render();
+        game.endFrame();
         stack.popPose();
         super.render(graphics, p_281550_, p_282878_, partialTicks);
         graphics.disableScissor();

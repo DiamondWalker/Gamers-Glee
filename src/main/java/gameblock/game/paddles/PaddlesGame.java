@@ -143,20 +143,21 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render() {
         if (gameStarted) {
             // draw the dividing line
             for (int i = -30; i <= 30; i++) {
-                drawRectangle(graphics, 0, i * 5, 1, 3, new ColorF(1.0f), 0);
+                drawRectangle(0, i * 5, 1, 3, new ColorF(1.0f), 0);
             }
+            float partialTicks = getPartialTicks();
 
-            drawRectangle(graphics, -Paddle.POSITION, leftPaddle.oldPos + partialTicks * (leftPaddle.pos - leftPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
-            drawRectangle(graphics, Paddle.POSITION, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            drawRectangle(-Paddle.POSITION, leftPaddle.oldPos + partialTicks * (leftPaddle.pos - leftPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            drawRectangle(Paddle.POSITION, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
 
-            drawRectangle(graphics, ball.oldPos.x + partialTicks * (ball.pos.x - ball.oldPos.x), ball.oldPos.y + partialTicks * (ball.pos.y - ball.oldPos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
+            drawRectangle(ball.oldPos.x + partialTicks * (ball.pos.x - ball.oldPos.x), ball.oldPos.y + partialTicks * (ball.pos.y - ball.oldPos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
         } else if (prompt == null) {
-            drawText(graphics, 0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
-            drawText(graphics, 0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));
+            drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
+            drawText(0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));
         }
     }
 }

@@ -22,10 +22,11 @@ public class GameblockBackgroundRenderer {
         if (os.getGameTime() % 10 == 0) cubes.enqueue(new BackgroundBlock());
     }
 
-    public void render(GuiGraphics graphics, float partialTicks) {
-        os.drawRectangle(graphics, 0, 0, 200, 200, new ColorF(1, 18, 23, 255), 0);
-        PoseStack pose = graphics.pose();
+    public void render() {
+        os.drawRectangle(0, 0, 200, 200, new ColorF(1, 18, 23, 255), 0);
+        PoseStack pose = os.getGraphicsInstance().pose();
 
+        float partialTicks = os.getPartialTicks();
         cubes.forEach((BackgroundBlock block) -> {
             for (int i = 0; i < 8; i++) {
                 float time = partialTicks + os.getGameTime() - block.timeStart;
@@ -38,7 +39,7 @@ public class GameblockBackgroundRenderer {
                 pose.mulPose(Axis.ZP.rotation((partialTicks + os.getGameTime() - i * 10) / 400));
                 pose.scale(scale, scale, 1);
                 pose.translate(block.x, block.y, /*100 - time*/0);
-                os.drawRectangle(graphics, RenderType.gui(), 0,0, 0.2f, 0.2f, new ColorF(5, 129, 62).withAlpha(0.8f * alpha), 0);
+                os.drawRectangle(RenderType.gui(), 0,0, 0.2f, 0.2f, new ColorF(5, 129, 62).withAlpha(0.8f * alpha), 0);
                 pose.popPose();
             }
         });

@@ -112,38 +112,38 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render() {
         if (getGameTime() <= LOGO_DURATION) {
-            logoRenderer.render(graphics, partialTicks);
+            logoRenderer.render();
         } else if (menuLoaded()) {
-            bgRenderer.render(graphics, partialTicks);
+            bgRenderer.render();
 
-            float iconTransparency = (partialTicks + getGameTime() - LOGO_DURATION - MENU_FADE_IN_TIME - ICON_FADE_IN_DELAY) / ICON_FADE_IN_TIME;
+            float iconTransparency = (getPartialTicks() + getGameTime() - LOGO_DURATION - MENU_FADE_IN_TIME - ICON_FADE_IN_DELAY) / ICON_FADE_IN_TIME;
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
 
             if (!gameIcons.isEmpty()) {
-                for (OSIcon icon : gameIcons) icon.render(graphics, partialTicks, iconTransparency);
+                for (OSIcon icon : gameIcons) icon.render(iconTransparency);
             } else {
-                drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 0.5f), 0);
-                drawText(graphics, 0, 0, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.os.no_cartridges_1"), Component.translatable("gui.gameblock.os.no_cartridges_2"));
+                drawRectangle(0, 0, 200, 200, new ColorF(0, 0, 0, 0.5f), 0);
+                drawText(0, 0, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.os.no_cartridges_1"), Component.translatable("gui.gameblock.os.no_cartridges_2"));
             }
         } else { // loading screen
             for (int i = 0; i < 8; i++) {
                 float angle = Mth.HALF_PI - (Mth.TWO_PI / 8) * i;
                 int currentlyLitRect = (int) ((getGameTime() / 3) % 8);
-                drawRectangle(graphics, Mth.cos(angle) * 12, Mth.sin(angle) * 12, 5.0f, 4.0f, new ColorF(i == currentlyLitRect ? 1.0f : 0.3f), angle);
+                drawRectangle(Mth.cos(angle) * 12, Mth.sin(angle) * 12, 5.0f, 4.0f, new ColorF(i == currentlyLitRect ? 1.0f : 0.3f), angle);
             }
         }
 
         // the fade between the logo screen and the menu screen
-        float fade = (partialTicks + getGameTime()) - LOGO_DURATION;
+        float fade = (getPartialTicks() + getGameTime()) - LOGO_DURATION;
         if (fade < 0) { // logo fade out
             fade = -fade / LOGO_FADE_OUT_TIME;
         } else { // menu fade in
             fade = fade / MENU_FADE_IN_TIME;
         }
         if (fade < 1.0f) {
-            drawRectangle(graphics, 0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f - fade), 0);
+            drawRectangle(0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f - fade), 0);
         }
     }
 

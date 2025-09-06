@@ -330,7 +330,28 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     protected abstract void tick();
 
-    public abstract void render(GuiGraphics graphics, float partialTicks);
+    private GuiGraphics graphics = null;
+    private float partialTicks = 0.0f;
+
+    public final void startFrame(GuiGraphics graphics, float partialTicks) {
+        this.graphics = graphics;
+        this.partialTicks = partialTicks;
+    }
+
+    public final void endFrame() {
+        this.graphics = null;
+        this.partialTicks = 0.0f;
+    }
+
+    public GuiGraphics getGraphicsInstance() {
+        return graphics;
+    }
+
+    public float getPartialTicks() {
+        return partialTicks;
+    }
+
+    public abstract void render();
 
     public Music getMusic() {
         return null;
@@ -344,7 +365,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         playSound(event, 1.0f, 1.0f);
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, Component txt, ColorF color) {
+    private void drawText(float x, float y, float scale, Component txt, ColorF color) {
         Font font = Minecraft.getInstance().font;
         float width = font.width(txt);
         float height = font.lineHeight;
@@ -359,7 +380,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, Component[] txt, ColorF colorF) {
+    private void drawText(float x, float y, float scale, Component[] txt, ColorF colorF) {
         Font font = Minecraft.getInstance().font;
         float height = font.lineHeight * txt.length + 2 * (txt.length - 1);
 
@@ -387,20 +408,20 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
     }
 
-    public final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
+    public final void drawText(float x, float y, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
         TextRenderingRules rules = new TextRenderingRules().setMaxWidth(maxWidth).setMaxLines(maxLines);
-        drawText(graphics, x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
+        drawText(x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
     }
 
-    public final void drawText(GuiGraphics graphics, float x, float y, float scale, ColorF color, Component... lines) {
-        drawText(graphics, x, y, scale, lines, color);
+    public final void drawText(float x, float y, float scale, ColorF color, Component... lines) {
+        drawText(x, y, scale, lines, color);
     }
 
-    public final void drawRectangle(GuiGraphics graphics, float x, float y, float width, float height, ColorF color, float angle) {
-        drawRectangle(graphics, RenderType.gui(), x, y, width, height, color, angle);
+    public final void drawRectangle(float x, float y, float width, float height, ColorF color, float angle) {
+        drawRectangle(RenderType.gui(), x, y, width, height, color, angle);
     }
 
-    public final void drawRectangle(GuiGraphics graphics, RenderType type, float x, float y, float width, float height, ColorF color, float angle) {
+    public final void drawRectangle(RenderType type, float x, float y, float width, float height, ColorF color, float angle) {
         PoseStack pose = graphics.pose();
         pose.pushPose();
         pose.translate(x, y, 0.0f);
@@ -434,11 +455,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    public final void drawHollowRectangle(GuiGraphics graphics, float x, float y, float width, float height, float thickness, ColorF color, float angle) {
-        drawHollowRectangle(graphics, RenderType.gui(), x, y, width, height, thickness, color, angle);
+    public final void drawHollowRectangle(float x, float y, float width, float height, float thickness, ColorF color, float angle) {
+        drawHollowRectangle(RenderType.gui(), x, y, width, height, thickness, color, angle);
     }
 
-    public final void drawHollowRectangle(GuiGraphics graphics, RenderType type, float x, float y, float width, float height, float thickness, ColorF color,  float angle) {
+    public final void drawHollowRectangle(RenderType type, float x, float y, float width, float height, float thickness, ColorF color,  float angle) {
         PoseStack pose = graphics.pose();
         pose.pushPose();
         pose.translate(x, y, 0.0f);
@@ -498,27 +519,27 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
-        drawTexture(graphics, texture, x, y, width, height, angle, u, v, uWidth, vHeight, new ColorF(1.0f));
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
+        drawTexture(texture, x, y, width, height, angle, u, v, uWidth, vHeight, new ColorF(1.0f));
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle) {
-        drawTexture(graphics, texture, x, y, width, height, angle, new ColorF(1.0f));
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle) {
+        drawTexture(texture, x, y, width, height, angle, new ColorF(1.0f));
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
         float minU = (float) u / 256;
         float minV = (float) v / 256;
         float maxU = (float) (u + uWidth) / 256;
         float maxV = (float) (v + vHeight) / 256;
-        drawTexture(graphics, texture, x, y, width, height, angle, minU, maxU, minV, maxV, color);
+        drawTexture(texture, x, y, width, height, angle, minU, maxU, minV, maxV, color);
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, ColorF color) {
-        drawTexture(graphics, texture, x, y, width, height, angle, 0.0f, 1.0f, 0.0f, 1.0f, color);
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, ColorF color) {
+        drawTexture(texture, x, y, width, height, angle, 0.0f, 1.0f, 0.0f, 1.0f, color);
     }
 
-    private void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, float minU, float maxU, float minV, float maxV, ColorF color) {
+    private void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, float minU, float maxU, float minV, float maxV, ColorF color) {
         RenderSystem.setShaderTexture(0, texture);
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         RenderSystem.enableBlend();

@@ -50,20 +50,22 @@ public class OSIcon {
         }
     }
 
-    public void render(GuiGraphics graphics, float partialTicks, float transparency) {
+    public void render(float transparency) {
+        float partialTicks = os.getPartialTicks();
+
         Vec2 center = getPosition();
         float selectedFade = ((selected ? partialTicks : -partialTicks) + selectionTicks) / SELECTION_TIME;
         selectedFade = Mth.clamp(selectedFade, 0.0f, 1.0f);
         float scale = 1.0f + 0.2f * selectedFade;
         ColorF textColor = new ColorF(1.0f).fadeTo(new ColorF(1.0f, 1.0f, 0.0f), selectedFade);
 
-        PoseStack poseStack = graphics.pose();
+        PoseStack poseStack = os.getGraphicsInstance().pose();
         poseStack.pushPose();
         poseStack.translate(center.x, center.y, 0.0f);
         poseStack.scale(scale, scale, scale);
 
-        os.drawTexture(graphics, icon, 0, 5.0f, 15.0f, 15.0f, 0, new ColorF(1.0f).withAlpha(transparency));
-        os.drawText(graphics, 0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), translationKey);
+        os.drawTexture(icon, 0, 5.0f, 15.0f, 15.0f, 0, new ColorF(1.0f).withAlpha(transparency));
+        os.drawText(0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), translationKey);
 
         poseStack.popPose();
     }

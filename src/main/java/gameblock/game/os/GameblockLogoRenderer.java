@@ -164,21 +164,21 @@ public class GameblockLogoRenderer {
         this.os = os;
     }
 
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render() {
         for (Vec2i block : GameblockLogoRenderer.TITLE_BLOCKS) {
             long time = block.getX() + block.getY() + 50;
             if (os.getGameTime() >= time) {
                 time = os.getGameTime() - time;
-                float f = Math.min(1.0f, ((float)time + partialTicks) / BLOCK_FADE_TIME);
+                float f = Math.min(1.0f, ((float)time + os.getPartialTicks()) / BLOCK_FADE_TIME);
 
                 float wave = 1.0f;
-                float waveTime = os.getGameTime() - 85 + partialTicks;
+                float waveTime = os.getGameTime() - 85 + os.getPartialTicks();
                 if (waveTime >= 0) {
                     wave = Mth.cos(waveTime / 2) / 2 + 0.5f;
                     wave = wave * 0.15f + 0.85f;
                 }
 
-                os.drawRectangle(graphics, block.getX() * BLOCK_WIDTH, (block.getY() - 2.5f) * BLOCK_WIDTH, // blocks are translated down 2.5 units so they're centered
+                os.drawRectangle(block.getX() * BLOCK_WIDTH, (block.getY() - 2.5f) * BLOCK_WIDTH, // blocks are translated down 2.5 units so they're centered
                         BLOCK_WIDTH, BLOCK_WIDTH,
                         new ColorF(wave, wave, wave, f), 0);
             }
