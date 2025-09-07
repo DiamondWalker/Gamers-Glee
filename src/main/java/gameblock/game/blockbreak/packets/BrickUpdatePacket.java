@@ -4,14 +4,14 @@ import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.packet.UpdateGamePacket;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class BlockUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
+public class BrickUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     private short brick;
 
-    public BlockUpdatePacket(int i) {
+    public BrickUpdatePacket(int i) {
         this.brick = (short) i;
     }
 
-    public BlockUpdatePacket(FriendlyByteBuf buffer) {
+    public BrickUpdatePacket(FriendlyByteBuf buffer) {
         super(buffer);
     }
 

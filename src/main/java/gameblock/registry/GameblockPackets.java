@@ -50,7 +50,7 @@ public class GameblockPackets {
         // block break
         register(BallUpdatePacket.class, BallUpdatePacket::new);
         register(BallLaunchPacket.class, BallLaunchPacket::new);
-        register(BlockUpdatePacket.class, BlockUpdatePacket::new);
+        register(BrickUpdatePacket.class, BrickUpdatePacket::new);
         register(ScoreUpdatePacket.class, ScoreUpdatePacket::new);
 
         // serpent

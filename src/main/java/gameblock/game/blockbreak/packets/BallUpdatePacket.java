@@ -43,10 +43,10 @@ public class BallUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     public void gameUpdateReceivedOnClient(BlockBreakGame game) {
         if (game.getGameTime() - game.clientToPacketBallUpdateTime < 4) return;
 
-        game.ballX = xPos;
-        game.ballY = yPos;
-        game.ballMoveX = xMotion;
-        game.ballMoveY = yMotion;
+        game.ball.x = xPos;
+        game.ball.y = yPos;
+        game.ball.moveX = xMotion;
+        game.ball.moveY = yMotion;
         if (playSound && game.isClientSide()) game.playSound(GameblockSounds.BALL_BOUNCE.get());
     }
 
@@ -54,10 +54,10 @@ public class BallUpdatePacket extends UpdateGamePacket<BlockBreakGame> {
     public void gameUpdateReceivedOnServer(BlockBreakGame game, ServerPlayer sender) {
         game.lastPacketTime = game.getGameTime();
 
-        game.ballX = xPos;
-        game.ballY = yPos;
-        game.ballMoveX = xMotion;
-        game.ballMoveY = yMotion;
+        game.ball.x = xPos;
+        game.ball.y = yPos;
+        game.ball.moveX = xMotion;
+        game.ball.moveY = yMotion;
         if (playSound && game.isClientSide()) game.playSound(GameblockSounds.BALL_BOUNCE.get());
     }
 }
