@@ -35,6 +35,6 @@ public class BallLaunchPacket extends UpdateGamePacket<BlockBreakGame> {
     public void gameUpdateReceivedOnServer(BlockBreakGame game, ServerPlayer sender) {
         game.lastPacketTime = game.getGameTime();
         game.ball.x = xPos;
-        game.launchBall(xMotion);
+        game.ball.launch(xMotion);
     }
 }

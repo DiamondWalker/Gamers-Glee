@@ -36,15 +36,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
-    private static final int UPDATES_PER_TICK = 30;
-
     public static final float PLATFORM_Y = -50.0f;
     public static final float PLATFORM_WIDTH = 20.0f;
     public static final float PLATFORM_HEIGHT = 3.0f;
 
-    public static final float BALL_START_Y = PLATFORM_Y + PLATFORM_HEIGHT / 2 + BlockBreakBall.SIZE / 2;
-
-    private static final int BRICK_BREAK_CLIENT_REAPPEAR_TIME = 30; // when a brick is removed on the client side, we still aren't 100% sure it's actually getting removed, so after a bit we'll bring it back
+    public static final int BRICK_BREAK_CLIENT_REAPPEAR_TIME = 30; // when a brick is removed on the client side, we still aren't 100% sure it's actually getting removed, so after a bit we'll bring it back
 
     private static final int MAX_PACKET_INTERVAL = 10;
 
@@ -112,12 +108,8 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         highScore = buffer.readShort();
     }
 
-    private float calculateProgress() {
+    public float calculateProgress() {
         return (float) blocksBroken/ blocks.size();
-    }
-
-    private float calculateBallSpeed() {
-        return BlockBreakBall.INITIAL_SPEED + calculateProgress() * BlockBreakBall.SPEED_INCREASE;
     }
 
     private void recalculateScore() {
@@ -132,22 +124,12 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
     }
 
-    public void launchBall(float xMotion) {
-        ball.moveX = xMotion / 2;
-        ball.moveY = BlockBreakBall.INITIAL_SPEED / UPDATES_PER_TICK;
-
-        double speed = Math.sqrt(ball.moveX * ball.moveX + ball.moveY * ball.moveY);
-        ball.moveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-        ball.moveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-        ball.launched = true;
-    }
-
     @Override
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
         if (buttonPressed == Direction1D.LEFT) {
             if (!ball.launched) {
-                float motion = (platformPos - oldPlatformPos) / UPDATES_PER_TICK;
-                launchBall(motion);
+                float motion = platformPos - oldPlatformPos;
+                ball.launch(motion);
                 GameblockPackets.sendToServer(new BallLaunchPacket(ball.x, motion));
             }
 
@@ -159,106 +141,14 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public void tick() {
         if (!isGameOver()) {
             oldPlatformPos = platformPos;
-            ball.oldX = ball.x;
-            ball.oldY = ball.y;
-            if (ball.path != null && ball.launched) ball.path.enqueue(new Vector2f(ball.oldX, ball.oldY));
+            platformPos = getMouseCoordinates().x;
+            platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
 
-            boolean ballMoveUpdate = false;
-            boolean sendBounceNoise = false;
-
-            for (int ticks = 0; ticks < UPDATES_PER_TICK; ticks++) {
-                //platformPos += (PLATFORM_SPEED / UPDATES_PER_TICK) * moveDir.getComponent();
-                platformPos = getMouseCoordinates().x;
-                platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
-
-                if (!ball.launched) {
-                    ball.x = platformPos;
-                    ball.y = BALL_START_Y;
-                } else {
-                    ball.x += ball.moveX;
-                    ball.y += ball.moveY;
-
-                    if (ball.x >= 100.0f - BlockBreakBall.SIZE / 2) {
-                        ball.moveX = -Math.abs(ball.moveX);
-                        ballMoveUpdate = true;
-                        sendBounceNoise = true;
-                    } else if (ball.x <= -100.0f + BlockBreakBall.SIZE / 2) {
-                        ball.moveX = Math.abs(ball.moveX);
-                        ballMoveUpdate = true;
-                        sendBounceNoise = true;
-                    }
-                    if (ball.y >= 75.0f - BlockBreakBall.SIZE / 2) {
-                        ball.moveY = -Math.abs(ball.moveY);
-                        ballMoveUpdate = true;
-                        sendBounceNoise = true;
-                    } else if (ball.y <= -75.0f - BlockBreakBall.SIZE / 2) {
-                        if (!isClientSide()) setGameState(GameState.LOSS);
-                        return;
-                    }
-
-                    // platform collision (this is handled on the client)
-                    if (isClientSide() && ball.moveY < 0.0f) {
-                        float platformCurrentPos = oldPlatformPos + ((float) (ticks + 1) / UPDATES_PER_TICK) * (platformPos - oldPlatformPos);
-                        if (ball.x >= platformCurrentPos - (PLATFORM_WIDTH + BlockBreakBall.SIZE) / 2 && ball.x <= platformCurrentPos + (PLATFORM_WIDTH + BlockBreakBall.SIZE) / 2) {
-                            if (ball.y <= PLATFORM_Y + (PLATFORM_HEIGHT + BlockBreakBall.SIZE) / 2 && ball.y >= PLATFORM_Y - (PLATFORM_HEIGHT + BlockBreakBall.SIZE) / 2) {
-                                //ball.moveX += PLATFORM_SPEED / UPDATES_PER_TICK / 4 * moveDir.getComponent();
-                                ball.moveX += (platformPos - oldPlatformPos) / UPDATES_PER_TICK / 2;
-                                ball.moveY = Math.abs(ball.moveY);
-                                double speed = Math.sqrt(ball.moveX * ball.moveX + ball.moveY * ball.moveY);
-                                ball.moveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-                                ball.moveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-
-                                playSound(GameblockSounds.BALL_BOUNCE.get());
-                                GameblockPackets.sendToServer(new BallUpdatePacket(ball.x, ball.y, ball.moveX, ball.moveY, false));
-                                clientToPacketBallUpdateTime = getGameTime();
-                                //ballMoveUpdate = true;
-                            }
-                        }
-                    }
-
-                    for (int i = 0; i < blocks.size(); i++) {
-                        BlockBreakBrick block = blocks.get(i);
-                        if (block == null) continue;
-                        if (block.breaking > 0) {
-                            block.breaking--;
-                            continue;
-                        }
-
-                        float brickX = block.x * 5;
-                        float brickY = block.y * 5;
-                        if (ball.x >= brickX - (BlockBreakBall.SIZE + BlockBreakBrick.WIDTH) / 2 && ball.x <= brickX + (BlockBreakBall.SIZE + BlockBreakBrick.WIDTH) / 2) {
-                            if (ball.y >= brickY - (BlockBreakBall.SIZE + BlockBreakBrick.HEIGHT) / 2 && ball.y <= brickY + (BlockBreakBall.SIZE + BlockBreakBrick.HEIGHT) / 2) {
-                                float xComponent = (ball.x - brickX) / BlockBreakBrick.WIDTH;
-                                float yComponent = (ball.y - brickY) / BlockBreakBrick.HEIGHT;
-                                if (Math.abs(xComponent) > Math.abs(yComponent)) {
-                                    ball.moveX = Math.abs(ball.moveX) * Math.signum(xComponent);
-                                } else {
-                                    ball.moveY = Math.abs(ball.moveY) * Math.signum(yComponent);
-                                }
-                                double speed = Math.sqrt(ball.moveX * ball.moveX + ball.moveY * ball.moveY);
-                                ball.moveX *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-                                ball.moveY *= (calculateBallSpeed() / UPDATES_PER_TICK / speed);
-
-                                ballMoveUpdate = true;
-                                if (!isClientSide()) {
-                                    blocksBroken++;
-                                    blocks.set(i, null);//blocks.set(i, null);
-                                    if (blocksBroken >= blocks.size()) setGameState(GameState.WIN);
-                                    sendToAllPlayers(new BrickUpdatePacket(i), null);
-                                } else {
-                                    blocks.get(i).breaking = BRICK_BREAK_CLIENT_REAPPEAR_TIME;
-                                    spawnBrickBreakParticles(blocks.get(i));
-                                    //playSound(GameblockSounds.BRICK_BREAK.get());
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            ball.tick();
 
             if (ball.launched && !isClientSide()) { // server dictates the ball position
-                if (ballMoveUpdate || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
-                    boolean finalSendBounceNoise = sendBounceNoise;
+                if (ball.needsToSyncMovement() || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
+                    boolean finalSendBounceNoise = ball.shouldPlayBounceSound();
                     sendToAllPlayers(new BallUpdatePacket(ball.x, ball.y, ball.moveX, ball.moveY, finalSendBounceNoise), null);
                     lastPacketTime = getGameTime();
                 }

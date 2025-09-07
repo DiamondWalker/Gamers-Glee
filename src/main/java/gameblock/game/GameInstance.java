@@ -44,8 +44,10 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     private final boolean clientSide;
 
-    public static final int MAX_X = 100;
-    public static final int MAX_Y = 75;
+    public static final float MAX_X = 100.0f;
+    public static final float MIN_X = -100.0f;
+    public static final float MAX_Y = 75.0f;
+    public static final float MIN_Y = -75.0f;
 
     private long gameTime = 0;
     private GameState gameState = GameState.ACTIVE;
@@ -169,7 +171,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return null;
     }
 
-    protected final void setGameState(GameState state) {
+    public final void setGameState(GameState state) {
         gameState = state;
         if (!isClientSide()) {
             sendToAllPlayers(new GameStatePacket(state), null);

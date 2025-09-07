@@ -5,6 +5,7 @@ import gameblock.game.paddles.packets.ClientToServerPaddleUpdatePacket;
 import gameblock.game.paddles.packets.PaddleGameStatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.MathHelper;
 import gameblock.util.rendering.ColorF;
 import gameblock.util.physics.Direction1D;
 import net.minecraft.network.chat.Component;
@@ -122,12 +123,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             ball.pos = ball.pos.add(ball.motion);
 
             if (Math.abs(ball.pos.y + PaddlesBall.SIZE / 2) >= 75) {
-                if (Math.round(Math.signum(ball.pos.y)) == Math.round(Math.signum(ball.motion.y))) { // make sure it's still moving out of the screen
+                if (MathHelper.hasSameSign(ball.pos.y, ball.motion.y)) { // make sure it's still moving out of the screen
                     ball.motion = new Vec2(ball.motion.x, ball.motion.y * -1);
                 }
             }
             if (Math.abs(Math.abs(ball.pos.x) - Paddle.POSITION) <= (Paddle.DEPTH + PaddlesBall.SIZE) / 2) { // is ball at the correct x range to hit a paddle?
-                if (Math.round(Math.signum(ball.pos.x)) == Math.round(Math.signum(ball.motion.x))) { // make sure ball is moving towards the paddles and not bouncing off
+                if (MathHelper.hasSameSign(ball.pos.x, ball.motion.x)) { // make sure ball is moving towards the paddles and not bouncing off
                     Direction1D side = ball.pos.x > 0 ? Direction1D.RIGHT : Direction1D.LEFT;
                     Paddle hitPaddle = getPaddleFromDirection(side);
 
