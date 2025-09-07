@@ -36,11 +36,11 @@ public class CircularStack<T> {
 
         for (int i = index; i >= 0; i--) {
             if (c++ == count) return;
-            func.accept(data[i]);
+            if (data[i] != null) func.accept(data[i]);
         }
         for (int i = data.length - 1; i > index; i--) {
             if (c++ == count) return;
-            func.accept(data[i]);
+            if (data[i] != null) func.accept(data[i]);
         }
     }
 

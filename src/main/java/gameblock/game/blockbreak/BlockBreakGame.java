@@ -28,6 +28,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
+import org.lwjgl.system.Platform;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -36,20 +37,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
-    public static final float PLATFORM_Y = -50.0f;
-    public static final float PLATFORM_WIDTH = 20.0f;
-    public static final float PLATFORM_HEIGHT = 3.0f;
-
     public static final int BRICK_BREAK_CLIENT_REAPPEAR_TIME = 30; // when a brick is removed on the client side, we still aren't 100% sure it's actually getting removed, so after a bit we'll bring it back
 
     private static final int MAX_PACKET_INTERVAL = 10;
 
-    float platformPos = 0.0f;
-    float oldPlatformPos = platformPos;
 
     final BlockBreakParticleManager particleManager = isClientSide() ? new BlockBreakParticleManager(this) : null;
 
     public BlockBreakBall ball;
+    public BlockBreakPlatform platform;
 
     public long timeSinceLaunch = 0;
 
@@ -66,6 +62,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public BlockBreakGame(Player player) {
         super(player, GameblockGames.BLOCK_BREAK_GAME);
         ball = new BlockBreakBall(this);
+        platform = new BlockBreakPlatform(this);
         
         int col = 0;
         if (!isClientSide()) {
@@ -128,7 +125,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
         if (buttonPressed == Direction1D.LEFT) {
             if (!ball.launched) {
-                float motion = platformPos - oldPlatformPos;
+                float motion = platform.pos - platform.oldPos;
                 ball.launch(motion);
                 GameblockPackets.sendToServer(new BallLaunchPacket(ball.x, motion));
             }
@@ -139,19 +136,15 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
 
     @Override
     public void tick() {
-        if (!isGameOver()) {
-            oldPlatformPos = platformPos;
-            platformPos = getMouseCoordinates().x;
-            platformPos = Math.max(Math.min(100.0f - PLATFORM_WIDTH / 2, platformPos), -100.0f + PLATFORM_WIDTH / 2);
-
-            ball.tick();
-
-            if (ball.launched && !isClientSide()) { // server dictates the ball position
-                if (ball.needsToSyncMovement() || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
-                    boolean finalSendBounceNoise = ball.shouldPlayBounceSound();
-                    sendToAllPlayers(new BallUpdatePacket(ball.x, ball.y, ball.moveX, ball.moveY, finalSendBounceNoise), null);
-                    lastPacketTime = getGameTime();
-                }
+        platform.tick();
+        ball.tick();
+        if (ball.launched && !isClientSide()) { // server dictates the ball position
+            if (ball.needsToSyncMovement() || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
+                boolean finalSendBounceNoise = ball.shouldPlayBounceSound();
+                sendToAllPlayers(new BallUpdatePacket(ball.x, ball.y, ball.moveX, ball.moveY, finalSendBounceNoise), null);
+                lastPacketTime = getGameTime();
+            }
+            if (!isGameOver()) {
                 timeSinceLaunch++;
                 recalculateScore();
             }
@@ -253,7 +246,6 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
             timeString = TextUtil.getTimeString(timeSinceLaunch, false, true);
         }
 
-        float partialTicks = getPartialTicks();
         if (!isGameOver()) {
             drawText(80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
             drawText(80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));
@@ -291,36 +283,10 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
                     }
                 }
             }
-
-            partialTicks = 0.0f; // fix vibration when game ends
         }
 
-        drawTexture(SPRITE,
-                oldPlatformPos + (platformPos - oldPlatformPos) * partialTicks,
-                PLATFORM_Y,
-                PLATFORM_WIDTH, PLATFORM_HEIGHT, 0, 0, 0, 20, 3);
-        /*ball.path.forEach((Vector2f vect)-> drawTexture(graphics, SPRITE,
-                vect.x,
-                vect.y,
-                BlockBreakBall.SIZE, BlockBreakBall.SIZE, 0, 20, 4, 4, 4));*/
-        if (!isGameOver()) {
-            AtomicInteger i = new AtomicInteger();
-            float finalPartialTicks = partialTicks;
-            ball.path.forEach((Vector2f vect) -> {
-                float f = (i.getAndIncrement() + finalPartialTicks) / 5;
-                f = 1.0f - f;
-                drawRectangle(
-                        vect.x,
-                        vect.y, BlockBreakBall.SIZE * f, BlockBreakBall.SIZE * f, new ColorF(100).withAlpha(1.0f - f), 0);
-            });
-        /*drawTexture(graphics, SPRITE,
-                drawX,
-                drawY,
-                BlockBreakBall.SIZE, BlockBreakBall.SIZE, 0, 20, 0, 4, 4);*/
-            drawRectangle(
-                    ball.oldX + (ball.x - ball.oldX) * partialTicks,
-                    ball.oldY + (ball.y - ball.oldY) * partialTicks, BlockBreakBall.SIZE, BlockBreakBall.SIZE, new ColorF(100, 100, 255), 0);
-        }
+        platform.render();
+        ball.render();
 
         for (BlockBreakBrick block : blocks) {
             if (block == null) continue;

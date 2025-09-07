@@ -291,7 +291,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {}
 
-    protected boolean isGameOver() {
+    public boolean isGameOver() {
         return gameState != GameState.ACTIVE;
     }
 
