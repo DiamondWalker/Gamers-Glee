@@ -1,8 +1,7 @@
 package gameblock.game.os;
 
-import gameblock.util.ColorF;
-import gameblock.util.Vec2i;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.util.rendering.ColorF;
+import gameblock.util.physics.Vec2i;
 import net.minecraft.util.Mth;
 
 import java.util.ArrayList;

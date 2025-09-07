@@ -1,6 +1,7 @@
-package gameblock.util;
+package gameblock.util.datastructure;
 
-import java.util.ArrayList;
+import gameblock.util.physics.Vec2i;
+
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 

@@ -3,10 +3,9 @@ package gameblock.game.os;
 import gameblock.game.GamePrompt;
 import gameblock.game.os.packets.JoinGamePacket;
 import gameblock.registry.GameblockPackets;
-import gameblock.util.ColorF;
+import gameblock.util.rendering.ColorF;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.phys.Vec2;
 

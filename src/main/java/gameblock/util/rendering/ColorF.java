@@ -1,4 +1,4 @@
-package gameblock.util;
+package gameblock.util.rendering;
 
 import net.minecraft.util.Mth;
 

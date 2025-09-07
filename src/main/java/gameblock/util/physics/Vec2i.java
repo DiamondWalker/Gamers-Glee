@@ -1,11 +1,10 @@
-package gameblock.util;
+package gameblock.util.physics;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import net.minecraft.Util;
 import net.minecraft.core.Vec3i;
 import net.minecraft.util.ExtraCodecs;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.IntStream;
 

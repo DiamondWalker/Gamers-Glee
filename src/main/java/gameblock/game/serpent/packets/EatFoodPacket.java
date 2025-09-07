@@ -3,11 +3,8 @@ package gameblock.game.serpent.packets;
 import gameblock.game.serpent.SerpentGame;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockSounds;
-import gameblock.util.Direction2D;
 import net.minecraft.network.FriendlyByteBuf;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class EatFoodPacket extends UpdateGamePacket<SerpentGame> {

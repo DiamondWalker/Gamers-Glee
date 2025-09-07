@@ -1,4 +1,4 @@
-package gameblock.util;
+package gameblock.util.physics;
 
 public enum Direction1D {
     LEFT(-1),

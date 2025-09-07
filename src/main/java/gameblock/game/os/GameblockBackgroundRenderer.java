@@ -2,9 +2,8 @@ package gameblock.game.os;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
-import gameblock.util.CircularStack;
-import gameblock.util.ColorF;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.util.datastructure.CircularStack;
+import gameblock.util.rendering.ColorF;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 

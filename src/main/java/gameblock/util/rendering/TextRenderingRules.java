@@ -1,12 +1,11 @@
-package gameblock.util;
+package gameblock.util.rendering;
 
+import gameblock.util.physics.Direction1D;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 import java.util.Optional;
-import java.util.Stack;
 
 public class TextRenderingRules {
     int maxWidth = Integer.MAX_VALUE;

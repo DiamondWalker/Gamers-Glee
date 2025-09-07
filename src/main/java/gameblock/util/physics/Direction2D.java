@@ -1,7 +1,4 @@
-package gameblock.util;
-
-import net.minecraft.core.Vec3i;
-import org.joml.Vector2i;
+package gameblock.util.physics;
 
 public enum Direction2D {
     UP(0, 1),

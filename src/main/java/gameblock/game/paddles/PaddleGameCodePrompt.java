@@ -3,8 +3,7 @@ package gameblock.game.paddles;
 import gameblock.game.GamePrompt;
 import gameblock.game.paddles.packets.PaddleGameCodeSelectionPacket;
 import gameblock.registry.GameblockPackets;
-import gameblock.util.ColorF;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.util.rendering.ColorF;
 import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 

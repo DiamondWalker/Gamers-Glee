@@ -1,10 +1,9 @@
 package gameblock.game.serpent.packets;
 
-import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.game.serpent.SerpentGame;
 import gameblock.packet.UpdateGamePacket;
-import gameblock.util.Direction2D;
-import gameblock.util.Vec2i;
+import gameblock.util.physics.Direction2D;
+import gameblock.util.physics.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 

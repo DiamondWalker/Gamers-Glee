@@ -1,4 +1,4 @@
-package gameblock.util;
+package gameblock.util.datastructure;
 
 import java.util.function.Consumer;
 

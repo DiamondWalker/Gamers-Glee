@@ -1,10 +1,7 @@
 package gameblock.game.os;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import gameblock.game.GameInstance;
-import gameblock.registry.GameblockGames;
-import gameblock.util.ColorF;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.util.rendering.ColorF;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;

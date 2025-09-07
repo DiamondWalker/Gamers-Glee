@@ -2,7 +2,7 @@ package gameblock.game.defusal.packets;
 
 import gameblock.game.defusal.DefusalGame;
 import gameblock.packet.UpdateGamePacket;
-import gameblock.util.Vec2i;
+import gameblock.util.physics.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class BombRevealPacket extends UpdateGamePacket<DefusalGame> {

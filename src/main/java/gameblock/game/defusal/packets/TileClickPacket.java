@@ -2,8 +2,8 @@ package gameblock.game.defusal.packets;
 
 import gameblock.game.defusal.DefusalGame;
 import gameblock.packet.UpdateGamePacket;
-import gameblock.util.Direction1D;
-import gameblock.util.Vec2i;
+import gameblock.util.physics.Direction1D;
+import gameblock.util.physics.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 

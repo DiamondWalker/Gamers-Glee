@@ -2,7 +2,7 @@ package gameblock.game.paddles.packets;
 
 import gameblock.game.paddles.PaddlesGame;
 import gameblock.packet.UpdateGamePacket;
-import gameblock.util.Direction1D;
+import gameblock.util.physics.Direction1D;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class PaddleGameStatePacket extends UpdateGamePacket<PaddlesGame> {

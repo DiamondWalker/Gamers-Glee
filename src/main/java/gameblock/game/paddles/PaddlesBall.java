@@ -1,6 +1,5 @@
 package gameblock.game.paddles;
 
-import gameblock.util.ColorF;
 import net.minecraft.world.phys.Vec2;
 
 public class PaddlesBall {

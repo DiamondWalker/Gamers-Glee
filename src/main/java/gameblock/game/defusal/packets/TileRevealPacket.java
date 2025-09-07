@@ -4,7 +4,7 @@ import gameblock.game.defusal.DefusalGame;
 import gameblock.game.defusal.DefusalTile;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockSounds;
-import gameblock.util.Vec2i;
+import gameblock.util.physics.Vec2i;
 import net.minecraft.network.FriendlyByteBuf;
 
 public class TileRevealPacket extends UpdateGamePacket<DefusalGame> {

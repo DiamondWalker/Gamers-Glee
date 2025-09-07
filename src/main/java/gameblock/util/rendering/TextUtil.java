@@ -1,4 +1,4 @@
-package gameblock.util;
+package gameblock.util.rendering;
 
 public class TextUtil {
     public static String getTimeString(long ticks, boolean includeHours, boolean requireExtraDigitForTop) {
