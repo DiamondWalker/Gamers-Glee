@@ -13,9 +13,9 @@ public class PatrioticTrailParticleCosmetic extends BaseParticleCosmetic {
     }
 
     @Override
-    public void render() {
+    public void tick() {
         if (player.getDeltaMovement().lengthSqr() > 0.01f) {
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 6; i++) {
                 Vector3f color;
                 switch (player.getRandom().nextInt(3)) {
                     case 0: {

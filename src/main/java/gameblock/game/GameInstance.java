@@ -321,12 +321,12 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                 stayOpen = false;
             } else {
                 GameCapability hostCapability = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (hostCapability == null || !hostCapability.isPlaying()) stayOpen = false;
+                if (hostCapability == null || !hostCapability.isPlayingGame()) stayOpen = false;
             }
 
             if (!stayOpen) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null && cap.isPlaying()) {
+                if (cap != null && cap.isPlayingGame()) {
                     cap.setGame(null);
                 }
             }

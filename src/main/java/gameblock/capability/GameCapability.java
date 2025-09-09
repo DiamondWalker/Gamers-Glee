@@ -6,14 +6,10 @@ import gameblock.gui.GUIHandler;
 import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.registry.GameblockCosmetics;
-import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
-
-import javax.annotation.Nonnull;
-import java.lang.reflect.InvocationTargetException;
 
 @AutoRegisterCapability
 public class GameCapability {
@@ -25,7 +21,7 @@ public class GameCapability {
         this.player = player;
     }
 
-    public boolean isPlaying() {
+    public boolean isPlayingGame() {
         return game != null;
     }
 
@@ -71,7 +67,7 @@ public class GameCapability {
     }
 
     public void setCosmetic(GameblockCosmetics.CosmeticType cosmetic) {
-        this.cosmetic = cosmetic.constructor.apply(player);
+        this.cosmetic = cosmetic != null ? cosmetic.constructor.apply(player) : null;
         if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic));
     }
 }

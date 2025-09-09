@@ -1,7 +1,6 @@
 package gameblock.cosmetics.particles;
 
 import gameblock.registry.GameblockCosmetics;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.entity.player.Player;
 
 public abstract class BaseParticleCosmetic {
@@ -15,5 +14,5 @@ public abstract class BaseParticleCosmetic {
         this.type = type;
     }
 
-    public abstract void render();
+    public abstract void tick();
 }

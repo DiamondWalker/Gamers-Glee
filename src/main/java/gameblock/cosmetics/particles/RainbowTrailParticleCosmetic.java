@@ -14,13 +14,13 @@ public class RainbowTrailParticleCosmetic extends BaseParticleCosmetic {
     }
 
     @Override
-    public void render() {
+    public void tick() {
         if (player.getDeltaMovement().lengthSqr() > 0.01f) {
             float time = (float) player.tickCount / 100;
             int colorCode = Mth.hsvToRgb(time % 1.0f, 1.0f, 1.0f);
             Vector3f color = new Vector3f(FastColor.ARGB32.red(colorCode), FastColor.ARGB32.green(colorCode), FastColor.ARGB32.blue(colorCode));
             color = color.mul(1.0f / 255);
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 8; i++) {
                 Vec3 playerPos = player.position();
                 playerPos = playerPos.add(
                         (player.getRandom().nextFloat() - 0.5f) * player.getBbWidth(),

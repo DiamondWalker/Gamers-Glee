@@ -10,8 +10,8 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class CosmeticSyncPacket implements IPacket {
-    private int player;
-    private GameblockCosmetics.CosmeticType cosmetic;
+    public int player;
+    public GameblockCosmetics.CosmeticType cosmetic;
 
     public CosmeticSyncPacket(Player player, GameblockCosmetics.CosmeticType cosmetic) {
         this.player = player.getId();
@@ -25,7 +25,7 @@ public class CosmeticSyncPacket implements IPacket {
     @Override
     public void writeToBuffer(FriendlyByteBuf buffer) {
         buffer.writeInt(player);
-        buffer.writeUtf(cosmetic.id);
+        buffer.writeUtf(cosmetic != null ? cosmetic.id : "");
     }
 
     @Override

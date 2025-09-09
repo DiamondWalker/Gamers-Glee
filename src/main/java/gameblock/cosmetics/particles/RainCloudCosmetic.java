@@ -12,7 +12,7 @@ public class RainCloudCosmetic extends BaseParticleCosmetic {
     }
 
     @Override
-    public void render() {
+    public void tick() {
         for (int i = 0; i < 3; i++) {
             float angle = player.getRandom().nextFloat() * Mth.TWO_PI;
             float radius = player.getRandom().nextFloat() * 1.6f * player.getBbWidth();

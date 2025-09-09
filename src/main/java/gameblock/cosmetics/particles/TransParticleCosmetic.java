@@ -12,9 +12,9 @@ public class TransParticleCosmetic extends BaseParticleCosmetic {
     }
 
     @Override
-    public void render() {
+    public void tick() {
         if (player.getDeltaMovement().lengthSqr() > 0.01f) {
-            for (int i = 0; i < 4; i++) {
+            for (int i = 0; i < 12; i++) {
                 float randF = player.getRandom().nextFloat();
                 float distanceFromCenter = Math.abs((randF - 0.5f) * 2);
                 Vector3f[] colors = new Vector3f[]{

@@ -15,8 +15,14 @@ public class PlayerTickHandler {
             Player player = event.player;
 
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null && cap.isPlaying()) {
-                cap.getGame().baseTick(player);
+            if (cap != null) {
+                if (cap.isPlayingGame()) {
+                    cap.getGame().baseTick(player);
+                }
+
+                if (player.level().isClientSide() && cap.getCosmetic() != null) {
+                    cap.getCosmetic().tick();
+                }
             }
         }
     }

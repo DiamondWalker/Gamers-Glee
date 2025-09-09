@@ -12,7 +12,7 @@ public class FireTrailParticleCosmetic extends BaseParticleCosmetic {
     }
 
     @Override
-    public void render() {
+    public void tick() {
         if (player.onGround() && player.getDeltaMovement().lengthSqr() > 0.01f) {
             for (int i = 0; i < 1; i++) {
                 float angle = player.getRandom().nextFloat() * Mth.TWO_PI;

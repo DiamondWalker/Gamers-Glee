@@ -13,20 +13,26 @@ public class SaturnParticleCosmetic extends BaseParticleCosmetic {
     }
 
     @Override
-    public void render() {
-        for (int i = 0; i < 45; i++) {
-            float angle = player.getRandom().nextFloat() * Mth.TWO_PI;
-            float radiusRand = player.getRandom().nextFloat();
-            float radius = radiusRand * 4.0f * player.getBbWidth() + 2;
-            Vec3 particlePos = player.position().add(Math.cos(angle) * radius, player.getBbHeight() * 0.5, Math.sin(angle) * radius);
-            Vector3f color = new Vector3f(1.0f, 0.9f, 0.6f);
-            float thickness = 1.0f;//0.6f + 0.6f * (Mth.sin(radius * 10) / 2 + 0.5f);
-            if (radiusRand < 0.4f) {
-                color = color.mul(0.2f + 0.8f * radiusRand / 0.4f);
-            } else {
-                thickness *= Math.min(Math.abs(radiusRand - 0.7f) / 0.1f, 1.0f);
+    public void tick() {
+        for (int i = 0; i < 150; i++) {
+            float maxDist = 4.5f * player.getBbWidth() + 2;
+            float minDist = 2;
+            float x = player.getRandom().nextFloat() * maxDist * 2 - maxDist;
+            float y = player.getRandom().nextFloat() * maxDist * 2 - maxDist;
+            float dist = Mth.sqrt(x * x + y * y);
+
+            if (dist > minDist && dist < maxDist) {
+                float theThingForColor = (dist - minDist) / (maxDist - minDist);
+                Vec3 particlePos = player.position().add(x, player.getBbHeight() * 0.5, y);
+                Vector3f color = new Vector3f(1.0f, 0.9f, 0.6f);
+                float thickness = 1.5f;//0.6f + 0.6f * (Mth.sin(radius * 10) / 2 + 0.5f);
+                if (theThingForColor < 0.4f) {
+                    color = color.mul(0.2f + 0.8f * theThingForColor / 0.4f);
+                } else {
+                    thickness *= Math.min(Math.abs(theThingForColor - 0.68f) / 0.12f, 1.0f);
+                }
+                player.level().addParticle(new DustParticleOptions(color,  thickness), particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
             }
-            player.level().addParticle(new DustParticleOptions(color,  thickness), particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
         }
     }
 }
