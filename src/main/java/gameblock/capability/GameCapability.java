@@ -1,8 +1,11 @@
 package gameblock.capability;
 
+import gameblock.cosmetics.particles.BaseParticleCosmetic;
 import gameblock.game.GameInstance;
 import gameblock.gui.GUIHandler;
+import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
+import gameblock.registry.GameblockCosmetics;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 
 @AutoRegisterCapability
 public class GameCapability {
+    // game
     private final Player player;
     private GameInstance<? extends GameInstance<?>> game = null;
 
@@ -54,5 +58,20 @@ public class GameCapability {
 
     public GameInstance<? extends GameInstance<?>> getGame() {
         return game;
+    }
+
+
+
+
+    // cosmetic
+    private BaseParticleCosmetic cosmetic = null; // TODO: persistence
+
+    public BaseParticleCosmetic getCosmetic() {
+        return cosmetic;
+    }
+
+    public void setCosmetic(GameblockCosmetics.CosmeticType cosmetic) {
+        this.cosmetic = cosmetic.constructor.apply(player);
+        if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic));
     }
 }

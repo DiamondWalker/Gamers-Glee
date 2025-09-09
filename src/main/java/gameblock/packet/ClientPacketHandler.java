@@ -35,4 +35,8 @@ public class ClientPacketHandler {
             }
         }
     }
+
+    public static void handleCosmeticSyncPacket(CosmeticSyncPacket packet) {
+
+    }
 }

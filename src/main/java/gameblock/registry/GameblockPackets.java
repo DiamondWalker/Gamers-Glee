@@ -13,6 +13,7 @@ import gameblock.game.os.packets.SelectGamePacket;
 import gameblock.game.paddles.packets.*;
 import gameblock.game.serpent.packets.EatFoodPacket;
 import gameblock.game.serpent.packets.SnakeUpdatePacket;
+import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.packet.GameClosePacket;
 import gameblock.packet.IPacket;
@@ -41,6 +42,7 @@ public class GameblockPackets {
         register(GameStatePacket.class, GameStatePacket::new);
         register(GameClosePacket.class, GameClosePacket::new);
         register(GameRestartPacket.class, GameRestartPacket::new);
+        register(CosmeticSyncPacket.class, CosmeticSyncPacket::new);
 
         // OS
         register(SelectGamePacket.class, SelectGamePacket::new);
@@ -94,5 +96,9 @@ public class GameblockPackets {
 
     public static <MSG> void sendToPlayer(ServerPlayer player, MSG packet) {
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public static <MSG> void sendToPlayerAndOthers(ServerPlayer player, MSG packet) {
+        INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player), packet);
     }
 }

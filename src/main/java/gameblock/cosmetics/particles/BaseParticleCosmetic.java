@@ -1,0 +1,19 @@
+package gameblock.cosmetics.particles;
+
+import gameblock.registry.GameblockCosmetics;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.world.entity.player.Player;
+
+public abstract class BaseParticleCosmetic {
+    public final GameblockCosmetics.CosmeticType type;
+    protected final Player player;
+    protected final boolean isClientSide;
+
+    public BaseParticleCosmetic(Player player, GameblockCosmetics.CosmeticType type) {
+        this.player = player;
+        isClientSide = player.level().isClientSide();
+        this.type = type;
+    }
+
+    public abstract void render();
+}

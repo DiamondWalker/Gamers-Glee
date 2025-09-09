@@ -11,13 +11,11 @@ import gameblock.game.serpent.SerpentGame;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.function.Function;
 
 public class GameblockGames {
-    private static final HashMap<String, Game> registry = new HashMap<>();
+    private static final HashMap<String, Game> REGISTRY = new HashMap<>();
 
     public static final Game<GameblockOS> GAMEBLOCK_OS = registerGame("gameblock_os", GameblockOS::new);
     public static final Game<BlockBreakGame> BLOCK_BREAK_GAME = registerGame("block_break", BlockBreakGame::new);
@@ -28,12 +26,12 @@ public class GameblockGames {
 
     public static <T extends GameInstance> Game<T> registerGame(String name, Function<Player, T> constructor) {
         Game<T> game = new Game<T>(constructor, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));
-        registry.put(name, game);
+        REGISTRY.put(name, game);
         return game;
     }
 
     public static <T extends GameInstance> Game<T> getGame(String key) {
-        return registry.get(key);
+        return REGISTRY.get(key);
     }
 
     public static class Game<T extends GameInstance> {
