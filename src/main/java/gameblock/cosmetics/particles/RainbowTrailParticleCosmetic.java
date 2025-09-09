@@ -32,4 +32,9 @@ public class RainbowTrailParticleCosmetic extends BaseParticleCosmetic {
             }
         }
     }
+
+    @Override
+    public boolean displaysInFirstPerson() {
+        return false;
+    }
 }

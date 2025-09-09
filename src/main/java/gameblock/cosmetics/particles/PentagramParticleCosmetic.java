@@ -52,4 +52,9 @@ public class PentagramParticleCosmetic extends BaseParticleCosmetic {
             }
         }
     }
+
+    @Override
+    public boolean displaysInFirstPerson() {
+        return false;
+    }
 }

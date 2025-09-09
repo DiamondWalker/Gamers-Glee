@@ -15,4 +15,6 @@ public abstract class BaseParticleCosmetic {
     }
 
     public abstract void tick();
+
+    public abstract boolean displaysInFirstPerson();
 }

@@ -22,4 +22,9 @@ public class FireTrailParticleCosmetic extends BaseParticleCosmetic {
             }
         }
     }
+
+    @Override
+    public boolean displaysInFirstPerson() {
+        return true;
+    }
 }

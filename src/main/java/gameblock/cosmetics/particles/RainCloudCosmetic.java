@@ -24,4 +24,9 @@ public class RainCloudCosmetic extends BaseParticleCosmetic {
         Vec3 particlePos = player.position().add(Math.cos(angle) * radius, player.getBbHeight() * 1.6, Math.sin(angle) * radius);
         player.level().addParticle(ParticleTypes.FALLING_WATER, particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
     }
+
+    @Override
+    public boolean displaysInFirstPerson() {
+        return true;
+    }
 }

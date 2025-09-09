@@ -41,4 +41,9 @@ public class PatrioticTrailParticleCosmetic extends BaseParticleCosmetic {
             }
         }
     }
+
+    @Override
+    public boolean displaysInFirstPerson() {
+        return false;
+    }
 }

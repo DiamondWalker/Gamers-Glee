@@ -2,6 +2,7 @@ package gameblock.packet;
 
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
+import gameblock.util.ServerSafeMinecraftAccess;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.level.GameType;
@@ -33,8 +34,10 @@ public class GameChangePacket implements IPacket {
     public void readFromBuffer(FriendlyByteBuf buffer) {
         GameblockGames.Game<? extends GameInstance<?>> gameType = GameblockGames.getGame(buffer.readUtf());
         if (gameType != null) {
-            game = gameType.createInstance(Minecraft.getInstance().player);
-            game.readFromBuffer(buffer);
+            ServerSafeMinecraftAccess.accessPlayerObject((player) -> {
+                game = gameType.createInstance(player);
+                game.readFromBuffer(buffer);
+            });
         }
     }
 

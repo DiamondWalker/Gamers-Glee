@@ -35,4 +35,9 @@ public class SaturnParticleCosmetic extends BaseParticleCosmetic {
             }
         }
     }
+
+    @Override
+    public boolean displaysInFirstPerson() {
+        return false;
+    }
 }
