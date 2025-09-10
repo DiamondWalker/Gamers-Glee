@@ -26,7 +26,7 @@ public class GameCapabilityProvider implements ICapabilityProvider {
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
         if (cap == CAPABILITY_GAME) return (LazyOptional<T>) LazyOptional.of(() -> capability);
-        return null;
+        return LazyOptional.empty();
     }
 
     @SubscribeEvent
