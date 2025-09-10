@@ -1,20 +1,25 @@
 package gameblock.cosmetics.particles;
 
 import gameblock.registry.GameblockCosmetics;
+import gameblock.util.rendering.PlayerMotionTracker;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class PatrioticTrailParticleCosmetic extends BaseParticleCosmetic {
+    private final PlayerMotionTracker playerTracker;
 
     public PatrioticTrailParticleCosmetic(Player player) {
         super(player, GameblockCosmetics.PATRIOTIC_TRAIL);
+        playerTracker = new PlayerMotionTracker(player);
     }
 
     @Override
     public void tick() {
-        if (player.getDeltaMovement().lengthSqr() > 0.01f) {
+        playerTracker.tick();
+
+        if (playerTracker.hasPlayerMoved()) {
             for (int i = 0; i < 6; i++) {
                 Vector3f color;
                 switch (player.getRandom().nextInt(3)) {

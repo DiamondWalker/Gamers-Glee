@@ -2,6 +2,7 @@ package gameblock.cosmetics.particles;
 
 import gameblock.registry.GameblockCosmetics;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class BaseParticleCosmetic {
     public final GameblockCosmetics.CosmeticType type;

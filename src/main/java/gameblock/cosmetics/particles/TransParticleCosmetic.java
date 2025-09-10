@@ -1,19 +1,24 @@
 package gameblock.cosmetics.particles;
 
 import gameblock.registry.GameblockCosmetics;
+import gameblock.util.rendering.PlayerMotionTracker;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class TransParticleCosmetic extends BaseParticleCosmetic {
+    private final PlayerMotionTracker playerTracker;
     public TransParticleCosmetic(Player player) {
         super(player, GameblockCosmetics.TRANS);
+        playerTracker = new PlayerMotionTracker(player);
     }
 
     @Override
     public void tick() {
-        if (player.getDeltaMovement().lengthSqr() > 0.01f) {
+        playerTracker.tick();
+
+        if (playerTracker.hasPlayerMoved()) {
             for (int i = 0; i < 12; i++) {
                 float randF = player.getRandom().nextFloat();
                 float distanceFromCenter = Math.abs((randF - 0.5f) * 2);

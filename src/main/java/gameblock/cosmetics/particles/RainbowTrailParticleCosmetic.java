@@ -1,6 +1,7 @@
 package gameblock.cosmetics.particles;
 
 import gameblock.registry.GameblockCosmetics;
+import gameblock.util.rendering.PlayerMotionTracker;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
@@ -9,13 +10,17 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 
 public class RainbowTrailParticleCosmetic extends BaseParticleCosmetic {
+    private final PlayerMotionTracker playerTracker;
     public RainbowTrailParticleCosmetic(Player player) {
         super(player, GameblockCosmetics.RAINBOW_TRAIL);
+        playerTracker = new PlayerMotionTracker(player);
     }
 
     @Override
     public void tick() {
-        if (player.getDeltaMovement().lengthSqr() > 0.01f) {
+        playerTracker.tick();
+
+        if (playerTracker.hasPlayerMoved()) {
             float time = (float) player.tickCount / 100;
             int colorCode = Mth.hsvToRgb(time % 1.0f, 1.0f, 1.0f);
             Vector3f color = new Vector3f(FastColor.ARGB32.red(colorCode), FastColor.ARGB32.green(colorCode), FastColor.ARGB32.blue(colorCode));

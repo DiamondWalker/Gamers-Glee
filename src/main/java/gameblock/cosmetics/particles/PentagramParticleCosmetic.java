@@ -1,19 +1,24 @@
 package gameblock.cosmetics.particles;
 
 import gameblock.registry.GameblockCosmetics;
+import gameblock.util.rendering.PlayerMotionTracker;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 public class PentagramParticleCosmetic extends BaseParticleCosmetic {
+    private final PlayerMotionTracker playerTracker;
     public PentagramParticleCosmetic(Player player) {
         super(player, GameblockCosmetics.PENTAGRAM);
+        playerTracker = new PlayerMotionTracker(player);
     }
 
     @Override
     public void tick() {
-        if (player.onGround() && player.getDeltaMovement().lengthSqr() < 0.01f) {
+        playerTracker.tick();
+
+        if (player.onGround() && !playerTracker.hasPlayerMoved()) {
             // small smoke
             for (int i = 0; i < 600; i++) {
                 float x = player.getRandom().nextFloat() * 10 - 5;

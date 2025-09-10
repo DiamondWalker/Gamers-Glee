@@ -7,6 +7,7 @@ import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.registry.GameblockCosmetics;
 import gameblock.registry.GameblockPackets;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
@@ -69,5 +70,15 @@ public class GameCapability {
     public void setCosmetic(GameblockCosmetics.CosmeticType cosmetic) {
         this.cosmetic = cosmetic != null ? cosmetic.constructor.apply(player) : null;
         if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic));
+    }
+
+
+
+    protected void writeToNBT(CompoundTag nbt) {
+        if (cosmetic != null) nbt.putString("cosmetic", cosmetic.type.id);
+    }
+
+    protected void readFromNBT(CompoundTag nbt) {
+        if (nbt.contains("cosmetic")) setCosmetic(GameblockCosmetics.getTypeFromID(nbt.getString("cosmetic")));
     }
 }
