@@ -17,7 +17,11 @@ import org.jetbrains.annotations.Nullable;
 @Mod.EventBusSubscriber
 public class GameCapabilityProvider implements ICapabilityProvider {
     public static Capability<GameCapability> CAPABILITY_GAME = null;
-    private GameCapability capability = new GameCapability();
+    private final GameCapability capability;
+
+    private GameCapabilityProvider(Player player) {
+        capability = new GameCapability(player);
+    }
 
     @Override
     public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
@@ -27,8 +31,8 @@ public class GameCapabilityProvider implements ICapabilityProvider {
 
     @SubscribeEvent
     public static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-        if (event.getObject() instanceof Player) {
-            event.addCapability(new ResourceLocation("game_capability"), new GameCapabilityProvider());
+        if (event.getObject() instanceof Player player) {
+            event.addCapability(new ResourceLocation("game_capability"), new GameCapabilityProvider(player));
         }
     }
 }

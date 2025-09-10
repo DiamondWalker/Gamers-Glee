@@ -23,7 +23,7 @@ public class GameblockItem extends Item {
         if (!pLevel.isClientSide()) {
             GameCapability cap = pPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
-                cap.setGame(GameblockGames.GAMEBLOCK_OS, pPlayer);
+                cap.setGame(GameblockGames.GAMEBLOCK_OS.createInstance(pPlayer));
                 pPlayer.awardStat(Stats.ITEM_USED.get(this));
                 return InteractionResultHolder.success(pPlayer.getItemInHand(pUsedHand));
             }

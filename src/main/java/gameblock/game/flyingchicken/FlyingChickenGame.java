@@ -3,16 +3,22 @@ package gameblock.game.flyingchicken;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.flyingchicken.packets.PipeSpawnPacket;
+import gameblock.game.flyingchicken.packets.ScorePacket;
+import gameblock.game.flyingchicken.packets.WingFlapPacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.util.datastructure.CircularStack;
+import gameblock.util.rendering.ColorF;
+import gameblock.util.physics.Direction1D;
+import gameblock.util.rendering.TextUtil;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FastColor;
@@ -26,17 +32,17 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     private static final float HORIZONTAL_MOVEMENT_PER_TICK = 1.5f;
     private static final float SPACE_BETWEEN_PIPES = 30.0f;
 
-    protected float chickenY = 0.0f;
-    private float chickenMotion = 0.0f;
-    protected long time = 0;
+    public float chickenY = 0.0f;
+    public float chickenMotion = 0.0f;
+    public long time = 0;
     private int pipesSpawned = 0; // used to ensure the same pipe isn't spawned twice, since wing flap packets can sometimes move the bird back and make another pair spawn
     private long lastFlapTime = Integer.MIN_VALUE;
     private long gameOverTime = 0;
     private float gameOverFallDirection = 0.0f;
 
-    protected int score = 0;
-    protected int highScore = 0;
-    protected long lastScoreTime = 0;
+    public int score = 0;
+    public int highScore = 0;
+    public long lastScoreTime = 0;
 
     final GameInstance.KeyBinding jump = registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
@@ -45,7 +51,19 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
         super(player, GameblockGames.FLYING_CHICKEN_GAME);
     }
 
-    protected void flap() {
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeShort(highScore);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        highScore = buffer.readShort();
+    }
+
+    public void flap() {
         if (isClientSide()) {
             GameblockPackets.sendToServer(new WingFlapPacket(time, chickenY));
             lastFlapTime = time;
@@ -53,6 +71,10 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
             //playSound(SoundEvents.PHANTOM_FLAP, 1.0f, 350.0f);
         }
         chickenMotion = 2.56f;
+    }
+
+    public void addPipe(float x, float y) {
+        pipes.enqueue(new FlyingChickenGame.Pipe(x, y));
     }
 
     @Override
@@ -81,7 +103,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                             if (!pipe.passed && chickenX > (pipe.x - 12)) {
                                 score++;
                                 pipe.passed = true;
-                                forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new ScorePacket(score)));
+                                sendToAllPlayers(new ScorePacket(score), null);
                             }
                         }
                     });
@@ -92,7 +114,7 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
                 float x = pipesSpawned * 60 * HORIZONTAL_MOVEMENT_PER_TICK + 120;
                 float y = (-80.0f + SPACE_BETWEEN_PIPES) + new Random().nextFloat(160.0f - 2f * SPACE_BETWEEN_PIPES);
                 pipes.enqueue(new Pipe(x, y));
-                forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new PipeSpawnPacket(x, y)));
+                sendToAllPlayers(new PipeSpawnPacket(x, y), null);
 
                 pipesSpawned++;
             }
@@ -113,7 +135,6 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new FlyingChickenHighScorePacket(highScore)));
     }
 
     @Override
@@ -122,58 +143,58 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
-        graphics.fill(-100, -80, 100, 80, FastColor.ARGB32.color(255, 76, 196, 230)); // sky
+    public void render() {
+        getGraphicsInstance().fill(-100, -80, 100, 80, FastColor.ARGB32.color(255, 76, 196, 230)); // sky
 
-        final float pipeOffset = calculatePipeOffset(partialTicks);
+        final float pipeOffset = calculatePipeOffset(getPartialTicks());
         pipes.forEach((Pipe pipe) -> {
-            drawTexture(graphics, SPRITE,
+            drawTexture(SPRITE,
                     (pipe.x - pipeOffset), pipe.y - (80 + SPACE_BETWEEN_PIPES / 2), 23, 160, 0,
                     233, 0, 23, 160);
 
-            drawTexture(graphics, SPRITE,
+            drawTexture(SPRITE,
                     (pipe.x - pipeOffset), pipe.y + (80 + SPACE_BETWEEN_PIPES / 2), 23, 160, 0,
                     211, 0, 23, 160);
         });
 
         if (!isGameOver()) {
-            drawTexture(graphics, SPRITE,
-                    -70, (chickenY + partialTicks * chickenMotion), 12, 10, (float) Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
+            drawTexture(SPRITE,
+                    -70, (chickenY + getPartialTicks() * chickenMotion), 12, 10, (float) Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK),
                     0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
         } else {
-            float deathTime = gameOverTime + partialTicks;
+            float deathTime = gameOverTime + getPartialTicks();
             float y = deathTime / 5 - 2;
             y = -(y * y) + 4;
             y *= 5;
             y += chickenY;
 
             float rotationOffset = deathTime / 5 * -gameOverFallDirection;
-            drawTexture(graphics, SPRITE,
+            drawTexture(SPRITE,
                     -70 + deathTime * gameOverFallDirection, y, 12, 10, (float) Math.atan2(chickenMotion / 5, HORIZONTAL_MOVEMENT_PER_TICK) + rotationOffset,
                     0, time - lastFlapTime < 2 ? 0 : 10, 12, 10);
         }
 
         if (!isGameOver()) {
             ColorF col = score > highScore ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
-            float time = (partialTicks + (getGameTime() - lastScoreTime)) / 15;
+            float time = (getPartialTicks() + (getGameTime() - lastScoreTime)) / 15;
             String scoreString = TextUtil.formatWithUnits(score, 3);
-            if (lastScoreTime > 0 && time < 1.0f) drawText(graphics, 0.0f, 55.0f, 1.5f + time * 0.65f, col.withAlpha(1.0f - time), Component.literal(scoreString));
-            drawText(graphics, 0.0f, 55.0f, 1.5f, col, Component.literal(scoreString));
+            if (lastScoreTime > 0 && time < 1.0f) drawText(0.0f, 55.0f, 1.5f + time * 0.65f, col.withAlpha(1.0f - time), Component.literal(scoreString));
+            drawText(0.0f, 55.0f, 1.5f, col, Component.literal(scoreString));
         } else {
-            drawRectangle(graphics, 0.0f, 30.0f, 50.0f, 10.0f, new ColorF(1.0f, 0.5f, 0.0f), 0);
-            drawHollowRectangle(graphics, 0.0f, 30.0f, 50.0f, 10.0f, 1.0f, new ColorF(1.0f), 0);
-            drawText(graphics, 0.0f, 30.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.game_over"));
-            drawText(graphics, -40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.score", score));
-            drawText(graphics, 40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.best", highScore));
+            drawRectangle(0.0f, 30.0f, 50.0f, 10.0f, new ColorF(1.0f, 0.5f, 0.0f), 0);
+            drawHollowRectangle(0.0f, 30.0f, 50.0f, 10.0f, 1.0f, new ColorF(1.0f), 0);
+            drawText(0.0f, 30.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.game_over"));
+            drawText(-40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.score", score));
+            drawText(40.0f, 10.0f, 0.9f, new ColorF(1.0f), Component.translatable("gui.gameblock.flying_chicken.best", highScore));
             if (score > highScore) {
-                float time = partialTicks + getGameTime();
+                float time = getPartialTicks() + getGameTime();
                 float expand = (time % 20) / 20;
                 ColorF col = new ColorF(1.0f, 1.0f, 0.0f).fadeTo(new ColorF(1.0f), 1.0f - expand);
-                drawText(graphics, 0.0f, 10.0f, 0.7f + expand * 0.2f, col.withAlpha(1.0f - expand), Component.translatable("gui.gameblock.flying_chicken.new_best"));
-                drawText(graphics, 0.0f, 10.0f, 0.7f, col, Component.translatable("gui.gameblock.flying_chicken.new_best"));
+                drawText(0.0f, 10.0f, 0.7f + expand * 0.2f, col.withAlpha(1.0f - expand), Component.translatable("gui.gameblock.flying_chicken.new_best"));
+                drawText(0.0f, 10.0f, 0.7f, col, Component.translatable("gui.gameblock.flying_chicken.new_best"));
             }
             ColorF col = overRetryButton(getMouseCoordinates()) ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
-            drawText(graphics, 0.0f, -20.0f, 0.9f, col, Component.translatable("gui.gameblock.flying_chicken.retry"));
+            drawText(0.0f, -20.0f, 0.9f, col, Component.translatable("gui.gameblock.flying_chicken.retry"));
         }
 
 

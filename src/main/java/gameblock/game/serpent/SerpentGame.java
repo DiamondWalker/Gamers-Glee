@@ -3,15 +3,20 @@ package gameblock.game.serpent;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.serpent.packets.EatFoodPacket;
+import gameblock.game.serpent.packets.SnakeUpdatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.util.rendering.ColorF;
+import gameblock.util.datastructure.TileGrid2D;
+import gameblock.util.physics.Direction2D;
+import gameblock.util.physics.Vec2i;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.player.Player;
 
@@ -22,17 +27,17 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/serpent.png");
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
-    protected final TileGrid2D<Integer> tiles;
+    public final TileGrid2D<Integer> tiles;
 
-    protected int headX, headY;
-    protected int targetSnakeLength = INITIAL_SNAKE_LENGTH;
-    protected int snakeLength = targetSnakeLength;
-    protected int foodX = 10000, foodY = 10000; // these values are why outside the game area so it's like the food doesn't exist
+    public int headX, headY;
+    public int targetSnakeLength = INITIAL_SNAKE_LENGTH;
+    public int snakeLength = targetSnakeLength;
+    public int foodX, foodY;
 
     private Direction2D snakeDirection = Direction2D.UP;
     private boolean snakeDirectionChanged = false; // so that if you press 2 direction change buttons in one tick you can't go into yourself
 
-    protected int foodEaten = 0;
+    public int foodEaten = 0;
     private long endTime = Integer.MIN_VALUE;
 
     final GameInstance.KeyBinding left = registerKey(InputConstants.KEY_LEFT, () -> setSnakeDirection(Direction2D.LEFT));
@@ -42,14 +47,26 @@ public class SerpentGame extends GameInstance<SerpentGame> {
 
     public SerpentGame(Player player) {
         super(player, GameblockGames.SERPENT_GAME);
-        tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
+        tiles = new TileGrid2D<>(-20, 20, -20, 20, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
-        if (!isClientSide()) randomFoodPosition(); // FIXME: doesn't work?
-        System.out.println(foodY);
-        System.out.println(isClientSide());
+        if (!isClientSide()) randomFoodPosition();
     }
 
-    protected void setSnakeDirection(Direction2D dir) {
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeByte(foodX);
+        buffer.writeByte(foodY);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        foodX = buffer.readByte();
+        foodY = buffer.readByte();
+    }
+
+    public void setSnakeDirection(Direction2D dir) {
         if (dir == snakeDirection || dir == snakeDirection.getOpposite() || snakeDirectionChanged) return;
         snakeDirection = dir;
 
@@ -96,7 +113,6 @@ public class SerpentGame extends GameInstance<SerpentGame> {
             foodX = random.nextInt((tiles.maxX - tiles.minX) + 1) + tiles.minX;
             foodY = random.nextInt((tiles.maxY - tiles.minY) + 1) + tiles.minY;
         } while (isSnakeTile(foodX, foodY));
-        forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten)));
     }
 
     @Override
@@ -133,6 +149,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
                     targetSnakeLength += SNAKE_LENGTH_INCREASE;
                     foodEaten++;
                     randomFoodPosition();
+                    sendToAllPlayers(new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten), null);
                 }
             }
         } else if (!isClientSide() && getGameTime() - endTime > 20 * 3) {
@@ -141,39 +158,40 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
-        int rectMinX = tiles.minX * 2 - 2;
-        int rectMaxX = tiles.maxX * 2 + 2;
-        int rectMinY = tiles.minY * 2 - 9 - 2;
-        int rectMaxY = tiles.maxY * 2 - 9 + 2;
+    public void render() {
+        int rectMinX = tiles.minX * 3 ;
+        int rectMaxX = tiles.maxX * 3 ;
+        int rectMinY = tiles.minY * 3 - 9;
+        int rectMaxY = tiles.maxY * 3 - 9;
         float midX = (float)(rectMinX + rectMaxX) / 2;
         float midY = (float)(rectMinY + rectMaxY) / 2;
-        int sideWidth = rectMaxX - rectMinX + 2;
-        int sideHeight = rectMaxY - rectMinY + 2;
+        int sideWidth = rectMaxX - rectMinX;
+        int sideHeight = rectMaxY - rectMinY;
 
-        drawRectangle(graphics, midX, rectMaxY, sideWidth, 2, new ColorF(1.0f), 0); // top
-        drawRectangle(graphics, midX, rectMinY, sideWidth, 2, new ColorF(1.0f), 0); // bottom
-        drawRectangle(graphics, rectMinX, midY, 2, sideHeight, new ColorF(1.0f), 0); // left
-        drawRectangle(graphics, rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right
+        drawHollowRectangle(midX, midY, sideWidth + 3, sideHeight + 3, 3.0f, new ColorF(1.0f), 0);
+        /*drawRectangle(midX, rectMaxY, sideWidth, 2, new ColorF(1.0f), 0); // top
+        drawRectangle(midX, rectMinY, sideWidth, 2, new ColorF(1.0f), 0); // bottom
+        drawRectangle(rectMinX, midY, 2, sideHeight, new ColorF(1.0f), 0); // left
+        drawRectangle(rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right*/
 
         float y = (75.0f - rectMaxY + 1) / 2 + rectMaxY;
-        drawText(graphics, 80.0f, y, 1.0f, new ColorF(1.0f), Component.literal(String.valueOf(foodEaten)));
-        drawTexture(graphics, SPRITE, 70.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
+        drawText(60.0f, y, 1.0f, new ColorF(1.0f), Component.literal(String.valueOf(foodEaten)));
+        drawTexture(SPRITE, 50.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
 
         tiles.forEach((Vec2i coords, Integer i) -> {
             if (isSnakeTile(coords.getX(), coords.getY())) {
-                drawRectangle(graphics, coords.getX() * 2, coords.getY() * 2 - 9, 2.0f, 2.0f, new ColorF(1.0f), 0);
+                drawRectangle(coords.getX() * 3, coords.getY() * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f), 0);
             }
         });
         /*for (int x = tiles.minX; x <= tiles.maxX; x++) {
             for (int y = tiles.minY; y <= tiles.maxY; y++) {
                 //if (isSnakeTile(x, y)) {
-                    drawRectangle(graphics, x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
+                    drawRectangle(x * 2, y * 2, 2.0f, 2.0f, new ColorF(1.0f, 1.0f, 1.0f, 1.0f), 0);
                 //}
             }
         }*/
 
-        drawRectangle(graphics, foodX * 2, foodY * 2 - 9, 2.0f, 2.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
+        drawRectangle(foodX * 3, foodY * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f, 0, 0, 1.0f), 0);
         //System.out.println(foodY);
     }
 

@@ -24,7 +24,7 @@ public class GameStatePacket extends UpdateGamePacket<GameInstance> {
     }
 
     @Override
-    public void handleGameUpdate(GameInstance game) {
+    public void gameUpdateReceivedOnClient(GameInstance game) {
         game.setGameState(state);
     }
 }

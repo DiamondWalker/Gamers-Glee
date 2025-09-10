@@ -5,17 +5,21 @@ import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
+import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.*;
+import gameblock.util.rendering.ColorF;
+import gameblock.util.physics.Direction1D;
+import gameblock.util.rendering.TextRenderingRules;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,13 +30,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix4f;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class GameInstance<T extends GameInstance<?>> {
@@ -41,10 +41,13 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
+
     private final boolean clientSide;
 
-    public static final int MAX_X = 100;
-    public static final int MAX_Y = 75;
+    public static final float MAX_X = 100.0f;
+    public static final float MIN_X = -100.0f;
+    public static final float MAX_Y = 75.0f;
+    public static final float MIN_Y = -75.0f;
 
     private long gameTime = 0;
     private GameState gameState = GameState.ACTIVE;
@@ -77,28 +80,82 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return players[i];
     }
 
+    public final int getPlayerIndex(Player player) {
+        for (int i = 0; i < players.length; i++) if (players[i] == player) return i;
+        throw new IllegalArgumentException("Player not found!");
+    }
+
+    public void sendToAllPlayers(UpdateGamePacket<?> packet, ServerPlayer exception) {
+        if (clientSide) throw new IllegalStateException("Cannot send a packet to the clients if already on a client!");
+        for (Player player : players) {
+            if (player != null && player != exception) GameblockPackets.sendToPlayer((ServerPlayer) player, packet);
+        }
+    }
+
+    /**
+     * Writes all the extra game data that has to be sent to a new player
+     */
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+
+    }
+
+    /**
+     * Writes all the extra game data that was sent to a new player
+     */
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+
+    }
+
     public void forEachPlayer(Consumer<Player> action) {
         for (Player player : players) {
             if (player != null) action.accept(player);
         }
     }
 
-    public final boolean addPlayer(ServerPlayer player) {
-        GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-        if (cap != null) {
-            for (int i = 1; i < players.length; i++) {
-                if (players[i] == null) {
-                    players[i] = player;
-                    cap.setGame(gameType, player);
-                    onPlayerJoined(player);
-                    return true;
-                }
-            }
-        }
+    public final boolean isPlaying(ServerPlayer player) {
+        for (int i = 0; i < players.length; i++) if (players[i] == player) return true;
         return false;
     }
 
-    protected void onPlayerJoined(ServerPlayer player) {
+    public boolean canJoin() {
+        return getPlayerCount() < getMaxPlayers();
+    }
+
+    public final void addPlayer(ServerPlayer player) {
+        for (int i = 1; i < players.length; i++) {
+            if (players[i] == null) {
+                players[i] = player;
+                onPlayerJoined(i, player);
+                return;
+            }
+        }
+        throw new IllegalStateException("Attempted to add new players when there is no more room for players!");
+    }
+
+    public final void removePlayer(ServerPlayer player) {
+        if (player == getHostPlayer()) {
+            for (int i = 1; i < players.length; i++) {
+                if (players[i] != null) removePlayer((ServerPlayer) players[i]);
+            }
+
+            save();
+            return;
+        }
+
+        for (int i = 1; i < players.length; i++) {
+            if (players[i] == player) {
+                players[i] = null;
+                onPlayerDisconnected(i, player);
+                return;
+            }
+        }
+    }
+
+    protected void onPlayerJoined(int index, ServerPlayer player) {
+
+    }
+
+    protected void onPlayerDisconnected(int index, ServerPlayer player) {
 
     }
 
@@ -114,10 +171,10 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return null;
     }
 
-    protected final void setGameState(GameState state) {
+    public final void setGameState(GameState state) {
         gameState = state;
         if (!isClientSide()) {
-            for (Player player : players) GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state));
+            sendToAllPlayers(new GameStatePacket(state), null);
         }
         if (state == GameState.WIN) {
             onGameWin();
@@ -200,7 +257,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             for (Player player : players) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null) {
-                    cap.setGame(gameType, player);
+                    cap.setGame(gameType.createInstance(player));
                 }
             }
         } else {
@@ -234,7 +291,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {}
 
-    protected boolean isGameOver() {
+    public boolean isGameOver() {
         return gameState != GameState.ACTIVE;
     }
 
@@ -242,6 +299,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         if (prompt != null && prompt.shouldClose()) prompt = null;
 
         if (player == getHostPlayer()) {
+            if (!isClientSide()) {
+                // ensure players that, for example, left the game, are removed
+                for (int i = 0; i < players.length; i++) {
+                    ServerPlayer serverPlayer = (ServerPlayer) players[i];
+                    GameCapability cap = null;
+                    if (serverPlayer != null) cap = serverPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                    if (cap == null || cap.getGame() != this || serverPlayer.isDeadOrDying()) removePlayer(serverPlayer);
+                }
+            }
+
             tick();
             gameTime++;
         }
@@ -254,13 +321,13 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                 stayOpen = false;
             } else {
                 GameCapability hostCapability = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (hostCapability == null || !hostCapability.isPlaying()) stayOpen = false;
+                if (hostCapability == null || !hostCapability.isPlayingGame()) stayOpen = false;
             }
 
             if (!stayOpen) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null && cap.isPlaying()) {
-                    cap.setGame(null, player);
+                if (cap != null && cap.isPlayingGame()) {
+                    cap.setGame(null);
                 }
             }
         }
@@ -268,7 +335,28 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     protected abstract void tick();
 
-    public abstract void render(GuiGraphics graphics, float partialTicks);
+    private GuiGraphics graphics = null;
+    private float partialTicks = 0.0f;
+
+    public final void startFrame(GuiGraphics graphics, float partialTicks) {
+        this.graphics = graphics;
+        this.partialTicks = partialTicks;
+    }
+
+    public final void endFrame() {
+        this.graphics = null;
+        this.partialTicks = 0.0f;
+    }
+
+    public GuiGraphics getGraphicsInstance() {
+        return graphics;
+    }
+
+    public float getPartialTicks() {
+        return partialTicks;
+    }
+
+    public abstract void render();
 
     public Music getMusic() {
         return null;
@@ -282,7 +370,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         playSound(event, 1.0f, 1.0f);
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, Component txt, ColorF color) {
+    private void drawText(float x, float y, float scale, Component txt, ColorF color) {
         Font font = Minecraft.getInstance().font;
         float width = font.width(txt);
         float height = font.lineHeight;
@@ -297,7 +385,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    private void drawText(GuiGraphics graphics, float x, float y, float scale, Component[] txt, ColorF colorF) {
+    private void drawText(float x, float y, float scale, Component[] txt, ColorF colorF) {
         Font font = Minecraft.getInstance().font;
         float height = font.lineHeight * txt.length + 2 * (txt.length - 1);
 
@@ -325,20 +413,20 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
     }
 
-    public final void drawText(GuiGraphics graphics, float x, float y, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
+    public final void drawText(float x, float y, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
         TextRenderingRules rules = new TextRenderingRules().setMaxWidth(maxWidth).setMaxLines(maxLines);
-        drawText(graphics, x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
+        drawText(x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
     }
 
-    public final void drawText(GuiGraphics graphics, float x, float y, float scale, ColorF color, Component... lines) {
-        drawText(graphics, x, y, scale, lines, color);
+    public final void drawText(float x, float y, float scale, ColorF color, Component... lines) {
+        drawText(x, y, scale, lines, color);
     }
 
-    public final void drawRectangle(GuiGraphics graphics, float x, float y, float width, float height, ColorF color, float angle) {
-        drawRectangle(graphics, RenderType.gui(), x, y, width, height, color, angle);
+    public final void drawRectangle(float x, float y, float width, float height, ColorF color, float angle) {
+        drawRectangle(RenderType.gui(), x, y, width, height, color, angle);
     }
 
-    public final void drawRectangle(GuiGraphics graphics, RenderType type, float x, float y, float width, float height, ColorF color, float angle) {
+    public final void drawRectangle(RenderType type, float x, float y, float width, float height, ColorF color, float angle) {
         PoseStack pose = graphics.pose();
         pose.pushPose();
         pose.translate(x, y, 0.0f);
@@ -372,11 +460,11 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    public final void drawHollowRectangle(GuiGraphics graphics, float x, float y, float width, float height, float thickness, ColorF color, float angle) {
-        drawHollowRectangle(graphics, RenderType.gui(), x, y, width, height, thickness, color, angle);
+    public final void drawHollowRectangle(float x, float y, float width, float height, float thickness, ColorF color, float angle) {
+        drawHollowRectangle(RenderType.gui(), x, y, width, height, thickness, color, angle);
     }
 
-    public final void drawHollowRectangle(GuiGraphics graphics, RenderType type, float x, float y, float width, float height, float thickness, ColorF color,  float angle) {
+    public final void drawHollowRectangle(RenderType type, float x, float y, float width, float height, float thickness, ColorF color,  float angle) {
         PoseStack pose = graphics.pose();
         pose.pushPose();
         pose.translate(x, y, 0.0f);
@@ -436,27 +524,27 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
-        drawTexture(graphics, texture, x, y, width, height, angle, u, v, uWidth, vHeight, new ColorF(1.0f));
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
+        drawTexture(texture, x, y, width, height, angle, u, v, uWidth, vHeight, new ColorF(1.0f));
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle) {
-        drawTexture(graphics, texture, x, y, width, height, angle, new ColorF(1.0f));
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle) {
+        drawTexture(texture, x, y, width, height, angle, new ColorF(1.0f));
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
         float minU = (float) u / 256;
         float minV = (float) v / 256;
         float maxU = (float) (u + uWidth) / 256;
         float maxV = (float) (v + vHeight) / 256;
-        drawTexture(graphics, texture, x, y, width, height, angle, minU, maxU, minV, maxV, color);
+        drawTexture(texture, x, y, width, height, angle, minU, maxU, minV, maxV, color);
     }
 
-    public final void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, ColorF color) {
-        drawTexture(graphics, texture, x, y, width, height, angle, 0.0f, 1.0f, 0.0f, 1.0f, color);
+    public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, ColorF color) {
+        drawTexture(texture, x, y, width, height, angle, 0.0f, 1.0f, 0.0f, 1.0f, color);
     }
 
-    private void drawTexture(GuiGraphics graphics, ResourceLocation texture, float x, float y, float width, float height, float angle, float minU, float maxU, float minV, float maxV, ColorF color) {
+    private void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, float minU, float maxU, float minV, float maxV, ColorF color) {
         RenderSystem.setShaderTexture(0, texture);
         RenderSystem.setShader(GameRenderer::getPositionColorTexShader);
         RenderSystem.enableBlend();

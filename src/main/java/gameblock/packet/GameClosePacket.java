@@ -6,7 +6,7 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class GameClosePacket {
+public class GameClosePacket implements IPacket {
     public GameClosePacket() {}
 
     public GameClosePacket(FriendlyByteBuf buffer) {
