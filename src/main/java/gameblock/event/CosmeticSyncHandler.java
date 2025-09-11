@@ -29,10 +29,15 @@ public class CosmeticSyncHandler {
 
     @SubscribeEvent
     public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
-        if (event.getEntity().level() instanceof ServerLevel level) {
+        if (event.getEntity() instanceof ServerPlayer player && player.level() instanceof ServerLevel level) {
             level.getServer().execute(() -> {
-                GameCapability cap = event.getEntity().getCapability(GameCapabilityProvider.CAPABILITY_GAME).orElse(null);
-                if (cap != null) cap.forceSync();
+                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME).orElse(null);
+                if (cap != null) {
+                    BaseParticleCosmetic cosmetic = cap.getCosmetic();
+                    if (cosmetic != null) {
+                        GameblockPackets.sendToPlayer(player, new CosmeticSyncPacket(player, cosmetic.type));
+                    }
+                }
             });
         }
     }

@@ -72,10 +72,6 @@ public class GameCapability {
         if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic));
     }
 
-    public void forceSync() {
-        if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic.type));
-    }
-
 
 
     protected void writeToNBT(CompoundTag nbt) {
