@@ -5,6 +5,7 @@ import gameblock.capability.GameCapabilityProvider;
 import gameblock.cosmetics.particles.BaseParticleCosmetic;
 import gameblock.packet.CosmeticSyncPacket;
 import gameblock.registry.GameblockPackets;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -23,6 +24,16 @@ public class CosmeticSyncHandler {
                     GameblockPackets.sendToPlayer(newTracker, new CosmeticSyncPacket(player, cosmetic.type));
                 }
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
+        if (event.getEntity().level() instanceof ServerLevel level) {
+            level.getServer().execute(() -> {
+                GameCapability cap = event.getEntity().getCapability(GameCapabilityProvider.CAPABILITY_GAME).orElse(null);
+                if (cap != null) cap.forceSync();
+            });
         }
     }
 }

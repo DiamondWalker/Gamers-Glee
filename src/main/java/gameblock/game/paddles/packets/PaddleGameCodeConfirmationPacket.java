@@ -6,14 +6,14 @@ import gameblock.packet.UpdateGamePacket;
 import gameblock.util.CompletionStatus;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class PaddleGameCreationResultPacket extends UpdateGamePacket<PaddlesGame> {
+public class PaddleGameCodeConfirmationPacket extends UpdateGamePacket<PaddlesGame> {
     CompletionStatus result;
 
-    public PaddleGameCreationResultPacket(CompletionStatus result) {
+    public PaddleGameCodeConfirmationPacket(CompletionStatus result) {
         this.result = result;
     }
 
-    public PaddleGameCreationResultPacket(FriendlyByteBuf buffer) {
+    public PaddleGameCodeConfirmationPacket(FriendlyByteBuf buffer) {
         super(buffer);
     }
 

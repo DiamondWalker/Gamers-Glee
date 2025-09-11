@@ -39,6 +39,6 @@ public class PaddleGameCodeSelectionPacket extends UpdateGamePacket<PaddlesGame>
             result = CompletionStatus.FAIL;
         }
 
-        GameblockPackets.sendToPlayer(sender, new PaddleGameCreationResultPacket(result));
+        GameblockPackets.sendToPlayer(sender, new PaddleGameCodeConfirmationPacket(result));
     }
 }

@@ -77,7 +77,7 @@ public class GameblockPackets {
         register(ClientToServerPaddleUpdatePacket.class, ClientToServerPaddleUpdatePacket::new);
         register(ServerToClientPaddleUpdatePacket.class, ServerToClientPaddleUpdatePacket::new);
         register(PaddleGameCodeSelectionPacket.class, PaddleGameCodeSelectionPacket::new);
-        register(PaddleGameCreationResultPacket.class, PaddleGameCreationResultPacket::new);
+        register(PaddleGameCodeConfirmationPacket.class, PaddleGameCodeConfirmationPacket::new);
     }
 
     private static <MSG extends IPacket> void register(Class<MSG> clazz, Function<FriendlyByteBuf, MSG> constructor) {

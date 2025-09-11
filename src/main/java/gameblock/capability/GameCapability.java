@@ -61,7 +61,7 @@ public class GameCapability {
 
 
     // cosmetic
-    private BaseParticleCosmetic cosmetic = null; // TODO: persistence
+    private BaseParticleCosmetic cosmetic = null;
 
     public BaseParticleCosmetic getCosmetic() {
         return cosmetic;
@@ -70,6 +70,10 @@ public class GameCapability {
     public void setCosmetic(GameblockCosmetics.CosmeticType cosmetic) {
         this.cosmetic = cosmetic != null ? cosmetic.constructor.apply(player) : null;
         if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic));
+    }
+
+    public void forceSync() {
+        if (player instanceof ServerPlayer serverPlayer) GameblockPackets.sendToPlayerAndOthers(serverPlayer, new CosmeticSyncPacket(player, cosmetic.type));
     }
 
 
