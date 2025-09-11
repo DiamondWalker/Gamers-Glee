@@ -10,8 +10,10 @@ import gameblock.util.rendering.ColorF;
 import gameblock.util.physics.Direction1D;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 public class PaddlesGame extends GameInstance<PaddlesGame> {
 
@@ -151,10 +153,10 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             }
             float partialTicks = getPartialTicks();
 
-            drawRectangle(-Paddle.POSITION, leftPaddle.oldPos + partialTicks * (leftPaddle.pos - leftPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
-            drawRectangle(Paddle.POSITION, rightPaddle.oldPos + partialTicks * (rightPaddle.pos - rightPaddle.oldPos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            drawRectangle(-Paddle.POSITION, Mth.lerp(partialTicks, leftPaddle.oldPos, leftPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            drawRectangle(Paddle.POSITION, Mth.lerp(partialTicks, rightPaddle.oldPos, rightPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
 
-            drawRectangle(ball.oldPos.x + partialTicks * (ball.pos.x - ball.oldPos.x), ball.oldPos.y + partialTicks * (ball.pos.y - ball.oldPos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
+            drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
         } else if (prompt == null) {
             drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
             drawText(0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));

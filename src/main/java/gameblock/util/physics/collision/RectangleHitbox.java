@@ -7,6 +7,14 @@ import net.minecraft.world.phys.Vec2;
 public class RectangleHitbox extends Hitbox {
     float width, height;
 
+    public RectangleHitbox(float x, float y, float sideLength) {
+        this(new Vec2(x, y), sideLength);
+    }
+
+    public RectangleHitbox(float x, float y, float width, float height) {
+        this(new Vec2(x, y), width, height);
+    }
+
     public RectangleHitbox(Vec2 origin, float sideLength) {
         this(origin, sideLength, sideLength);
     }

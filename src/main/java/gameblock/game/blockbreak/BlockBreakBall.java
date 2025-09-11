@@ -8,7 +8,10 @@ import gameblock.registry.GameblockSounds;
 import gameblock.util.GameState;
 import gameblock.util.MathHelper;
 import gameblock.util.datastructure.CircularStack;
+import gameblock.util.physics.collision.Hitbox;
+import gameblock.util.physics.collision.RectangleHitbox;
 import gameblock.util.rendering.ColorF;
+import net.minecraft.util.Mth;
 import org.joml.Vector2f;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,21 +95,16 @@ public class BlockBreakBall {
 
                     // platform collision (this is handled on the client)
                     if (game.isClientSide() && moveY < 0.0f) {
-                        float platformCurrentPos = game.platform.oldPos + ((float) (ticks + 1) / UPDATES_PER_TICK) * (game.platform.pos - game.platform.oldPos);
-                        if (x >= platformCurrentPos - (BlockBreakPlatform.WIDTH + BlockBreakBall.SIZE) / 2 && x <= platformCurrentPos + (BlockBreakPlatform.WIDTH + BlockBreakBall.SIZE) / 2) {
-                            if (y <= BlockBreakPlatform.Y_POSITION + (BlockBreakPlatform.HEIGHT + BlockBreakBall.SIZE) / 2 && y >= BlockBreakPlatform.Y_POSITION - (BlockBreakPlatform.HEIGHT + BlockBreakBall.SIZE) / 2) {
-                                //moveX += PLATFORM_SPEED / UPDATES_PER_TICK / 4 * moveDir.getComponent();
-                                moveX += (game.platform.pos - game.platform.oldPos) / 2;
-                                moveY = Math.abs(moveY);
-                                double speed = Math.sqrt(moveX * moveX + moveY * moveY);
-                                moveX *= (calculateBallSpeed() / speed);
-                                moveY *= (calculateBallSpeed() / speed);
+                        if (Hitbox.areColliding(getHitbox(), game.platform.getHitbox(((float) (ticks + 1) / UPDATES_PER_TICK)))) {
+                            moveX += (game.platform.pos - game.platform.oldPos) / 2;
+                            moveY = Math.abs(moveY);
+                            double speed = Math.sqrt(moveX * moveX + moveY * moveY);
+                            moveX *= (calculateBallSpeed() / speed);
+                            moveY *= (calculateBallSpeed() / speed);
 
-                                game.playSound(GameblockSounds.BALL_BOUNCE.get());
-                                GameblockPackets.sendToServer(new BallUpdatePacket(x, y, moveX, moveY, false));
-                                game.clientToPacketBallUpdateTime = game.getGameTime();
-                                //ballMoveUpdate = true;
-                            }
+                            game.playSound(GameblockSounds.BALL_BOUNCE.get());
+                            GameblockPackets.sendToServer(new BallUpdatePacket(x, y, moveX, moveY, false));
+                            game.clientToPacketBallUpdateTime = game.getGameTime();
                         }
                     }
 
@@ -170,14 +168,18 @@ public class BlockBreakBall {
         });
         if (!game.isGameOver()) {
             game.drawRectangle(
-                    oldX + (x - oldX) * partialTicks,
-                    oldY + (y - oldY) * partialTicks,
+                    Mth.lerp(partialTicks, oldX, x),
+                    Mth.lerp(partialTicks, oldY, y),
                     BlockBreakBall.SIZE,
                     BlockBreakBall.SIZE,
                     new ColorF(100, 100, 255),
                     0
             );
         }
+    }
+
+    public Hitbox getHitbox() {
+        return new RectangleHitbox(x, y, SIZE);
     }
 
     public boolean needsToSyncMovement() {

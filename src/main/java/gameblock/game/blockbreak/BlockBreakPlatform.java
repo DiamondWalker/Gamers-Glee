@@ -1,6 +1,9 @@
 package gameblock.game.blockbreak;
 
 import gameblock.game.GameInstance;
+import gameblock.util.physics.collision.Hitbox;
+import gameblock.util.physics.collision.RectangleHitbox;
+import net.minecraft.util.Mth;
 
 public class BlockBreakPlatform {
     public static final float Y_POSITION = -50.0f;
@@ -25,8 +28,12 @@ public class BlockBreakPlatform {
 
     public void render() {
         game.drawTexture(BlockBreakGame.SPRITE,
-                oldPos + (pos - oldPos) * (game.isGameOver() ? 0.0f : game.getPartialTicks()),
+                Mth.lerp(game.isGameOver() ? 0.0f : game.getPartialTicks(), oldPos, pos),
                 Y_POSITION,
                 WIDTH, HEIGHT, 0, 0, 0, 20, 3);
+    }
+
+    public Hitbox getHitbox(float lerp) {
+        return new RectangleHitbox(Mth.lerp(lerp, oldPos, pos), Y_POSITION, WIDTH, HEIGHT);
     }
 }
