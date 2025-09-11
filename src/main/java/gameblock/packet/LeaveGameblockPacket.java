@@ -6,10 +6,10 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
-public class GameClosePacket implements IPacket {
-    public GameClosePacket() {}
+public class LeaveGameblockPacket implements IPacket {
+    public LeaveGameblockPacket() {}
 
-    public GameClosePacket(FriendlyByteBuf buffer) {
+    public LeaveGameblockPacket(FriendlyByteBuf buffer) {
         readFromBuffer(buffer);
     }
 
@@ -19,7 +19,7 @@ public class GameClosePacket implements IPacket {
 
     public void handle(Supplier<NetworkEvent.Context> context) {
         if (context.get().getDirection() == NetworkDirection.PLAY_TO_SERVER) {
-            context.get().enqueueWork(() -> ServerPacketHandler.handleGameClosePacket(this, context.get().getSender()));
+            context.get().enqueueWork(() -> ServerPacketHandler.handleGameblockExitPacket(this, context.get().getSender()));
         }
         context.get().setPacketHandled(true);
     }

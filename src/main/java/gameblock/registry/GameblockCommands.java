@@ -40,7 +40,7 @@ public class GameblockCommands {
     }
 
     private static LiteralArgumentBuilder<CommandSourceStack> buildCosmeticCommand() {
-        LiteralArgumentBuilder<CommandSourceStack> command = Commands.literal("cosmetic")
+        return Commands.literal("cosmetic")
                 .then(Commands.argument("type", StringArgumentType.word())
                         .suggests((context, builder) -> {
                             builder.suggest("clear");
@@ -49,21 +49,20 @@ public class GameblockCommands {
                             return builder.buildFuture();
                         })
                         .executes(commandContext -> {
-                            ServerPlayer sender = commandContext.getSource().getPlayer();
-                            String arg = StringArgumentType.getString(commandContext, "type");
+                                    ServerPlayer sender = commandContext.getSource().getPlayer();
+                                    String arg = StringArgumentType.getString(commandContext, "type");
 
-                            GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME).orElse(null);
-                            if (cap != null) {
-                                if (arg.matches("clear")) cap.setCosmetic(null);
-                                GameblockCosmetics.CosmeticType cosmetic = GameblockCosmetics.getTypeFromID(arg);
-                                if (cosmetic == null) return 0;
-                                cap.setCosmetic(cosmetic);
-                                return Command.SINGLE_SUCCESS;
-                            }
-                            return 0;
-                        }
+                                    GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME).orElse(null);
+                                    if (cap != null) {
+                                        if (arg.matches("clear")) cap.setCosmetic(null);
+                                        GameblockCosmetics.CosmeticType cosmetic = GameblockCosmetics.getTypeFromID(arg);
+                                        if (cosmetic == null) return 0;
+                                        cap.setCosmetic(cosmetic);
+                                        return Command.SINGLE_SUCCESS;
+                                    }
+                                    return 0;
+                                }
                         )
                 );
-        return command;
     }
 }

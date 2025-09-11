@@ -3,10 +3,20 @@ package gameblock.packet;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
+import gameblock.game.os.GameblockOS;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ServerPacketHandler {
-    public static void handleGameClosePacket(GameClosePacket packet, ServerPlayer sender) {
+    public static void handleCloseGamePacket(CloseGamePacket packet, ServerPlayer sender) {
+        if (sender != null) {
+            GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null && cap.isPlayingGame() && !(cap.getGame() instanceof GameblockOS)) {
+                cap.setGame(new GameblockOS(sender, false));
+            }
+        }
+    }
+
+    public static void handleGameblockExitPacket(LeaveGameblockPacket packet, ServerPlayer sender) {
         if (sender != null) {
             GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {

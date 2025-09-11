@@ -7,7 +7,9 @@ import gameblock.game.GameInstance;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.packet.GameClosePacket;
+import gameblock.game.os.GameblockOS;
+import gameblock.packet.CloseGamePacket;
+import gameblock.packet.LeaveGameblockPacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.physics.Direction1D;
 import net.minecraft.client.GameNarrator;
@@ -21,6 +23,7 @@ import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class GameScreen extends Screen {
     public static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/gameblock.png");
@@ -132,6 +135,10 @@ public class GameScreen extends Screen {
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (game.prompt != null && game.prompt.handleKeyPress(pKeyCode)) return true;
         if (game.pressKey(pKeyCode)) return true;
+        if (pKeyCode == GLFW.GLFW_KEY_ESCAPE && !(game instanceof GameblockOS)) {
+            GameblockPackets.sendToServer(new CloseGamePacket());
+            return true;
+        }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
@@ -155,7 +162,7 @@ public class GameScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        GameblockPackets.sendToServer(new GameClosePacket());
+        GameblockPackets.sendToServer(new LeaveGameblockPacket());
         game.soundManager.stopAll();
         if (currentMusic != null) minecraft.getMusicManager().stopPlaying(currentMusic);
     }

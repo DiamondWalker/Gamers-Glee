@@ -13,6 +13,7 @@ import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.rendering.ColorF;
 import gameblock.util.physics.Direction1D;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -26,9 +27,7 @@ import net.minecraft.world.phys.Vec2;
 import java.util.*;
 
 public class GameblockOS extends GameInstance<GameblockOS> {
-    private static final int LOGO_DURATION = 200;
     private static final int LOGO_FADE_OUT_TIME = 20;
-    private static final int MENU_FADE_IN_TIME = 80;
     private static final int ICON_FADE_IN_DELAY = 20;
     private static final int ICON_FADE_IN_TIME = 80;
 
@@ -36,13 +35,31 @@ public class GameblockOS extends GameInstance<GameblockOS> {
 
     private GameblockLogoRenderer logoRenderer;
     private GameblockBackgroundRenderer bgRenderer;
+    private boolean showStartupScreen;
 
     public GameblockOS(Player player) {
+        this(player, true);
+    }
+
+    public GameblockOS(Player player, boolean showStartupScreen) {
         super(player, GameblockGames.GAMEBLOCK_OS);
+        this.showStartupScreen = showStartupScreen;
         if (isClientSide()) {
             logoRenderer = new GameblockLogoRenderer(this);
             bgRenderer = new GameblockBackgroundRenderer(this);
         }
+    }
+
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeBoolean(showStartupScreen);
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        showStartupScreen = buffer.readBoolean();
     }
 
     public OSIcon[] getIcons() {
@@ -83,7 +100,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
         }
 
         if (isClientSide()) {
-            if (getGameTime() == 85) {
+            if (showStartupScreen && getGameTime() == 85) {
                 playSound(GameblockSounds.GAMEBLOCK_LOGON.get());
             }
         }
@@ -110,14 +127,22 @@ public class GameblockOS extends GameInstance<GameblockOS> {
         }
     }
 
+    private int getLogoDuration() {
+        return showStartupScreen ? 200 : 0;
+    }
+
+    private int getMenuFadeInTime() {
+        return showStartupScreen ? 80 : 20;
+    }
+
     @Override
     public void render() {
-        if (getGameTime() <= LOGO_DURATION) {
+        if (getGameTime() <= getLogoDuration()) {
             logoRenderer.render();
         } else if (menuLoaded()) {
             bgRenderer.render();
 
-            float iconTransparency = (getPartialTicks() + getGameTime() - LOGO_DURATION - MENU_FADE_IN_TIME - ICON_FADE_IN_DELAY) / ICON_FADE_IN_TIME;
+            float iconTransparency = (getPartialTicks() + getGameTime() - getLogoDuration() - getMenuFadeInTime() - ICON_FADE_IN_DELAY) / ICON_FADE_IN_TIME;
             iconTransparency = Mth.clamp(iconTransparency, 0.0f, 1.0f);
 
             if (!gameIcons.isEmpty()) {
@@ -135,12 +160,13 @@ public class GameblockOS extends GameInstance<GameblockOS> {
         }
 
         // the fade between the logo screen and the menu screen
-        float fade = (getPartialTicks() + getGameTime()) - LOGO_DURATION;
+        float fade = (getPartialTicks() + getGameTime()) - getLogoDuration();
         if (fade < 0) { // logo fade out
             fade = -fade / LOGO_FADE_OUT_TIME;
         } else { // menu fade in
-            fade = fade / MENU_FADE_IN_TIME;
+            fade = fade / getMenuFadeInTime();
         }
+        System.out.println(fade);
         if (fade < 1.0f) {
             drawRectangle(0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f - fade), 0);
         }
@@ -162,11 +188,11 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     }
 
     private boolean menuLoaded() {
-        return getGameTime() > LOGO_DURATION && gameIcons != null;
+        return getGameTime() > getLogoDuration() && gameIcons != null;
     }
 
     private boolean isMenuInteractable() {
-        return getGameTime() > LOGO_DURATION + MENU_FADE_IN_TIME + ICON_FADE_IN_DELAY + ICON_FADE_IN_TIME;
+        return getGameTime() > getLogoDuration() + getMenuFadeInTime() + ICON_FADE_IN_DELAY + ICON_FADE_IN_TIME;
     }
 
     @Override

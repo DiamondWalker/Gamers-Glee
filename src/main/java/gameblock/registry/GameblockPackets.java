@@ -13,10 +13,7 @@ import gameblock.game.os.packets.SelectGamePacket;
 import gameblock.game.paddles.packets.*;
 import gameblock.game.serpent.packets.EatFoodPacket;
 import gameblock.game.serpent.packets.SnakeUpdatePacket;
-import gameblock.packet.CosmeticSyncPacket;
-import gameblock.packet.GameChangePacket;
-import gameblock.packet.GameClosePacket;
-import gameblock.packet.IPacket;
+import gameblock.packet.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +37,8 @@ public class GameblockPackets {
     public static void registerPackets() {
         register(GameChangePacket.class, GameChangePacket::new);
         register(GameStatePacket.class, GameStatePacket::new);
-        register(GameClosePacket.class, GameClosePacket::new);
+        register(CloseGamePacket.class, CloseGamePacket::new);
+        register(LeaveGameblockPacket.class, LeaveGameblockPacket::new);
         register(GameRestartPacket.class, GameRestartPacket::new);
         register(CosmeticSyncPacket.class, CosmeticSyncPacket::new);
 
