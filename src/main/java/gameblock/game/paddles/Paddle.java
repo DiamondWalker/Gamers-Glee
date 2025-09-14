@@ -39,7 +39,7 @@ public class Paddle {
         }
     }
 
-    public Hitbox getHitbox() {
-        return new RectangleHitbox(POSITION * direction.getComponent(), pos, DEPTH, WIDTH);
+    public Hitbox getHitbox(float f) {
+        return new RectangleHitbox(POSITION * direction.getComponent(), oldPos + (pos - oldPos) * f, DEPTH, WIDTH);
     }
 }

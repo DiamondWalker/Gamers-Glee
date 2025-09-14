@@ -15,6 +15,10 @@ public abstract class Hitbox {
         this.origin = pos;
     }
 
+    public Vec2 getOrigin() {
+        return origin;
+    }
+
     public abstract boolean containsPoint(Vec2 point);
 
     public abstract void render(GameInstance<?> game);

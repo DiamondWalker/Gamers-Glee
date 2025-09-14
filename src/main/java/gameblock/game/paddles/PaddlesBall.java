@@ -1,5 +1,6 @@
 package gameblock.game.paddles;
 
+import gameblock.game.GameInstance;
 import gameblock.game.paddles.packets.PaddleGameBallUpdatePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.MathHelper;
@@ -12,11 +13,12 @@ public class PaddlesBall {
     private final PaddlesGame game;
 
     public static final float SIZE = 3.0f;
+    private static final int PADDLE_COLLISION_CHECKS = 100;
 
     public Vec2 pos = Vec2.ZERO;
     public Vec2 oldPos = Vec2.ZERO;
     public Vec2 motion = Vec2.ZERO;
-    public float speed = 1.5f;
+    public float speed = 2.5f;
 
     public PaddlesBall(PaddlesGame game) {
         this.game = game;
@@ -34,20 +36,34 @@ public class PaddlesBall {
         }
 
         // paddle collision
-        if (MathHelper.hasSameSign(pos.x, motion.x)) { // make sure the ball is moving towards one of the paddles
-            for (Paddle paddle : new Paddle[] {game.leftPaddle, game.rightPaddle}) {
-                if (Hitbox.areColliding(this.getHitbox(), paddle.getHitbox())) {
-                    float yComponent = (pos.y - paddle.pos) / ((PaddlesBall.SIZE + Paddle.WIDTH) / 2); // if the ball hits the very corner, this will be 1 or -1. If the ball hits the center, it'll be 0
-                    speed *= 1.2f;
-                    motion = new Vec2(-motion.x, yComponent).normalized().scale(speed);
+        for (int i = 1; i <= PADDLE_COLLISION_CHECKS; i++) {
+            if (MathHelper.hasSameSign(pos.x, motion.x)) { // make sure the ball is moving towards one of the paddles
+                for (Paddle paddle : new Paddle[] {game.leftPaddle, game.rightPaddle}) {
+                    float f = (float) i / PADDLE_COLLISION_CHECKS;
+                    Hitbox ballHitbox = this.getHitbox(f);
+                    Hitbox paddleHitbox = paddle.getHitbox(f);
+                    if (Hitbox.areColliding(ballHitbox, paddleHitbox)) {
+                        float yComponent = (ballHitbox.getOrigin().y - paddleHitbox.getOrigin().y) / ((PaddlesBall.SIZE + Paddle.WIDTH) / 2); // if the ball hits the very corner, this will be 1 or -1. If the ball hits the center, it'll be 0
+                        speed += 0.2f;
+                        motion = new Vec2(-paddle.direction.getComponent(), yComponent).scale(speed);
 
-                    if (paddle.direction == game.whichPaddleAmI) GameblockPackets.sendToServer(new PaddleGameBallUpdatePacket(pos, motion));
+                        if (game.isClientSide() && paddle.direction == game.whichPaddleAmI) {
+                            GameblockPackets.sendToServer(new PaddleGameBallUpdatePacket(pos, motion, speed));
+                        }
+                        pos = ballHitbox.getOrigin();
+                        break;
+                    }
                 }
             }
         }
+
+        // win condition
+        if (!game.isClientSide() && pos.x - SIZE > GameInstance.MAX_X || pos.x + SIZE < GameInstance.MIN_X) {
+            game.score(Direction1D.getFromCoordinate(pos.x));
+        }
     }
 
-    public Hitbox getHitbox() {
-        return new RectangleHitbox(pos, SIZE, SIZE);
+    public Hitbox getHitbox(float f) {
+        return new RectangleHitbox(pos.add(oldPos.negated()).scale(f).add(oldPos), SIZE, SIZE);
     }
 }

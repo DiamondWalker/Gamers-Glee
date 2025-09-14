@@ -26,6 +26,10 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     public PaddlesBall ball;
 
+    public byte leftScore;
+    public byte rightScore;
+    public long scoreTime = Long.MIN_VALUE;
+
     // SERVER DATA
     public static final Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
 
@@ -72,11 +76,26 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         rightPaddle = new Paddle(this, Direction1D.RIGHT);
         ball = new PaddlesBall(this);
         ball.motion = new Vec2(-1, 0).scale(ball.speed);
+        leftScore = rightScore = 0;
+        // TODO: send score packet
     }
 
     public void stopGame() {
         gameStarted = false;
         whichPaddleAmI = null;
+    }
+
+    public void score(Direction1D dir) {
+        if (dir == Direction1D.LEFT) {
+            leftScore++;
+        } else if (dir == Direction1D.RIGHT) {
+            rightScore++;
+        } else {
+            throw new IllegalArgumentException("Invalid score direction!");
+        }
+
+        scoreTime = getGameTime();
+        // TODO: send score packet
     }
 
     @Override
