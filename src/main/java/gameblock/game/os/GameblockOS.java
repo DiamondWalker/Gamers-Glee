@@ -166,7 +166,6 @@ public class GameblockOS extends GameInstance<GameblockOS> {
         } else { // menu fade in
             fade = fade / getMenuFadeInTime();
         }
-        System.out.println(fade);
         if (fade < 1.0f) {
             drawRectangle(0, 0, 200, 200, new ColorF(0, 0, 0, 1.0f - fade), 0);
         }

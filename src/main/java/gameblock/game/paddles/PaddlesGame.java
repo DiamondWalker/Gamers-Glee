@@ -68,9 +68,9 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
     public void initializeGame() {
         gameStarted = true;
-        leftPaddle = new Paddle();
-        rightPaddle = new Paddle();
-        ball = new PaddlesBall();
+        leftPaddle = new Paddle(this, Direction1D.LEFT);
+        rightPaddle = new Paddle(this, Direction1D.RIGHT);
+        ball = new PaddlesBall(this);
         ball.motion = new Vec2(-1, 0).scale(ball.speed);
     }
 
@@ -106,41 +106,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         if (!gameStarted) {
             if (isClientSide() && gameCode == null && prompt == null) prompt = new PaddleGameCodePrompt(this);
         } else {
-            if (isClientSide()) {
-                if (prompt != null) prompt.close();
+            if (isClientSide() && prompt != null) prompt.close();
 
-                Paddle myPaddle = getPaddleFromDirection(whichPaddleAmI);
-                Paddle opponentPaddle = getPaddleFromDirection(whichPaddleAmI.getOpposite());
+            leftPaddle.tick();
+            rightPaddle.tick();
 
-                myPaddle.oldPos = myPaddle.pos;
-                myPaddle.pos = getMouseCoordinates().y;
-
-                opponentPaddle.oldPos = opponentPaddle.pos;
-                opponentPaddle.pos = otherPaddleUpdatePos;
-
-                if (myPaddle.pos != myPaddle.oldPos) GameblockPackets.sendToServer(new ClientToServerPaddleUpdatePacket(myPaddle.pos));
-            }
-
-            ball.oldPos = ball.pos;
-            ball.pos = ball.pos.add(ball.motion);
-
-            if (Math.abs(ball.pos.y + PaddlesBall.SIZE / 2) >= 75) {
-                if (MathHelper.hasSameSign(ball.pos.y, ball.motion.y)) { // make sure it's still moving out of the screen
-                    ball.motion = new Vec2(ball.motion.x, ball.motion.y * -1);
-                }
-            }
-            if (Math.abs(Math.abs(ball.pos.x) - Paddle.POSITION) <= (Paddle.DEPTH + PaddlesBall.SIZE) / 2) { // is ball at the correct x range to hit a paddle?
-                if (MathHelper.hasSameSign(ball.pos.x, ball.motion.x)) { // make sure ball is moving towards the paddles and not bouncing off
-                    Direction1D side = ball.pos.x > 0 ? Direction1D.RIGHT : Direction1D.LEFT;
-                    Paddle hitPaddle = getPaddleFromDirection(side);
-
-                    float yComponent = (ball.pos.y - hitPaddle.pos) / ((PaddlesBall.SIZE + Paddle.WIDTH) / 2); // if the ball hits the very corner, this will be 1 or -1. If the ball hits the center, it'll be 0
-                    if (Math.abs(yComponent) <= 1.0f) { // ball is at the correct y range (hit paddle)
-                        ball.speed *= 1.2f;
-                        ball.motion = new Vec2(side.getOpposite().getComponent(), yComponent).scale(ball.speed);
-                    }
-                }
-            }
+            ball.tick();
         }
     }
 
