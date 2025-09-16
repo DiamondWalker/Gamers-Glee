@@ -30,6 +30,8 @@
 
   "gui.gameblock.os.no_cartridges_1": "No cartridges detected.",
   "gui.gameblock.os.no_cartridges_2": "Find some in loot chests!",
+  "gui.gameblock.os.enter_game_code": "Enter 8-character game code:",
+  "gui.gameblock.os.select_game_code": "Enter",
 
   "gui.gameblock.block_break.score": "Score: %s",
   "gui.gameblock.block_break.time": "Time: %s",
@@ -43,5 +45,11 @@
   "gui.gameblock.flying_chicken.score": "Score: %s",
   "gui.gameblock.flying_chicken.best": "Best: %s",
   "gui.gameblock.flying_chicken.new_best": "New Best!",
-  "gui.gameblock.flying_chicken.retry": "Retry?"
+  "gui.gameblock.flying_chicken.retry": "Retry?",
+
+  "gui.gameblock.paddles.enter_game_code": "Enter an 8-character game code:",
+  "gui.gameblock.paddles.game_code_already_used": "That game code is already used!",
+  "gui.gameblock.paddles.game_code_info": "(Other players will need this code to join!)",
+  "gui.gameblock.paddles.waiting_for_players": "Waiting for players...",
+  "gui.gameblock.paddles.game_code_reminder": "(Remember: your game code is %s)"
 }

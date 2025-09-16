@@ -178,8 +178,8 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
             if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
         } else if (prompt == null) {
-            drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
-            drawText(0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));
+            drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.paddles.waiting_for_players"));
+            drawText(0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.paddles.game_code_reminder", gameCode));
         }
     }
 }

@@ -39,7 +39,7 @@ public class MultiplayerGamePrompt extends GamePrompt.GameCodePrompt<GameblockOS
         } else {
             fieldColor = new ColorF(1.0f);
         }
-        game.drawText(0, 26, 0.8f, new ColorF(1.0f), Component.literal("Enter 8-digit game code:")); // TODO: translate
+        game.drawText(0, 26, 0.8f, new ColorF(1.0f), Component.translatable("gui.gameblock.os.enter_game_code"));
         game.drawHollowRectangle(0, 8, 100, 12, 1, fieldColor, 0);
         game.drawText(0, 8, 0.8f, new ColorF(0.8f), Component.literal(entry));
 
@@ -54,6 +54,6 @@ public class MultiplayerGamePrompt extends GamePrompt.GameCodePrompt<GameblockOS
         Vec2 mouse = game.getMouseCoordinates();
         ColorF buttonColor = Math.abs(mouse.x) < 40 && Math.abs(mouse.y - -18) < 10 ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
         game.drawHollowRectangle(0, -18, 80, 20, 1, buttonColor, 0);
-        game.drawText(0, -18, 0.8f, buttonColor, Component.literal("Enter")); // TODO: translate
+        game.drawText(0, -18, 0.8f, buttonColor, Component.translatable("gui.gameblock.os.select_game_code"));
     }
 }

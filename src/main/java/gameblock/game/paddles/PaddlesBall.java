@@ -14,7 +14,7 @@ public class PaddlesBall {
     private final PaddlesGame game;
 
     public static final float SIZE = 3.0f;
-    public static final float DEFAULT_SPEED = 2.5f;
+    public static final float DEFAULT_SPEED = 3.0f;
     private static final int PADDLE_COLLISION_CHECKS = 100;
 
     public Vec2 pos = Vec2.ZERO;
