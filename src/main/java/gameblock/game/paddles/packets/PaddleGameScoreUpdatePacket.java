@@ -36,8 +36,7 @@ public class PaddleGameScoreUpdatePacket extends UpdateGamePacket<PaddlesGame> {
     public void gameUpdateReceivedOnClient(PaddlesGame game) {
         game.leftScore = leftScore;
         game.rightScore = rightScore;
-        game.ball.oldPos = game.ball.pos = Vec2.ZERO;
-        game.ball.speed = PaddlesBall.DEFAULT_SPEED;
+        game.ball.resetBall();
         game.scoreTimer.reset();
         game.winSide = Direction1D.CENTER;
     }

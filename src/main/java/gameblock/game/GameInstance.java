@@ -257,10 +257,12 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public final void restart() {
         if (!isClientSide()) {
+            T newGame = gameType.createInstance(getHostPlayer());
             for (Player player : players) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null) {
-                    cap.setGame(gameType.createInstance(player));
+                    cap.setGame(newGame);
+                    if (player != getHostPlayer()) addPlayer((ServerPlayer) player);
                 }
             }
         } else {

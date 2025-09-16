@@ -82,7 +82,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         leftPaddle = new Paddle(this, Direction1D.LEFT);
         rightPaddle = new Paddle(this, Direction1D.RIGHT);
         ball = new PaddlesBall(this);
-        ball.motion = new Vec2(-1, 0).scale(ball.speed);
+        ball.motion = new Vec2(-1, 0);
         leftScore = rightScore = 0;
     }
 
@@ -106,10 +106,10 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
 
             // schedule the start of the new round.
             scoreTimer.start(40, () -> {
-                ball.oldPos = ball.pos = Vec2.ZERO;
-                ball.speed = PaddlesBall.DEFAULT_SPEED;
+                ball.resetBall();
                 sendToAllPlayers(new PaddleGameScoreUpdatePacket(leftScore, rightScore), null);
                 scoreTimer.reset();
+                // TODO: game win condition
             });
         }
     }
