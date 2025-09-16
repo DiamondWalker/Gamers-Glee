@@ -4,6 +4,7 @@ import gameblock.game.GameInstance;
 import gameblock.game.paddles.packets.PaddleGameBallUpdatePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.MathHelper;
+import gameblock.util.TickTimer;
 import gameblock.util.physics.Direction1D;
 import gameblock.util.physics.collision.Hitbox;
 import gameblock.util.physics.collision.RectangleHitbox;
@@ -26,50 +27,69 @@ public class PaddlesBall {
     }
 
     public void tick() {
-        oldPos = pos;
-        pos = pos.add(motion.scale(speed));
+        if (game.isGameOver()) {
+            oldPos = pos;
+            pos = pos.add(motion.scale(3.5f));
 
-        // bounce off the top and bottom of the screen
-        if (Math.abs(pos.y + PaddlesBall.SIZE / 2) >= 75) {
-            if (MathHelper.hasSameSign(pos.y, motion.y)) { // make sure it's still moving out of the screen
-                motion = new Vec2(motion.x, -motion.y);
+            // bounce off the top and bottom of the screen
+            if (pos.y + PaddlesBall.SIZE / 2 >= GameInstance.MAX_Y || pos.y - PaddlesBall.SIZE / 2 <= GameInstance.MIN_Y) {
+                if (MathHelper.hasSameSign(pos.y, motion.y)) { // make sure it's still moving out of the screen
+                    motion = new Vec2(motion.x, -motion.y);
+                }
             }
-        }
+            // bounce off the sides for the game over animation thing
+            if (pos.x + PaddlesBall.SIZE / 2 >= GameInstance.MAX_X || pos.x - PaddlesBall.SIZE / 2 <= GameInstance.MIN_X) {
+                if (MathHelper.hasSameSign(pos.x, motion.x)) { // make sure it's still moving out of the screen
+                    motion = new Vec2(-motion.x, motion.y);
+                }
+            }
+        } else {
+            oldPos = pos;
+            pos = pos.add(motion.scale(speed));
 
-        // paddle collision
-        if (game.isClientSide()) {
-            for (int i = 1; i <= PADDLE_COLLISION_CHECKS; i++) {
-                if (MathHelper.hasSameSign(pos.x, motion.x)) { // make sure the ball is moving towards one of the paddles
-                    for (Paddle paddle : new Paddle[] {game.leftPaddle, game.rightPaddle}) {
-                        float f = (float) i / PADDLE_COLLISION_CHECKS;
-                        Hitbox ballHitbox = this.getHitbox(f);
-                        Hitbox paddleHitbox = paddle.getHitbox(f);
-                        if (Hitbox.areColliding(ballHitbox, paddleHitbox)) {
-                            float yComponent = (ballHitbox.getOrigin().y - paddleHitbox.getOrigin().y) / ((PaddlesBall.SIZE + Paddle.WIDTH) / 2); // if the ball hits the very corner, this will be 1 or -1. If the ball hits the center, it'll be 0
-                            speed += 0.2f;
-                            motion = new Vec2(-paddle.direction.getComponent(), yComponent);
+            // bounce off the top and bottom of the screen
+            if (pos.y + PaddlesBall.SIZE / 2 >= GameInstance.MAX_Y || pos.y - PaddlesBall.SIZE / 2 <= GameInstance.MIN_Y) {
+                if (MathHelper.hasSameSign(pos.y, motion.y)) { // make sure it's still moving out of the screen
+                    motion = new Vec2(motion.x, -motion.y);
+                }
+            }
 
-                            if (paddle.direction == game.whichPaddleAmI) {
-                                GameblockPackets.sendToServer(new PaddleGameBallUpdatePacket(pos, motion, speed));
+            // paddle collision
+            if (game.isClientSide()) {
+                for (int i = 1; i <= PADDLE_COLLISION_CHECKS; i++) {
+                    if (MathHelper.hasSameSign(pos.x, motion.x)) { // make sure the ball is moving towards one of the paddles
+                        for (Paddle paddle : new Paddle[] {game.leftPaddle, game.rightPaddle}) {
+                            float f = (float) i / PADDLE_COLLISION_CHECKS;
+                            Hitbox ballHitbox = this.getHitbox(f);
+                            Hitbox paddleHitbox = paddle.getHitbox(f);
+                            if (Hitbox.areColliding(ballHitbox, paddleHitbox)) {
+                                float yComponent = (ballHitbox.getOrigin().y - paddleHitbox.getOrigin().y) / ((PaddlesBall.SIZE + Paddle.WIDTH) / 2); // if the ball hits the very corner, this will be 1 or -1. If the ball hits the center, it'll be 0
+                                speed += 0.2f;
+                                motion = new Vec2(-paddle.direction.getComponent(), yComponent);
+
+                                if (paddle.direction == game.whichPaddleAmI) {
+                                    GameblockPackets.sendToServer(new PaddleGameBallUpdatePacket(pos, motion, speed));
+                                }
+                                pos = ballHitbox.getOrigin();
+                                break;
                             }
-                            pos = ballHitbox.getOrigin();
-                            break;
                         }
                     }
                 }
             }
-        }
 
-        // win condition
-        if (!game.isClientSide()) {
-            if (pos.x - SIZE > GameInstance.MAX_X || pos.x + SIZE < GameInstance.MIN_X) {
-                game.score(Direction1D.getFromCoordinate(pos.x).getOpposite());
+            // win condition
+            if (!game.isClientSide()) {
+                if (pos.x - SIZE > GameInstance.MAX_X || pos.x + SIZE < GameInstance.MIN_X) {
+                    game.score(Direction1D.getFromCoordinate(pos.x).getOpposite());
+                }
             }
         }
     }
 
     public void resetBall() {
         pos = oldPos = Vec2.ZERO;
+        motion = new Vec2(Math.signum(motion.x), Math.signum(motion.y));
         speed = DEFAULT_SPEED;
     }
 

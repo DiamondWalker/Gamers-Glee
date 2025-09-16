@@ -8,6 +8,7 @@ import gameblock.game.paddles.packets.PaddleGameScoreUpdatePacket;
 import gameblock.game.paddles.packets.PaddleGameStatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.GameState;
 import gameblock.util.MathHelper;
 import gameblock.util.TickTimer;
 import gameblock.util.rendering.ColorF;
@@ -84,6 +85,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         ball = new PaddlesBall(this);
         ball.motion = new Vec2(-1, 0);
         leftScore = rightScore = 0;
+        setGameState(GameState.ACTIVE);
     }
 
     public void stopGame() {
@@ -109,7 +111,9 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
                 ball.resetBall();
                 sendToAllPlayers(new PaddleGameScoreUpdatePacket(leftScore, rightScore), null);
                 scoreTimer.reset();
-                // TODO: game win condition
+                if (leftScore >= 11 || rightScore >= 11) {
+                    setGameState(GameState.WIN);
+                }
             });
         }
     }
@@ -146,7 +150,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             leftPaddle.tick();
             rightPaddle.tick();
 
-            ball.tick();
+            if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) ball.tick();
         }
     }
 
@@ -167,10 +171,12 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             }
             float partialTicks = getPartialTicks();
 
-            drawRectangle(-Paddle.POSITION, Mth.lerp(partialTicks, leftPaddle.oldPos, leftPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
-            drawRectangle(Paddle.POSITION, Mth.lerp(partialTicks, rightPaddle.oldPos, rightPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            if (!isGameOver()) {
+                drawRectangle(-Paddle.POSITION, Mth.lerp(partialTicks, leftPaddle.oldPos, leftPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+                drawRectangle(Paddle.POSITION, Mth.lerp(partialTicks, rightPaddle.oldPos, rightPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+            }
 
-            drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
+            if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
         } else if (prompt == null) {
             drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal("Waiting for players...")); // TODO: translate
             drawText(0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.literal("(Remember: your game code is " + gameCode + ")"));
