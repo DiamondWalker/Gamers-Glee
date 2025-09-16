@@ -13,12 +13,13 @@ public class PaddlesBall {
     private final PaddlesGame game;
 
     public static final float SIZE = 3.0f;
+    public static final float DEFAULT_SPEED = 2.5f;
     private static final int PADDLE_COLLISION_CHECKS = 100;
 
     public Vec2 pos = Vec2.ZERO;
     public Vec2 oldPos = Vec2.ZERO;
     public Vec2 motion = Vec2.ZERO;
-    public float speed = 2.5f;
+    public float speed = DEFAULT_SPEED;
 
     public PaddlesBall(PaddlesGame game) {
         this.game = game;
@@ -58,8 +59,10 @@ public class PaddlesBall {
         }
 
         // win condition
-        if (!game.isClientSide() && pos.x - SIZE > GameInstance.MAX_X || pos.x + SIZE < GameInstance.MIN_X) {
-            game.score(Direction1D.getFromCoordinate(pos.x));
+        if (!game.isClientSide()) {
+            if (pos.x - SIZE > GameInstance.MAX_X || pos.x + SIZE < GameInstance.MIN_X) {
+                game.score(Direction1D.getFromCoordinate(pos.x).getOpposite());
+            }
         }
     }
 

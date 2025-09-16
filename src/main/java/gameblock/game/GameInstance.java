@@ -3,6 +3,7 @@ package gameblock.game;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.packet.UpdateGamePacket;
@@ -41,6 +42,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
     private final Player[] players;
+
+    private final ArrayList<TickTimer> gameTimers = new ArrayList<>();
 
     private final boolean clientSide;
 
@@ -295,6 +298,14 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return gameState != GameState.ACTIVE;
     }
 
+    public void addTickTimer(TickTimer timer) {
+        if (gameTimers.contains(timer)) {
+            GameblockMod.LOGGER.warn("Timer is already being ticked!");
+        } else {
+            gameTimers.add(timer);
+        }
+    }
+
     public final void baseTick(Player player) {
         if (prompt != null && prompt.shouldClose()) prompt = null;
 
@@ -306,6 +317,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
                     GameCapability cap = null;
                     if (serverPlayer != null) cap = serverPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap == null || cap.getGame() != this || serverPlayer.isDeadOrDying()) removePlayer(serverPlayer);
+                }
+            }
+
+            // tick game timers
+            int i = 0;
+            while (i < gameTimers.size()) {
+                if (gameTimers.get(i).tick()) {
+                    i++;
+                } else {
+                    gameTimers.remove(i);
                 }
             }
 
