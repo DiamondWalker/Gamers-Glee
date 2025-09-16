@@ -325,9 +325,12 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             // tick game timers
             int i = 0;
             while (i < gameTimers.size()) {
-                if (gameTimers.get(i).tick()) {
+                TickTimer timer = gameTimers.get(i);
+                timer.tick();
+                if (timer.getState() == TickTimer.TimerState.RUNNING) {
                     i++;
                 } else {
+                    timer.executeScheduledAction();
                     gameTimers.remove(i);
                 }
             }

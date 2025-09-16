@@ -8,7 +8,7 @@ public final class TickTimer {
 
     private long targetTicks;
     private long ticksElapsed;
-    private Runnable action;
+    private Runnable scheduledAction;
     private TimerState state = TimerState.STOPPED;
 
     public TickTimer(GameInstance<?> game) {
@@ -30,7 +30,7 @@ public final class TickTimer {
         ticksElapsed = 0;
         targetTicks = time;
         state = TimerState.RUNNING;
-        this.action = action;
+        this.scheduledAction = action;
         gameInstance.addTickTimer(this);
     }
 
@@ -38,7 +38,7 @@ public final class TickTimer {
         ticksElapsed = 0;
         targetTicks = 0;
         state = TimerState.STOPPED;
-        action = null;
+        scheduledAction = null;
     }
 
     public long getTicksElapsed() {
@@ -60,18 +60,15 @@ public final class TickTimer {
         return state;
     }
 
-    public boolean tick() {
+    public void tick() {
         ticksElapsed++;
-        if (state != TimerState.RUNNING) return false;
         if (targetTicks >= 0 && ticksElapsed >= targetTicks) {
             state = TimerState.DONE;
-            if (action != null) {
-                action.run();
-                action = null;
-            }
-            return false;
         }
-        return true;
+    }
+
+    public void executeScheduledAction() {
+        if (scheduledAction != null) scheduledAction.run();
     }
 
     public enum TimerState {
