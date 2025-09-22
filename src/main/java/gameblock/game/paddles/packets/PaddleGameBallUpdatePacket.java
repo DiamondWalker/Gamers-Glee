@@ -2,6 +2,7 @@ package gameblock.game.paddles.packets;
 
 import gameblock.game.paddles.PaddlesGame;
 import gameblock.packet.UpdateGamePacket;
+import gameblock.registry.GameblockSounds;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec2;
@@ -44,6 +45,7 @@ public class PaddleGameBallUpdatePacket extends UpdateGamePacket<PaddlesGame> {
         game.ball.pos = pos;
         game.ball.motion = motion;
         game.ball.speed = speed;
+        game.playSound(GameblockSounds.PADDLES_BOUNCE.get());
     }
 
     @Override

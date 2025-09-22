@@ -35,6 +35,9 @@ public class GameblockSounds {
     public static final RegistryObject<SoundEvent> DEFUSAL_SELECT = registerSound("defusal_select");
     public static final RegistryObject<SoundEvent> DEFUSAL_TIMER = registerSound("defusal_timer");
 
+    public static final RegistryObject<SoundEvent> PADDLES_BOUNCE = registerSound("paddles_bounce");
+    public static final RegistryObject<SoundEvent> PADDLES_SCORE = registerSound("paddles_score");
+    public static final RegistryObject<SoundEvent> PADDLES_WIN = registerSound("paddles_win");
 
     private static RegistryObject<SoundEvent> registerSound(String name) {
         return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(GameblockMod.MODID, name)));

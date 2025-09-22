@@ -3,6 +3,7 @@ package gameblock.game.paddles;
 import gameblock.game.GameInstance;
 import gameblock.game.paddles.packets.PaddleGameBallUpdatePacket;
 import gameblock.registry.GameblockPackets;
+import gameblock.registry.GameblockSounds;
 import gameblock.util.MathHelper;
 import gameblock.util.TickTimer;
 import gameblock.util.physics.Direction1D;
@@ -51,6 +52,7 @@ public class PaddlesBall {
             if (pos.y + PaddlesBall.SIZE / 2 >= GameInstance.MAX_Y || pos.y - PaddlesBall.SIZE / 2 <= GameInstance.MIN_Y) {
                 if (MathHelper.hasSameSign(pos.y, motion.y)) { // make sure it's still moving out of the screen
                     motion = new Vec2(motion.x, -motion.y);
+                    game.playSound(GameblockSounds.PADDLES_BOUNCE.get());
                 }
             }
 

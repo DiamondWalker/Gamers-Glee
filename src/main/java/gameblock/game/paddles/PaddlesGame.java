@@ -103,15 +103,16 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
                 throw new IllegalArgumentException("Invalid score direction!");
             }
 
+            boolean gameEnd = leftScore >= 11 || rightScore >= 11;
             // tell the clients that the round has ended and inform them of the winner. This lets them know to start flashing one of the numbers
-            sendToAllPlayers(new PaddleGameRoundEndPacket(dir), null);
+            sendToAllPlayers(new PaddleGameRoundEndPacket(dir, gameEnd), null);
 
             // schedule the start of the new round.
             scoreTimer.start(40, () -> {
                 ball.resetBall();
                 sendToAllPlayers(new PaddleGameScoreUpdatePacket(leftScore, rightScore), null);
                 scoreTimer.reset();
-                if (leftScore >= 11 || rightScore >= 11) {
+                if (gameEnd) {
                     setGameState(GameState.WIN);
                 }
             });
