@@ -25,6 +25,7 @@ public class GameblockItems {
     public static final RegistryObject<Item> CARTRIDGE_DEFUSAL = ITEMS.register("defusal", () -> new CartridgeItem<>(GameblockGames.DEFUSAL_GAME)); // minesweeper
     public static final RegistryObject<Item> CARTRIDGE_PADDLES = ITEMS.register("paddles", () -> new CartridgeItem<>(GameblockGames.PADDLES_GAME));
     public static final RegistryObject<Item> CARTRIDGE_CHESS = ITEMS.register("chess", () -> new CartridgeItem<>(GameblockGames.CHESS_GAME));
+    public static final RegistryObject<Item> CARTRIDGE_TIC_TAC_TOE = ITEMS.register("tic_tac_toe", () -> new CartridgeItem<>(GameblockGames.TIC_TAC_TOE_GAME));
 
 
     // Creates a creative tab with the id "examplemod:example_tab" for the example item, that is placed after the combat tab

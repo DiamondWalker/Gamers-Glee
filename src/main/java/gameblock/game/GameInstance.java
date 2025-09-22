@@ -3,6 +3,7 @@ package gameblock.game;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
+import gameblock.GameblockConfig;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
@@ -27,6 +28,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.FastColor;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -550,6 +552,103 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
         graphics.flush();
 
+        pose.popPose();
+    }
+
+    public final void drawArc(float x, float y, float innerRadius, float outerRadius, float startAngle, float endAngle, ColorF color) {
+        drawArc(RenderType.gui(), x, y, innerRadius, outerRadius, startAngle, endAngle, color);
+    }
+
+    public final void drawArc(RenderType type, float x, float y, float innerRadius, float outerRadius, float startAngle, float endAngle, ColorF color) {
+        if (endAngle < startAngle) {
+            // swap the angles
+            float temp = startAngle;
+            startAngle = endAngle;
+            endAngle = temp;
+        }
+
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0.0f);
+        Matrix4f matrix4f = pose.last().pose();
+
+        VertexConsumer consumer = graphics.bufferSource().getBuffer(type);
+        int subdivisions = GameblockConfig.CIRCLE_RENDERING_SUBDIVISIONS.get();
+        boolean breakLoop = false;
+        for (int i = 0; i < subdivisions; i++) {
+            float angle1 = startAngle + Mth.TWO_PI * i / subdivisions;
+            float angle2 = startAngle + Mth.TWO_PI * (i + 1) / subdivisions;
+
+            if (angle2 > endAngle) {
+                angle2 = endAngle;
+                breakLoop = true;
+            }
+
+            Vec2 vec1 = MathHelper.getUnitVectorFromAngle(angle1);
+            Vec2 vec2 = MathHelper.getUnitVectorFromAngle(angle2);
+
+
+            consumer.vertex(matrix4f, vec1.x * innerRadius, vec1.y * innerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, vec1.x * outerRadius, vec1.y * outerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, vec2.x * outerRadius, vec2.y * outerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, vec2.x * innerRadius, vec2.y * innerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+            if (breakLoop) break;
+        }
+
+        graphics.flush();
+        pose.popPose();
+    }
+
+    public final void drawRing(float x, float y, float innerRadius, float outerRadius, ColorF color) {
+        drawRing(RenderType.gui(), x, y, innerRadius, outerRadius, color);
+    }
+
+    public final void drawRing(RenderType type, float x, float y, float innerRadius, float outerRadius, ColorF color) {
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0.0f);
+        Matrix4f matrix4f = pose.last().pose();
+
+        VertexConsumer consumer = graphics.bufferSource().getBuffer(type);
+        int subdivisions = GameblockConfig.CIRCLE_RENDERING_SUBDIVISIONS.get();
+        for (int i = 0; i < subdivisions; i++) {
+            Vec2 angle1 = MathHelper.getUnitVectorFromAngle(Mth.TWO_PI * i / subdivisions);
+            Vec2 angle2 = MathHelper.getUnitVectorFromAngle(Mth.TWO_PI * (i + 1) / subdivisions);
+
+            consumer.vertex(matrix4f, angle1.x * innerRadius, angle1.y * innerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, angle1.x * outerRadius, angle1.y * outerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, angle2.x * outerRadius, angle2.y * outerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, angle2.x * innerRadius, angle2.y * innerRadius, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        }
+
+        graphics.flush();
+        pose.popPose();
+    }
+
+    public final void drawCircle(float x, float y, float radius, ColorF color) {
+        drawCircle(RenderType.gui(), x, y, radius, color);
+    }
+
+    public final void drawCircle(RenderType type, float x, float y, float radius, ColorF color) {
+        PoseStack pose = graphics.pose();
+        pose.pushPose();
+        pose.translate(x, y, 0.0f);
+        Matrix4f matrix4f = pose.last().pose();
+
+        VertexConsumer consumer = graphics.bufferSource().getBuffer(type);
+        int subdivisions = GameblockConfig.CIRCLE_RENDERING_SUBDIVISIONS.get();
+        for (int i = 0; i < subdivisions; i++) {
+            Vec2 angle1 = MathHelper.getUnitVectorFromAngle(Mth.TWO_PI * i / subdivisions).scale(radius);
+            Vec2 angle2 = MathHelper.getUnitVectorFromAngle(Mth.TWO_PI * (i + 1) / subdivisions).scale(radius);
+
+            consumer.vertex(matrix4f, 0.0f, 0.0f, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, angle1.x, angle1.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, angle2.x, angle2.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+            consumer.vertex(matrix4f, 0.0f, 0.0f, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        }
+
+        graphics.flush();
         pose.popPose();
     }
 

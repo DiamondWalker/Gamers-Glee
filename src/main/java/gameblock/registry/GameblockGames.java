@@ -9,6 +9,7 @@ import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.game.os.GameblockOS;
 import gameblock.game.paddles.PaddlesGame;
 import gameblock.game.serpent.SerpentGame;
+import gameblock.game.tictactoe.TicTacToeGame;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
@@ -25,6 +26,7 @@ public class GameblockGames {
     public static final Game<DefusalGame> DEFUSAL_GAME = registerGame("defusal", DefusalGame::new);
     public static final Game<PaddlesGame> PADDLES_GAME = registerGame("paddles", PaddlesGame::new);
     public static final Game<ChessGame> CHESS_GAME = registerGame("chess", ChessGame::new);
+    public static final Game<TicTacToeGame> TIC_TAC_TOE_GAME = registerGame("tic_tac_toe", TicTacToeGame::new);
 
     public static <T extends GameInstance> Game<T> registerGame(String name, Function<Player, T> constructor) {
         Game<T> game = new Game<T>(constructor, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));

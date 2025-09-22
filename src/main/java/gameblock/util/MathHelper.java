@@ -1,5 +1,8 @@
 package gameblock.util;
 
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec2;
+
 public class MathHelper {
     public static byte getSign(byte num) {
         return (byte) (num / Math.abs(num));
@@ -46,5 +49,9 @@ public class MathHelper {
 
     public static boolean hasSameSign(double f1, double f2) {
         return getSign(f1) == getSign(f2);
+    }
+
+    public static Vec2 getUnitVectorFromAngle(float angle) {
+        return new Vec2(Mth.cos(angle), Mth.sin(angle));
     }
 }
