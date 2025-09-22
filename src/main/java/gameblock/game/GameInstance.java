@@ -52,6 +52,9 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public static final float MAX_Y = 75.0f;
     public static final float MIN_Y = -75.0f;
 
+    public static final float SCREEN_WIDTH = MAX_X - MIN_X;
+    public static final float SCREEN_HEIGHT = MAX_Y - MIN_Y;
+
     private long gameTime = 0;
     private GameState gameState = GameState.ACTIVE;
 

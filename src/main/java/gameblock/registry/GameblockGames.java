@@ -3,6 +3,7 @@ package gameblock.registry;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.game.blockbreak.BlockBreakGame;
+import gameblock.game.chess.ChessGame;
 import gameblock.game.defusal.DefusalGame;
 import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.game.os.GameblockOS;
@@ -23,6 +24,7 @@ public class GameblockGames {
     public static final Game<FlyingChickenGame> FLYING_CHICKEN_GAME = registerGame("flying_chicken", FlyingChickenGame::new);
     public static final Game<DefusalGame> DEFUSAL_GAME = registerGame("defusal", DefusalGame::new);
     public static final Game<PaddlesGame> PADDLES_GAME = registerGame("paddles", PaddlesGame::new);
+    public static final Game<ChessGame> CHESS_GAME = registerGame("chess", ChessGame::new);
 
     public static <T extends GameInstance> Game<T> registerGame(String name, Function<Player, T> constructor) {
         Game<T> game = new Game<T>(constructor, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));
