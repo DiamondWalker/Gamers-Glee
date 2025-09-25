@@ -27,8 +27,8 @@ public class MultiplayerGamePrompt extends GamePrompt.GameCodePrompt<GameblockOS
 
     @Override
     public void render() {
-        game.drawRectangle(0, 0, 150, 80, new ColorF(0.0f), 0);
-        game.drawHollowRectangle(0, 0, 150, 80, 2, new ColorF(1.0f), 0);
+        game.drawRectangle(0, 0, 150, 80, ColorF.BLACK, 0);
+        game.drawHollowRectangle(0, 0, 150, 80, 2, ColorF.WHITE, 0);
 
         String entry = get();
         ColorF fieldColor;
@@ -37,9 +37,9 @@ public class MultiplayerGamePrompt extends GamePrompt.GameCodePrompt<GameblockOS
         } else if (!entry.isEmpty()) {
             fieldColor = new ColorF(1.0f, 0.5f, 0.5f);
         } else {
-            fieldColor = new ColorF(1.0f);
+            fieldColor = ColorF.WHITE;
         }
-        game.drawText(0, 26, 0.8f, new ColorF(1.0f), Component.translatable("gui.gameblock.os.enter_game_code"));
+        game.drawText(0, 26, 0.8f, ColorF.WHITE, Component.translatable("gui.gameblock.os.enter_game_code"));
         game.drawHollowRectangle(0, 8, 100, 12, 1, fieldColor, 0);
         game.drawText(0, 8, 0.8f, new ColorF(0.8f), Component.literal(entry));
 
@@ -52,7 +52,7 @@ public class MultiplayerGamePrompt extends GamePrompt.GameCodePrompt<GameblockOS
 
 
         Vec2 mouse = game.getMouseCoordinates();
-        ColorF buttonColor = Math.abs(mouse.x) < 40 && Math.abs(mouse.y - -18) < 10 ? new ColorF(1.0f, 1.0f, 0.0f) : new ColorF(1.0f);
+        ColorF buttonColor = Math.abs(mouse.x) < 40 && Math.abs(mouse.y - -18) < 10 ? ColorF.YELLOW : ColorF.WHITE;
         game.drawHollowRectangle(0, -18, 80, 20, 1, buttonColor, 0);
         game.drawText(0, -18, 0.8f, buttonColor, Component.translatable("gui.gameblock.os.select_game_code"));
     }

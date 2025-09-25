@@ -22,9 +22,9 @@ public class ChessGame extends GameInstance<ChessGame> {
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
                 if (x % 2 != y % 2) {
-                    drawRectangle((-3.5f + x) * 15, (-3.5f + y) * 15, 15, 15, new ColorF(1.0f), 0);
+                    drawRectangle((-3.5f + x) * 15, (-3.5f + y) * 15, 15, 15, ColorF.WHITE, 0);
                 } else {
-                    drawRectangle((-3.5f + x) * 15, (-3.5f + y) * 15, 15, 15, new ColorF(0.0f), 0);
+                    drawRectangle((-3.5f + x) * 15, (-3.5f + y) * 15, 15, 15, ColorF.BLACK, 0);
                 }
             }
         }

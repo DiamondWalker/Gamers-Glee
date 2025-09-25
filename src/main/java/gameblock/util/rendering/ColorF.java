@@ -3,6 +3,16 @@ package gameblock.util.rendering;
 import net.minecraft.util.Mth;
 
 public class ColorF {
+    public static final ColorF WHITE = new ColorF(1.0f);
+    public static final ColorF BLACK = new ColorF(0.0f);
+
+    public static final ColorF RED = new ColorF(1.0f, 0.0f, 0.0f);
+    public static final ColorF YELLOW = new ColorF(1.0f, 1.0f, 0.0f);
+    public static final ColorF GREEN = new ColorF(0.0f, 1.0f, 0.0f);
+    public static final ColorF CYAN = new ColorF(0.0f, 1.0f, 1.0f);
+    public static final ColorF BLUE = new ColorF(0.0f, 0.0f, 1.0f);
+    public static final ColorF PURPLE = new ColorF(1.0f, 0.0f, 1.0f);
+
     private float red, green, blue, alpha;
 
     public ColorF(int whiteness) {

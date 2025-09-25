@@ -231,7 +231,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         vertexconsumer.vertex(matrix, 100.0f, -30.0f + offset, 0.0f).color(col2.getRed(), col2.getGreen(), col2.getBlue(), col2.getAlpha()).endVertex();
 
         // progress bar
-        /*ColorF barCol = new ColorF(1.0f);
+        /*ColorF barCol = ColorF.WHITE;
         float minX = -70.0f;
         float maxX = -70.0f + progress * (70.0f * 2);
         vertexconsumer.vertex(matrix, minX, 63.0f, 0.0f).color(barCol.getRed(), barCol.getGreen(), barCol.getBlue(), barCol.getAlpha()).endVertex();
@@ -247,36 +247,36 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
         }
 
         if (!isGameOver()) {
-            drawText(80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
-            drawText(80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));
+            drawText(80.0f, 67.5f, 0.5f, ColorF.WHITE, Component.translatable("gui.gameblock.block_break.score", score));
+            drawText(80.0f, 62.5f, 0.5f, ColorF.WHITE, Component.literal(timeString));
         } else {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
                 if (getGameState() == GameState.WIN) {
-                    drawText(0.0f, 16.0f, 0.7f, new ColorF(0.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.win"));
+                    drawText(0.0f, 16.0f, 0.7f, ColorF.GREEN, Component.translatable("gui.gameblock.block_break.win"));
                 } else {
-                    drawText(0.0f, 16.0f, 0.7f, new ColorF(1.0f, 0.0f, 0.0f), Component.translatable("gui.gameblock.block_break.lose"));
+                    drawText(0.0f, 16.0f, 0.7f, ColorF.RED, Component.translatable("gui.gameblock.block_break.lose"));
                 }
 
                 if (gameOverTime > 40) {
                     int percent = (int)(progress * 100);
-                    drawText(0.0f, 8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.blocks_broken", blocksBroken, percent));
+                    drawText(0.0f, 8.0f, 0.7f, ColorF.WHITE, Component.translatable("gui.gameblock.block_break.blocks_broken", blocksBroken, percent));
 
                     if (gameOverTime > 60) {
-                        drawText(0.0f, 0.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.time", timeString));
+                        drawText(0.0f, 0.0f, 0.7f, ColorF.WHITE, Component.translatable("gui.gameblock.block_break.time", timeString));
 
                         if (gameOverTime > 80) {
-                            drawText(0.0f, -8.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
+                            drawText(0.0f, -8.0f, 0.7f, ColorF.WHITE, Component.translatable("gui.gameblock.block_break.score", score));
 
                             if (gameOverTime > 100) {
                                 if (score > highScore) { // new high score!
-                                    drawText(40.0f, -8.0f, 0.4f, new ColorF(1.0f, 1.0f, 0.0f), Component.translatable("gui.gameblock.block_break.highscore"));
+                                    drawText(40.0f, -8.0f, 0.4f, ColorF.YELLOW, Component.translatable("gui.gameblock.block_break.highscore"));
 
                                     if (gameOverTime > 120) {
-                                        drawText(0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
+                                        drawText(0.0f, -16.0f, 0.7f, ColorF.WHITE, Component.translatable("gui.gameblock.block_break.restart"));
                                     }
                                 } else {
-                                    drawText(0.0f, -16.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.restart"));
+                                    drawText(0.0f, -16.0f, 0.7f, ColorF.WHITE, Component.translatable("gui.gameblock.block_break.restart"));
                                 }
                             }
                         }

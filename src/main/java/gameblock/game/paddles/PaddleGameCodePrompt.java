@@ -31,16 +31,16 @@ public class PaddleGameCodePrompt extends GamePrompt.GameCodePrompt<PaddlesGame>
 
     @Override
     public void render() {
-        game.drawText(0.0f, 15.0f, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.paddles.enter_game_code"));
-        game.drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.literal(get()));
+        game.drawText(0.0f, 15.0f, 1.0f, ColorF.WHITE, Component.translatable("gui.gameblock.paddles.enter_game_code"));
+        game.drawText(0.0f, 0.0f, 1.0f, ColorF.WHITE, Component.literal(get()));
         if (isCodeTaken) {
             if (!get().isEmpty()) {
                 isCodeTaken = false;
             } else {
-                game.drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f, 0.0f, 0.0f), Component.translatable("gui.gameblock.paddles.game_code_already_used"));
+                game.drawText(0.0f, 0.0f, 1.0f, ColorF.RED, Component.translatable("gui.gameblock.paddles.game_code_already_used"));
             }
         }
-        game.drawText(0.0f, -15.0f, 0.7f, new ColorF(1.0f), Component.translatable("gui.gameblock.paddles.game_code_info"));
+        game.drawText(0.0f, -15.0f, 0.7f, ColorF.WHITE, Component.translatable("gui.gameblock.paddles.game_code_info"));
     }
 
     public void setFailed() {

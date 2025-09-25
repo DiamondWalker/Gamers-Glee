@@ -54,14 +54,14 @@ public class OSIcon {
         float selectedFade = ((selected ? partialTicks : -partialTicks) + selectionTicks) / SELECTION_TIME;
         selectedFade = Mth.clamp(selectedFade, 0.0f, 1.0f);
         float scale = 1.0f + 0.2f * selectedFade;
-        ColorF textColor = new ColorF(1.0f).fadeTo(new ColorF(1.0f, 1.0f, 0.0f), selectedFade);
+        ColorF textColor = ColorF.WHITE.fadeTo(ColorF.YELLOW, selectedFade);
 
         PoseStack poseStack = os.getGraphicsInstance().pose();
         poseStack.pushPose();
         poseStack.translate(center.x, center.y, 0.0f);
         poseStack.scale(scale, scale, scale);
 
-        os.drawTexture(icon, 0, 5.0f, 15.0f, 15.0f, 0, new ColorF(1.0f).withAlpha(transparency));
+        os.drawTexture(icon, 0, 5.0f, 15.0f, 15.0f, 0, ColorF.WHITE.withAlpha(transparency));
         os.drawText(0, -5.5f, 0.5f, 0, 2, textColor.withAlpha(transparency), translationKey);
 
         poseStack.popPose();

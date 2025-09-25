@@ -444,17 +444,33 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
     }
 
+    public final void drawText(Vec2 pos, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
+        drawText(pos.x, pos.y, scale, maxWidth, maxLines, color, txt);
+    }
+
     public final void drawText(float x, float y, float scale, int maxWidth, int maxLines, ColorF color, Component txt) {
         TextRenderingRules rules = new TextRenderingRules().setMaxWidth(maxWidth).setMaxLines(maxLines);
         drawText(x, y, scale, rules.splitIntoLines(Minecraft.getInstance().font, txt), color);
+    }
+
+    public final void drawText(Vec2 pos, float scale, ColorF color, Component... lines) {
+        drawText(pos.x, pos.y, scale, color, lines);
     }
 
     public final void drawText(float x, float y, float scale, ColorF color, Component... lines) {
         drawText(x, y, scale, lines, color);
     }
 
+    public final void drawRectangle(Vec2 pos, float width, float height, ColorF color, float angle) {
+        drawRectangle(pos.x, pos.y, width, height, color, angle);
+    }
+
     public final void drawRectangle(float x, float y, float width, float height, ColorF color, float angle) {
         drawRectangle(RenderType.gui(), x, y, width, height, color, angle);
+    }
+
+    public final void drawRectangle(RenderType type, Vec2 pos, float width, float height, ColorF color, float angle) {
+        drawRectangle(type, pos.x, pos.y, width, height, color, angle);
     }
 
     public final void drawRectangle(RenderType type, float x, float y, float width, float height, ColorF color, float angle) {
@@ -491,8 +507,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
+    public final void drawHollowRectangle(Vec2 pos, float width, float height, float thickness, ColorF color, float angle) {
+        drawHollowRectangle(pos.x, pos.y, width, height, thickness, color, angle);
+    }
+
     public final void drawHollowRectangle(float x, float y, float width, float height, float thickness, ColorF color, float angle) {
         drawHollowRectangle(RenderType.gui(), x, y, width, height, thickness, color, angle);
+    }
+
+    public final void drawHollowRectangle(RenderType type, Vec2 pos, float width, float height, float thickness, ColorF color, float angle) {
+        drawHollowRectangle(type, pos.x, pos.y, width, height, thickness, color, angle);
     }
 
     public final void drawHollowRectangle(RenderType type, float x, float y, float width, float height, float thickness, ColorF color,  float angle) {
@@ -555,8 +579,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
+    public final void drawArc(Vec2 pos, float innerRadius, float outerRadius, float startAngle, float endAngle, ColorF color) {
+        drawArc(pos.x, pos.y, innerRadius, outerRadius, startAngle, endAngle, color);
+    }
+
     public final void drawArc(float x, float y, float innerRadius, float outerRadius, float startAngle, float endAngle, ColorF color) {
         drawArc(RenderType.gui(), x, y, innerRadius, outerRadius, startAngle, endAngle, color);
+    }
+
+    public final void drawArc(RenderType type, Vec2 pos, float innerRadius, float outerRadius, float startAngle, float endAngle, ColorF color) {
+        drawArc(type, pos.x, pos.y, innerRadius, outerRadius, startAngle, endAngle, color);
     }
 
     public final void drawArc(RenderType type, float x, float y, float innerRadius, float outerRadius, float startAngle, float endAngle, ColorF color) {
@@ -600,8 +632,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
+    public final void drawRing(Vec2 pos, float innerRadius, float outerRadius, ColorF color) {
+        drawRing(pos.x, pos.y, innerRadius, outerRadius, color);
+    }
+
     public final void drawRing(float x, float y, float innerRadius, float outerRadius, ColorF color) {
         drawRing(RenderType.gui(), x, y, innerRadius, outerRadius, color);
+    }
+
+    public final void drawRing(RenderType type, Vec2 pos, float innerRadius, float outerRadius, ColorF color) {
+        drawRing(type, pos.x, pos.y, innerRadius, outerRadius, color);
     }
 
     public final void drawRing(RenderType type, float x, float y, float innerRadius, float outerRadius, ColorF color) {
@@ -626,8 +666,16 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
+    public final void drawCircle(Vec2 pos, float radius, ColorF color) {
+        drawCircle(pos.x, pos.y, radius, color);
+    }
+
     public final void drawCircle(float x, float y, float radius, ColorF color) {
         drawCircle(RenderType.gui(), x, y, radius, color);
+    }
+
+    public final void drawCircle(RenderType type, Vec2 pos, float radius, ColorF color) {
+        drawCircle(type, pos.x, pos.y, radius, color);
     }
 
     public final void drawCircle(RenderType type, float x, float y, float radius, ColorF color) {
@@ -652,12 +700,86 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         pose.popPose();
     }
 
+    public final void drawLine(float startX, float startY, float endX, float endY, float width, boolean roundedEnds, ColorF color) {
+        drawLine(new Vec2(startX, startY), new Vec2(endX, endY), width, roundedEnds, color);
+    }
+
+    public final void drawLine(Vec2 startPoint, Vec2 endPoint, float width, boolean roundedEnds, ColorF color) {
+        drawLine(RenderType.gui(), startPoint, endPoint, width, roundedEnds, color);
+    }
+
+    public final void drawLine(RenderType type, float startX, float startY, float endX, float endY, float width, boolean roundedEnds, ColorF color) {
+        drawLine(type, new Vec2(startX, startY), new Vec2(endX, endY), width, roundedEnds, color);
+    }
+
+    public final void drawLine(RenderType type, Vec2 startPoint, Vec2 endPoint, float width, boolean roundedEnds, ColorF color) {
+        PoseStack pose = graphics.pose();
+        Matrix4f matrix = pose.last().pose();
+        float halfWidth = width / 2;
+
+        VertexConsumer consumer = graphics.bufferSource().getBuffer(type);
+
+        Vec2 vector = new Vec2(endPoint.x - startPoint.x, endPoint.y - startPoint.y);
+        Vec2 perpendicularVector = new Vec2(vector.y, -vector.x).normalized().scale(halfWidth);
+
+        // the rectangle part
+        consumer.vertex(matrix, startPoint.x + perpendicularVector.x, startPoint.y + perpendicularVector.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        consumer.vertex(matrix, startPoint.x - perpendicularVector.x, startPoint.y - perpendicularVector.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        consumer.vertex(matrix, startPoint.x + vector.x - perpendicularVector.x, startPoint.y + vector.y - perpendicularVector.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+        consumer.vertex(matrix, startPoint.x + vector.x + perpendicularVector.x, startPoint.y + vector.y + perpendicularVector.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+        if (roundedEnds) {
+            float endPointAngle = (float) Math.atan2(vector.y, vector.x);
+
+            boolean breakLoop = false;
+            int subdivisions = GameblockConfig.CIRCLE_RENDERING_SUBDIVISIONS.get();
+            for (int i = 0; i < subdivisions; i++) {
+                float angle1 = -Mth.HALF_PI + Mth.TWO_PI * i / subdivisions;
+                float angle2 = -Mth.HALF_PI + Mth.TWO_PI * (i + 1) / subdivisions;
+
+                if (angle2 > Mth.HALF_PI) {
+                    angle2 = Mth.HALF_PI;
+                    breakLoop = true;
+                }
+
+                Vec2 vec1 = MathHelper.getUnitVectorFromAngle(angle1 + endPointAngle);
+                Vec2 vec2 = MathHelper.getUnitVectorFromAngle(angle2 + endPointAngle);
+
+                consumer.vertex(matrix, endPoint.x, endPoint.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+                consumer.vertex(matrix, endPoint.x + vec1.x * halfWidth, endPoint.y + vec1.y * halfWidth, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+                consumer.vertex(matrix, endPoint.x + vec2.x * halfWidth, endPoint.y + vec2.y * halfWidth, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+                consumer.vertex(matrix, endPoint.x, endPoint.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+                consumer.vertex(matrix, startPoint.x, startPoint.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+                consumer.vertex(matrix, startPoint.x - vec1.x * halfWidth, startPoint.y - vec1.y * halfWidth, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+                consumer.vertex(matrix, startPoint.x - vec2.x * halfWidth, startPoint.y - vec2.y * halfWidth, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+                consumer.vertex(matrix, startPoint.x, startPoint.y, 0.0f).color(color.getRed(), color.getGreen(), color.getBlue(), color.getAlpha()).endVertex();
+
+                if (breakLoop) break;
+            }
+        }
+
+        graphics.flush();
+    }
+
+    public final void drawTexture(ResourceLocation texture, Vec2 pos, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
+        drawTexture(texture, pos.x, pos.y, width, height, angle, u, v, uWidth, vHeight);
+    }
+
     public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight) {
-        drawTexture(texture, x, y, width, height, angle, u, v, uWidth, vHeight, new ColorF(1.0f));
+        drawTexture(texture, x, y, width, height, angle, u, v, uWidth, vHeight, ColorF.WHITE);
+    }
+
+    public final void drawTexture(ResourceLocation texture, Vec2 pos, float width, float height, float angle) {
+        drawTexture(texture, pos.x, pos.y, width, height, angle);
     }
 
     public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle) {
-        drawTexture(texture, x, y, width, height, angle, new ColorF(1.0f));
+        drawTexture(texture, x, y, width, height, angle, ColorF.WHITE);
+    }
+
+    public final void drawTexture(ResourceLocation texture, Vec2 pos, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
+        drawTexture(texture, pos.x, pos.y, width, height, angle, u, v, uWidth, vHeight, color);
     }
 
     public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
@@ -666,6 +788,10 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         float maxU = (float) (u + uWidth) / 256;
         float maxV = (float) (v + vHeight) / 256;
         drawTexture(texture, x, y, width, height, angle, minU, maxU, minV, maxV, color);
+    }
+
+    public final void drawTexture(ResourceLocation texture, Vec2 pos, float width, float height, float angle, ColorF color) {
+        drawTexture(texture, pos.x, pos.y, width, height, angle, color);
     }
 
     public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, ColorF color) {

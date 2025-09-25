@@ -5,8 +5,11 @@ import gameblock.registry.GameblockGames;
 import gameblock.util.rendering.ColorF;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
 
 public class TicTacToeGame extends GameInstance<TicTacToeGame> {
+    TicTacToeShape temp = new TicTacToeShape(this, TicTacToeShapeType.X);
+
     public TicTacToeGame(Player player) {
         super(player, GameblockGames.TIC_TAC_TOE_GAME);
     }
@@ -18,8 +21,11 @@ public class TicTacToeGame extends GameInstance<TicTacToeGame> {
 
     @Override
     public void render() {
-        //drawCircle(0.0f, 0.0f, 100.0f, new ColorF(1.0f));
-        //drawRing(0.0f, 0.0f, 5.0f, 10.0f, new ColorF(1.0f));
-        //drawArc(0.0f, 0.0f, 5.0f, 10.0f, Mth.PI + 0.1f, Mth.HALF_PI * 3 - 0.1f, new ColorF(1.0f));
+        drawLine(-60, 20, 60, 20, 3, true, ColorF.WHITE);
+        drawLine(-60, -20, 60, -20, 3, true, ColorF.WHITE);
+        drawLine(20, -60, 20, 60, 3, true, ColorF.WHITE);
+        drawLine(-20, -60, -20, 60, 3, true, ColorF.WHITE);
+
+        temp.render(Vec2.ZERO);
     }
 }

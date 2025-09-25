@@ -168,19 +168,19 @@ public class SerpentGame extends GameInstance<SerpentGame> {
         int sideWidth = rectMaxX - rectMinX;
         int sideHeight = rectMaxY - rectMinY;
 
-        drawHollowRectangle(midX, midY, sideWidth + 3, sideHeight + 3, 3.0f, new ColorF(1.0f), 0);
-        /*drawRectangle(midX, rectMaxY, sideWidth, 2, new ColorF(1.0f), 0); // top
-        drawRectangle(midX, rectMinY, sideWidth, 2, new ColorF(1.0f), 0); // bottom
-        drawRectangle(rectMinX, midY, 2, sideHeight, new ColorF(1.0f), 0); // left
-        drawRectangle(rectMaxX, midY, 2, sideHeight, new ColorF(1.0f), 0); // right*/
+        drawHollowRectangle(midX, midY, sideWidth + 3, sideHeight + 3, 3.0f, ColorF.WHITE, 0);
+        /*drawRectangle(midX, rectMaxY, sideWidth, 2, ColorF.WHITE, 0); // top
+        drawRectangle(midX, rectMinY, sideWidth, 2, ColorF.WHITE, 0); // bottom
+        drawRectangle(rectMinX, midY, 2, sideHeight, ColorF.WHITE, 0); // left
+        drawRectangle(rectMaxX, midY, 2, sideHeight, ColorF.WHITE, 0); // right*/
 
         float y = (75.0f - rectMaxY + 1) / 2 + rectMaxY;
-        drawText(60.0f, y, 1.0f, new ColorF(1.0f), Component.literal(String.valueOf(foodEaten)));
-        drawTexture(SPRITE, 50.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, new ColorF(1.0f));
+        drawText(60.0f, y, 1.0f, ColorF.WHITE, Component.literal(String.valueOf(foodEaten)));
+        drawTexture(SPRITE, 50.0f, y, 8.0f, 8.0f, 0, 0, 0, 13, 13, ColorF.WHITE);
 
         tiles.forEach((Vec2i coords, Integer i) -> {
             if (isSnakeTile(coords.getX(), coords.getY())) {
-                drawRectangle(coords.getX() * 3, coords.getY() * 3 - 9, 3.0f, 3.0f, new ColorF(1.0f), 0);
+                drawRectangle(coords.getX() * 3, coords.getY() * 3 - 9, 3.0f, 3.0f, ColorF.WHITE, 0);
             }
         });
         /*for (int x = tiles.minX; x <= tiles.maxX; x++) {

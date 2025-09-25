@@ -160,7 +160,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         if (gameStarted) {
             // draw the dividing line
             for (int i = -30; i <= 30; i++) {
-                drawRectangle(0, i * 5, 1, 3, new ColorF(1.0f), 0);
+                drawRectangle(0, i * 5, 1, 3, ColorF.WHITE, 0);
             }
 
             // draw the score counters
@@ -173,14 +173,14 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
             float partialTicks = getPartialTicks();
 
             if (!isGameOver()) {
-                drawRectangle(-Paddle.POSITION, Mth.lerp(partialTicks, leftPaddle.oldPos, leftPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
-                drawRectangle(Paddle.POSITION, Mth.lerp(partialTicks, rightPaddle.oldPos, rightPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, new ColorF(1.0f), 0);
+                drawRectangle(-Paddle.POSITION, Mth.lerp(partialTicks, leftPaddle.oldPos, leftPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, ColorF.WHITE, 0);
+                drawRectangle(Paddle.POSITION, Mth.lerp(partialTicks, rightPaddle.oldPos, rightPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, ColorF.WHITE, 0);
             }
 
-            if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, new ColorF(1.0f), 0);
+            if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, ColorF.WHITE, 0);
         } else if (prompt == null) {
-            drawText(0.0f, 0.0f, 1.0f, new ColorF(1.0f), Component.translatable("gui.gameblock.paddles.waiting_for_players"));
-            drawText(0.0f, -10.0f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.paddles.game_code_reminder", gameCode));
+            drawText(0.0f, 0.0f, 1.0f, ColorF.WHITE, Component.translatable("gui.gameblock.paddles.waiting_for_players"));
+            drawText(0.0f, -10.0f, 0.5f, ColorF.WHITE, Component.translatable("gui.gameblock.paddles.game_code_reminder", gameCode));
         }
     }
 }

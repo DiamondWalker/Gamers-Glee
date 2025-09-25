@@ -28,7 +28,7 @@ public class GameblockConfig {
 
         CIRCLE_RENDERING_SUBDIVISIONS = builder
                 .comment("Increasing this makes circular/rounded shapes in the games look smoother")
-                .defineInRange("Circle rendering subdivisions", 50, 0,Integer.MAX_VALUE);
+                .defineInRange("Circle rendering subdivisions", 50, 0, Integer.MAX_VALUE);
 
         builder.pop();
 
