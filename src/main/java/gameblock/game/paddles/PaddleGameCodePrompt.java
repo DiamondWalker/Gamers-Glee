@@ -16,7 +16,7 @@ public class PaddleGameCodePrompt extends GamePrompt.GameCodePrompt<PaddlesGame>
 
     @Override
     public boolean handleKeyPress(int key) {
-        if (key == GLFW.GLFW_KEY_ENTER) {
+        if (key == GLFW.GLFW_KEY_ENTER && conditionsForGameCodeMet()) {
             game.gameCode = get();
             GameblockPackets.sendToServer(new PaddleGameCodeSelectionPacket(game.gameCode));
             return true;

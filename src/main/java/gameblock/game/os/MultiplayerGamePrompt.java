@@ -17,7 +17,7 @@ public class MultiplayerGamePrompt extends GamePrompt.GameCodePrompt<GameblockOS
     @Override
     public boolean click(Vec2 clickCoordinates) {
         if (Math.abs(clickCoordinates.x) < 40 && Math.abs(clickCoordinates.y - -18) < 10) {
-            if (get().length() == 8) {
+            if (conditionsForGameCodeMet()) {
                 GameblockPackets.sendToServer(new JoinGamePacket(get()));
             }
             return true;

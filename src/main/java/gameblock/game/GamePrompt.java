@@ -88,5 +88,9 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
         public void handleCharTyped(char character) {
             if (get().length() < 8 && Character.isLetterOrDigit(character)) super.handleCharTyped(Character.toUpperCase(character));
         }
+
+        public boolean conditionsForGameCodeMet() {
+            return get().length() == 8;
+        }
     }
 }
