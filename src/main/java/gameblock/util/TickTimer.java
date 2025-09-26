@@ -4,14 +4,14 @@ import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 
 public final class TickTimer {
-    private final GameInstance<?> gameInstance;
+    private final GameInstance<?, ?> gameInstance;
 
     private long targetTicks;
     private long ticksElapsed;
     private Runnable scheduledAction;
     private TimerState state = TimerState.STOPPED;
 
-    public TickTimer(GameInstance<?> game) {
+    public TickTimer(GameInstance<?, ?> game) {
         this.gameInstance = game;
     }
 

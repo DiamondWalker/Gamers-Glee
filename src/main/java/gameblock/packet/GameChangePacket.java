@@ -12,9 +12,9 @@ import net.minecraftforge.network.NetworkEvent;
 import java.util.function.Supplier;
 
 public class GameChangePacket implements IPacket {
-    public GameInstance<? extends GameInstance<?>> game;
+    public GameInstance<? extends GameInstance<?, ?>, ?> game;
 
-    public GameChangePacket(GameInstance<? extends GameInstance<?>> game) {
+    public GameChangePacket(GameInstance<? extends GameInstance<?, ?>, ?> game) {
         this.game = game;
     }
 
@@ -32,7 +32,7 @@ public class GameChangePacket implements IPacket {
     }
 
     public void readFromBuffer(FriendlyByteBuf buffer) {
-        GameblockGames.Game<? extends GameInstance<?>> gameType = GameblockGames.getGame(buffer.readUtf());
+        GameblockGames.Game<? extends GameInstance<?, ?>> gameType = GameblockGames.getGame(buffer.readUtf());
         if (gameType != null) {
             ServerSafeMinecraftAccess.accessPlayerObject((player) -> {
                 game = gameType.createInstance(player);

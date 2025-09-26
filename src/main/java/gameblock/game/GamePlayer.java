@@ -36,6 +36,6 @@ public class GamePlayer<T extends GamePlayer.GamePlayerData> {
         return data;
     }
 
-    protected class GamePlayerData {
+    public static class GamePlayerData {
     }
 }

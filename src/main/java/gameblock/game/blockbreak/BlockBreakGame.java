@@ -3,6 +3,7 @@ package gameblock.game.blockbreak;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
 import gameblock.game.blockbreak.packets.BallLaunchPacket;
 import gameblock.game.blockbreak.packets.BallUpdatePacket;
 import gameblock.game.blockbreak.packets.BrickUpdatePacket;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BlockBreakGame extends GameInstance<BlockBreakGame> {
+public class BlockBreakGame extends GameInstance<BlockBreakGame, GamePlayer.GamePlayerData> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
     public static final int BRICK_BREAK_CLIENT_REAPPEAR_TIME = 30; // when a brick is removed on the client side, we still aren't 100% sure it's actually getting removed, so after a bit we'll bring it back
@@ -60,7 +61,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     public long clientToPacketBallUpdateTime = -1;
 
     public BlockBreakGame(Player player) {
-        super(player, GameblockGames.BLOCK_BREAK_GAME);
+        super(player, GameblockGames.BLOCK_BREAK_GAME, GamePlayer.GamePlayerData::new);
         ball = new BlockBreakBall(this);
         platform = new BlockBreakPlatform(this);
         

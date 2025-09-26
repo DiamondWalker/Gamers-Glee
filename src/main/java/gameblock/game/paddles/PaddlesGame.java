@@ -2,6 +2,7 @@ package gameblock.game.paddles;
 
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
 import gameblock.game.paddles.packets.ClientToServerPaddleUpdatePacket;
 import gameblock.game.paddles.packets.PaddleGameRoundEndPacket;
 import gameblock.game.paddles.packets.PaddleGameScoreUpdatePacket;
@@ -21,7 +22,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
-public class PaddlesGame extends GameInstance<PaddlesGame> {
+import java.util.Random;
+
+public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/paddles.png");
 
     // COMMON DATA
@@ -46,15 +49,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     public Direction1D winSide = Direction1D.CENTER;
 
     public PaddlesGame(Player player) {
-        super(player, GameblockGames.PADDLES_GAME);
-    }
-
-    public Direction1D getDirectionFromPlayer(ServerPlayer player) {
-        return PLAYER_DIRECTIONS[getPlayerIndex(player)];
-    }
-
-    public Paddle getPaddleFromPlayer(ServerPlayer player) {
-        return getPaddleFromDirection(getDirectionFromPlayer(player));
+        super(player, GameblockGames.PADDLES_GAME, PaddlesPlayerData::new);
     }
 
     public Paddle getPaddleFromDirection(Direction1D direction) {
@@ -82,6 +77,17 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
         gameStarted = true;
         leftPaddle = new Paddle(this, Direction1D.LEFT);
         rightPaddle = new Paddle(this, Direction1D.RIGHT);
+
+        if (!isClientSide()) {
+            getPlayer(0).data().direction = Direction1D.LEFT;
+            getPlayer(1).data().direction = Direction1D.RIGHT;
+
+            if (new Random().nextBoolean()) {
+                getPlayer(0).data().direction = getPlayer(0).data().direction.getOpposite();
+                getPlayer(1).data().direction = getPlayer(1).data().direction.getOpposite();
+            }
+        }
+
         ball = new PaddlesBall(this);
         ball.motion = new Vec2(-1, 0);
         leftScore = rightScore = 0;
@@ -120,23 +126,19 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     }
 
     @Override
-    protected void onPlayerJoined(int index, ServerPlayer serverPlayer) {
+    protected void onPlayerJoined(GamePlayer<PaddlesPlayerData> player) {
         if (!gameStarted && getPlayerCount() == getMaxPlayers()) {
             initializeGame();
-            forEachPlayer((Player p) -> {
-                ServerPlayer sp = (ServerPlayer) p;
-                GameblockPackets.sendToPlayer(sp, new PaddleGameStatePacket(getDirectionFromPlayer(sp)));
-            });
+            forEachPlayer((GamePlayer<PaddlesPlayerData> p) -> GameblockPackets.sendToPlayer((ServerPlayer) p.playerEntity(), new PaddleGameStatePacket(p.data().direction)));
         }
     }
 
     @Override
-    protected void onPlayerDisconnected(int index, ServerPlayer player) {
+    protected void onPlayerDisconnected(GamePlayer<PaddlesPlayerData> player) {
         if (gameStarted) {
             gameStarted = false;
-            forEachPlayer((Player p) -> {
-                ServerPlayer sp = (ServerPlayer) p;
-                GameblockPackets.sendToPlayer(sp, new PaddleGameStatePacket(Direction1D.CENTER)); // value of center means unassigned
+            forEachPlayer((GamePlayer<PaddlesPlayerData> p) -> {
+                GameblockPackets.sendToPlayer((ServerPlayer) p.playerEntity(), new PaddleGameStatePacket(Direction1D.CENTER)); // value of center means unassigned
             });
         }
     }

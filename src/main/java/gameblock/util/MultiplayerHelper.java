@@ -7,11 +7,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 
 public class MultiplayerHelper {
-    public static GameInstance<?> findGameWithGameCode(MinecraftServer server, String code) {
+    public static GameInstance<?, ?> findGameWithGameCode(MinecraftServer server, String code) {
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlayingGame()) {
-                GameInstance<?> joinGame = cap.getGame();
+                GameInstance<?, ?> joinGame = cap.getGame();
                 String joinGameCode = joinGame.getGameCode();
                 if (joinGameCode != null && code != null && joinGameCode.matches(code)) {
                     return joinGame;

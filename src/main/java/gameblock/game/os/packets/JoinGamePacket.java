@@ -33,7 +33,7 @@ public class JoinGamePacket extends UpdateGamePacket<GameblockOS> {
 
     @Override
     public void gameUpdateReceivedOnServer(GameblockOS game, ServerPlayer sender) {
-        GameInstance<?> joinGame = MultiplayerHelper.findGameWithGameCode(sender.getServer(), gameCode);
+        GameInstance<?, ?> joinGame = MultiplayerHelper.findGameWithGameCode(sender.getServer(), gameCode);
         if (joinGame != null) {
             GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) cap.attemptToJoinGame(joinGame);

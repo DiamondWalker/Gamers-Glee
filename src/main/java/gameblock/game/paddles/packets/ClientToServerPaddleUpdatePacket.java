@@ -29,8 +29,8 @@ public class ClientToServerPaddleUpdatePacket extends UpdateGamePacket<PaddlesGa
 
     @Override
     public void gameUpdateReceivedOnServer(PaddlesGame game, ServerPlayer sender) {
-        Direction1D changeDirection = game.getDirectionFromPlayer(sender);
+        Direction1D changeDirection = game.getGamePlayer(sender).data().direction;
         game.getPaddleFromDirection(changeDirection).pos = pos;
-        game.sendToAllPlayers(new ServerToClientPaddleUpdatePacket(pos), sender);
+        game.sendToAllPlayers(new ServerToClientPaddleUpdatePacket(pos), game.getGamePlayer(sender));
     }
 }

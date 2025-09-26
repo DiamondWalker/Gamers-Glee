@@ -22,7 +22,7 @@ public class CircleHitbox extends Hitbox {
     }
 
     @Override
-    public void render(GameInstance<?> game) {
+    public void render(GameInstance<?, ?> game) {
         throw new NotImplementedException();
     }
 }

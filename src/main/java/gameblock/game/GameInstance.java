@@ -37,13 +37,15 @@ import org.joml.Matrix4f;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-public abstract class GameInstance<T extends GameInstance<?>> {
+public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType extends GamePlayer.GamePlayerData> {
     public final GameblockGames.Game<T> gameType;
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
-    private final Player[] players;
+    private final GamePlayer<PlayerDataType>[] players;
+    private final Supplier<PlayerDataType> playerDataSupplier;
 
     private final ArrayList<TickTimer> gameTimers = new ArrayList<>();
 
@@ -64,11 +66,12 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public final GameblockSoundManager soundManager;
 
-    public GameInstance(Player player, GameblockGames.Game<T> gameType) {
+    public GameInstance(Player player, GameblockGames.Game<T> gameType, Supplier<PlayerDataType> playerData) {
         clientSide = player.level().isClientSide();
         soundManager = clientSide ? new GameblockSoundManager() : null;
-        this.players = new Player[clientSide ? 1 : getMaxPlayers()];
-        this.players[0] = player;
+        this.playerDataSupplier = playerData;
+        this.players = new GamePlayer[clientSide ? 1 : getMaxPlayers()];
+        this.players[0] = new GamePlayer<>(player, 0, playerDataSupplier.get());
         this.gameType = gameType;
     }
 
@@ -80,23 +83,24 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         return 1;
     }
 
-    public final Player getHostPlayer() {
+    public final GamePlayer<PlayerDataType> getHostPlayer() {
         return players[0];
     }
 
-    public final Player getPlayer(int i) {
+    public final GamePlayer<PlayerDataType> getPlayer(int i) {
         return players[i];
     }
 
-    public final int getPlayerIndex(Player player) {
-        for (int i = 0; i < players.length; i++) if (players[i] == player) return i;
+    public final GamePlayer<PlayerDataType> getGamePlayer(Player player) {
+        for (GamePlayer<PlayerDataType> playerDataTypeGamePlayer : players)
+            if (playerDataTypeGamePlayer.playerEntity() == player) return playerDataTypeGamePlayer;
         throw new IllegalArgumentException("Player not found!");
     }
 
-    public void sendToAllPlayers(UpdateGamePacket<?> packet, ServerPlayer exception) {
+    public void sendToAllPlayers(UpdateGamePacket<?> packet, GamePlayer<PlayerDataType> exception) {
         if (clientSide) throw new IllegalStateException("Cannot send a packet to the clients if already on a client!");
-        for (Player player : players) {
-            if (player != null && player != exception) GameblockPackets.sendToPlayer((ServerPlayer) player, packet);
+        for (GamePlayer<PlayerDataType> player : players) {
+            if (player != null && player != exception) GameblockPackets.sendToPlayer((ServerPlayer) player.playerEntity(), packet);
         }
     }
 
@@ -114,14 +118,14 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     }
 
-    public void forEachPlayer(Consumer<Player> action) {
-        for (Player player : players) {
+    public void forEachPlayer(Consumer<GamePlayer<PlayerDataType>> action) {
+        for (GamePlayer<PlayerDataType> player : players) {
             if (player != null) action.accept(player);
         }
     }
 
     public final boolean isPlaying(ServerPlayer player) {
-        for (int i = 0; i < players.length; i++) if (players[i] == player) return true;
+        for (int i = 0; i < players.length; i++) if (players[i] != null && players[i].playerEntity() == player) return true;
         return false;
     }
 
@@ -132,8 +136,8 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final void addPlayer(ServerPlayer player) {
         for (int i = 1; i < players.length; i++) {
             if (players[i] == null) {
-                players[i] = player;
-                onPlayerJoined(i, player);
+                players[i] = new GamePlayer<>(player, i, playerDataSupplier.get());
+                onPlayerJoined(players[i]);
                 return;
             }
         }
@@ -141,9 +145,9 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     }
 
     public final void removePlayer(ServerPlayer player) {
-        if (player == getHostPlayer()) {
+        if (player == getHostPlayer().playerEntity()) {
             for (int i = 1; i < players.length; i++) {
-                if (players[i] != null) removePlayer((ServerPlayer) players[i]);
+                if (players[i] != null) removePlayer((ServerPlayer) players[i].playerEntity());
             }
 
             save();
@@ -151,19 +155,21 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
 
         for (int i = 1; i < players.length; i++) {
-            if (players[i] == player) {
+            if (players[i].playerEntity() == player) {
+                GamePlayer<PlayerDataType> gamePlayer = players[i];
                 players[i] = null;
-                onPlayerDisconnected(i, player);
+                onPlayerDisconnected(gamePlayer);
+                gamePlayer.invalidate();
                 return;
             }
         }
     }
 
-    protected void onPlayerJoined(int index, ServerPlayer player) {
+    protected void onPlayerJoined(GamePlayer<PlayerDataType> player) {
 
     }
 
-    protected void onPlayerDisconnected(int index, ServerPlayer player) {
+    protected void onPlayerDisconnected(GamePlayer<PlayerDataType> player) {
 
     }
 
@@ -194,7 +200,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final void save() {
         ItemStack gameblockItem = null;
         for (InteractionHand hand : InteractionHand.values()) {
-            gameblockItem = getHostPlayer().getItemInHand(hand);
+            gameblockItem = getHostPlayer().playerEntity().getItemInHand(hand);
             if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
                 break;
             } else {
@@ -203,7 +209,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
 
         if (gameblockItem != null) {
-            String playerName = getHostPlayer().getGameProfile().getName();
+            String playerName = getHostPlayer().playerEntity().getGameProfile().getName();
             String gameName = gameType.gameID;
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
@@ -223,7 +229,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final void load() {
         ItemStack gameblockItem = null;
         for (InteractionHand hand : InteractionHand.values()) {
-            gameblockItem = getHostPlayer().getItemInHand(hand);
+            gameblockItem = getHostPlayer().playerEntity().getItemInHand(hand);
             if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
                 break;
             } else {
@@ -232,7 +238,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
         }
 
         if (gameblockItem != null) {
-            String playerName = getHostPlayer().getGameProfile().getName();
+            String playerName = getHostPlayer().playerEntity().getGameProfile().getName();
             String gameName = gameType.gameID;
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
@@ -262,12 +268,12 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public final void restart() {
         if (!isClientSide()) {
-            T newGame = gameType.createInstance(getHostPlayer());
-            for (Player player : players) {
-                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            T newGame = gameType.createInstance(getHostPlayer().playerEntity());
+            for (GamePlayer<PlayerDataType> player : players) {
+                GameCapability cap = player.playerEntity().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null) {
                     cap.setGame(newGame);
-                    if (player != getHostPlayer()) addPlayer((ServerPlayer) player);
+                    if (player != getHostPlayer()) addPlayer((ServerPlayer) player.playerEntity());
                 }
             }
         } else {
@@ -316,14 +322,15 @@ public abstract class GameInstance<T extends GameInstance<?>> {
     public final void baseTick(Player player) {
         if (prompt != null && prompt.shouldClose()) prompt = null;
 
-        if (player == getHostPlayer()) {
+        if (player == getHostPlayer().playerEntity()) {
             if (!isClientSide()) {
                 // ensure players that, for example, left the game, are removed
                 for (int i = 0; i < players.length; i++) {
-                    ServerPlayer serverPlayer = (ServerPlayer) players[i];
-                    GameCapability cap = null;
-                    if (serverPlayer != null) cap = serverPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                    if (cap == null || cap.getGame() != this || serverPlayer.isDeadOrDying()) removePlayer(serverPlayer);
+                    if (players[i] != null) {
+                        ServerPlayer serverPlayer = (ServerPlayer) players[i].playerEntity();
+                        GameCapability cap = serverPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                        if (cap == null || cap.getGame() != this || serverPlayer.isDeadOrDying()) removePlayer(serverPlayer);
+                    }
                 }
             }
 
@@ -348,10 +355,10 @@ public abstract class GameInstance<T extends GameInstance<?>> {
             boolean stayOpen = true;
             if ((!player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) && !player.getItemInHand(InteractionHand.OFF_HAND).is(GameblockItems.GAMEBLOCK.get()))) {
                 stayOpen = false;
-            } else if (getHostPlayer() == null || !getHostPlayer().isAlive()) {
+            } else if (getHostPlayer() == null || !getHostPlayer().playerEntity().isAlive()) {
                 stayOpen = false;
             } else {
-                GameCapability hostCapability = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                GameCapability hostCapability = getHostPlayer().playerEntity().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (hostCapability == null || !hostCapability.isPlayingGame()) stayOpen = false;
             }
 

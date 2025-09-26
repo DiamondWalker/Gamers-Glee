@@ -16,7 +16,7 @@ import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 public class GameCapability {
     // game
     private final Player player;
-    private GameInstance<? extends GameInstance<?>> game = null;
+    private GameInstance<? extends GameInstance<?, ?>, ?> game = null;
 
     protected GameCapability(Player player) {
         this.player = player;
@@ -26,11 +26,11 @@ public class GameCapability {
         return game != null;
     }
 
-    public void setGame(GameInstance<?> newGame) {
+    public void setGame(GameInstance<?, ?> newGame) {
         if (player instanceof ServerPlayer serverPlayer) {
             if (game != null) game.removePlayer(serverPlayer);
             game = newGame;
-            if (game != null && game.getHostPlayer() == player) game.load();
+            if (game != null && game.getHostPlayer().playerEntity() == player) game.load();
             GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(newGame));
         } else {
             game = newGame;
@@ -42,7 +42,7 @@ public class GameCapability {
         }
     }
 
-    public void attemptToJoinGame(GameInstance<?> newGame) {
+    public void attemptToJoinGame(GameInstance<?, ?> newGame) {
         if (player instanceof ServerPlayer serverPlayer) {
             if (!newGame.isPlaying(serverPlayer)) {
                 setGame(newGame);
@@ -53,7 +53,7 @@ public class GameCapability {
         throw new IllegalStateException("Attempted to join multiplayer game from the client!");
     }
 
-    public GameInstance<? extends GameInstance<?>> getGame() {
+    public GameInstance<? extends GameInstance<?, ?>, ?> getGame() {
         return game;
     }
 

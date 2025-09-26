@@ -2,6 +2,7 @@ package gameblock.game.defusal;
 
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
 import gameblock.game.defusal.packets.*;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
@@ -24,7 +25,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DefusalGame extends GameInstance<DefusalGame> {
+public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayerData> {
     public static final ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/defusal.png");
 
     public static final ColorF[] NUMBER_COLORS = new ColorF[] {
@@ -48,7 +49,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     private ArrayList<SweatDrop> sweatDrops;
 
     public DefusalGame(Player player) {
-        super(player, GameblockGames.DEFUSAL_GAME);
+        super(player, GameblockGames.DEFUSAL_GAME, GamePlayer.GamePlayerData::new);
 
         tiles = new TileGrid2D<>(-12, 12, -8, 8);
         tiles.setAll((DefusalTile t) -> new DefusalTile());

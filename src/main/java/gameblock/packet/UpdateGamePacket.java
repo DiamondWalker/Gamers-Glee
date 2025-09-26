@@ -26,6 +26,7 @@ public abstract class UpdateGamePacket<T extends GameInstance> implements IPacke
         GameblockMod.LOGGER.warn("Received " + getClass().getName() + " packet on client side, where it is not expected!");
     }
 
+    // TODO: change this argument to a GamePlayer instance
     public void gameUpdateReceivedOnServer(T game, ServerPlayer sender) {
         GameblockMod.LOGGER.warn("Received " + getClass().getName() + " packet on server side, where it is not expected!");
     }

@@ -11,7 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
-public class TicTacToeGame extends GameInstance<TicTacToeGame> {
+public class TicTacToeGame extends GameInstance<TicTacToeGame, TicTacToePlayerData> {
     // COMMON DATA
     public String gameCode = null;
     TileGrid2D<TicTacToeShape> shapes = new TileGrid2D<>(-1, 1, -1, 1);
@@ -20,7 +20,7 @@ public class TicTacToeGame extends GameInstance<TicTacToeGame> {
     TicTacToeShapeType myType = TicTacToeShapeType.O;
 
     public TicTacToeGame(Player player) {
-        super(player, GameblockGames.TIC_TAC_TOE_GAME);
+        super(player, GameblockGames.TIC_TAC_TOE_GAME, TicTacToePlayerData::new);
         if (isClientSide()) prompt = new TicTacToeGameCodePrompt(this);
     }
 

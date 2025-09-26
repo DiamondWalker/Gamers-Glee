@@ -31,7 +31,7 @@ public class RotatableRectangleHitbox extends Hitbox {
     }
 
     @Override
-    public void render(GameInstance<?> game) {
+    public void render(GameInstance<?, ?> game) {
         game.drawRectangle(origin.x, origin.y, width, height, new ColorF(1.0f, 0.0f, 0.0f, 0.5f), angle);
     }
 

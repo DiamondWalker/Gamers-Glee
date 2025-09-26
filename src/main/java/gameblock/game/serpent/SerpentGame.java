@@ -3,6 +3,7 @@ package gameblock.game.serpent;
 import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
 import gameblock.game.serpent.packets.EatFoodPacket;
 import gameblock.game.serpent.packets.SnakeUpdatePacket;
 import gameblock.registry.GameblockGames;
@@ -23,7 +24,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SerpentGame extends GameInstance<SerpentGame> {
+public class SerpentGame extends GameInstance<SerpentGame, GamePlayer.GamePlayerData> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/serpent.png");
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
@@ -46,7 +47,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     final GameInstance.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
 
     public SerpentGame(Player player) {
-        super(player, GameblockGames.SERPENT_GAME);
+        super(player, GameblockGames.SERPENT_GAME, GamePlayer.GamePlayerData::new);
         tiles = new TileGrid2D<>(-20, 20, -20, 20, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         if (!isClientSide()) randomFoodPosition();

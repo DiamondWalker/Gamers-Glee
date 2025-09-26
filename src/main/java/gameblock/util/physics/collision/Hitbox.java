@@ -21,7 +21,7 @@ public abstract class Hitbox {
 
     public abstract boolean containsPoint(Vec2 point);
 
-    public abstract void render(GameInstance<?> game);
+    public abstract void render(GameInstance<?, ?> game);
 
     public static boolean areColliding(Hitbox hitbox1, Hitbox hitbox2) {
         if (hitbox1 instanceof CircleHitbox circle1 && hitbox2 instanceof CircleHitbox circle2) {

@@ -1,13 +1,14 @@
 package gameblock.game.chess;
 
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
 import gameblock.registry.GameblockGames;
 import gameblock.util.rendering.ColorF;
 import net.minecraft.world.entity.player.Player;
 
-public class ChessGame extends GameInstance<ChessGame> {
+public class ChessGame extends GameInstance<ChessGame, GamePlayer.GamePlayerData> {
     public ChessGame(Player player) {
-        super(player, GameblockGames.CHESS_GAME);
+        super(player, GameblockGames.CHESS_GAME, GamePlayer.GamePlayerData::new);
     }
 
     @Override

@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public abstract class GamePrompt<T extends GameInstance<?>> {
+public abstract class GamePrompt<T extends GameInstance<?, ?>> {
     protected final T game;
 
     private final StringBuilder builder = new StringBuilder();
@@ -79,7 +79,7 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
 
     public abstract void render();
 
-    public abstract static class GameCodePrompt<T extends GameInstance<?>> extends GamePrompt<T> {
+    public abstract static class GameCodePrompt<T extends GameInstance<?, ?>> extends GamePrompt<T> {
         public GameCodePrompt(T game) {
             super(game);
         }

@@ -4,6 +4,7 @@ import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
 import gameblock.game.os.packets.MultiplayerPromptPacket;
 import gameblock.game.os.packets.SelectGamePacket;
 import gameblock.item.CartridgeItem;
@@ -26,7 +27,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.*;
 
-public class GameblockOS extends GameInstance<GameblockOS> {
+public class GameblockOS extends GameInstance<GameblockOS, GamePlayer.GamePlayerData> {
     private static final int LOGO_FADE_OUT_TIME = 20;
     private static final int ICON_FADE_IN_DELAY = 20;
     private static final int ICON_FADE_IN_TIME = 80;
@@ -42,7 +43,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     }
 
     public GameblockOS(Player player, boolean showStartupScreen) {
-        super(player, GameblockGames.GAMEBLOCK_OS);
+        super(player, GameblockGames.GAMEBLOCK_OS, GamePlayer.GamePlayerData::new);
         this.showStartupScreen = showStartupScreen;
         if (isClientSide()) {
             logoRenderer = new GameblockLogoRenderer(this);
@@ -73,7 +74,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
             LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
             int index = 0;
 
-            Inventory playerInventory = getHostPlayer().getInventory();
+            Inventory playerInventory = getHostPlayer().playerEntity().getInventory();
             for (int i = 0; i < playerInventory.getContainerSize(); i++) {
                 ItemStack stack = playerInventory.getItem(i);
                 if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
@@ -92,7 +93,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
 
             gameIcons.add(new OSIcon(
                     this,
-                    () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer(), new MultiplayerPromptPacket()),
+                    () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer().playerEntity(), new MultiplayerPromptPacket()),
                     new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
                     Component.translatable("icon.gameblock.multiplayer"),
                     index++
@@ -172,14 +173,14 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     }
 
     protected void selectGameAndSentToClient(GameblockGames.Game<?> game) {
-        Inventory playerInventory = getHostPlayer().getInventory();
+        Inventory playerInventory = getHostPlayer().playerEntity().getInventory();
         for (int i = 0; i < playerInventory.getContainerSize(); i++) {
             ItemStack stack = playerInventory.getItem(i);
             if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
                 if (cartridge.gameType == game) {
-                    GameCapability cap = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                    GameCapability cap = getHostPlayer().playerEntity().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap != null) {
-                        cap.setGame(game.createInstance(getHostPlayer()));
+                        cap.setGame(game.createInstance(getHostPlayer().playerEntity()));
                     }
                 }
             }
