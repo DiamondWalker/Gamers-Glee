@@ -6,14 +6,12 @@ import gameblock.game.GameInstance;
 import gameblock.game.GamePlayer;
 import gameblock.game.blockbreak.packets.BallLaunchPacket;
 import gameblock.game.blockbreak.packets.BallUpdatePacket;
-import gameblock.game.blockbreak.packets.BrickUpdatePacket;
 import gameblock.game.blockbreak.packets.ScoreUpdatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
-import gameblock.util.datastructure.CircularStack;
 import gameblock.util.rendering.ColorF;
 import gameblock.util.physics.Direction1D;
 import gameblock.util.rendering.TextUtil;
@@ -28,12 +26,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.lwjgl.system.Platform;
 
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockBreakGame extends GameInstance<BlockBreakGame, GamePlayer.GamePlayerData> {
     public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
@@ -114,7 +109,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame, GamePlayer.Game
         if (!isClientSide()) {
             int oldScore = score;
             score = (int) (blocksBroken - timeSinceLaunch / 100);
-            if (getGameState() == GameState.WIN) score += 50;
+            if (getGameState() == GameState.GAME_OVER_WIN) score += 50;
             score = Math.max(score, 0);
             if (score != oldScore || timeSinceLaunch % 20 == 0) {
                 sendToAllPlayers(new ScoreUpdatePacket(score, timeSinceLaunch / 20), null);
@@ -253,7 +248,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame, GamePlayer.Game
         } else {
             long gameOverTime = getGameTime() - endTime;
             if (gameOverTime > 20) {
-                if (getGameState() == GameState.WIN) {
+                if (getGameState() == GameState.GAME_OVER_WIN) {
                     drawText(0.0f, 16.0f, 0.7f, ColorF.GREEN, Component.translatable("gui.gameblock.block_break.win"));
                 } else {
                     drawText(0.0f, 16.0f, 0.7f, ColorF.RED, Component.translatable("gui.gameblock.block_break.lose"));

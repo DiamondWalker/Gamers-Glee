@@ -95,11 +95,11 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame, GamePlaye
 
             if (!isClientSide()) {
                 if (Math.abs(chickenY) > 75 - 5) {
-                    setGameState(GameState.LOSS);
+                    setGameState(GameState.GAME_OVER_LOSS);
                 } else {
                     pipes.forEach((Pipe pipe) -> {
                         if (Math.abs(pipe.x - chickenX) - 6 < 12 && Math.abs(pipe.y - chickenY) + 5 >= SPACE_BETWEEN_PIPES / 2) {
-                            setGameState(GameState.LOSS);
+                            setGameState(GameState.GAME_OVER_LOSS);
                         } else {
                             if (!pipe.passed && chickenX > (pipe.x - 12)) {
                                 score++;

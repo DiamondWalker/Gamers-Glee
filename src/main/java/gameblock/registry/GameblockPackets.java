@@ -13,6 +13,7 @@ import gameblock.game.os.packets.SelectGamePacket;
 import gameblock.game.paddles.packets.*;
 import gameblock.game.serpent.packets.EatFoodPacket;
 import gameblock.game.serpent.packets.SnakeUpdatePacket;
+import gameblock.game.tictactoe.packets.*;
 import gameblock.packet.*;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -79,6 +80,15 @@ public class GameblockPackets {
         register(PaddleGameBallUpdatePacket.class, PaddleGameBallUpdatePacket::new);
         register(PaddleGameRoundEndPacket.class, PaddleGameRoundEndPacket::new);
         register(PaddleGameScoreUpdatePacket.class, PaddleGameScoreUpdatePacket::new);
+
+        // tic-tac-toe
+        register(TicTacToeGameCodeConfirmationPacket.class, TicTacToeGameCodeConfirmationPacket::new);
+        register(TicTacToeGameCodeSelectionPacket.class, TicTacToeGameCodeSelectionPacket::new);
+        register(TicTacToeStartGamePacket.class, TicTacToeStartGamePacket::new);
+        register(TicTacToeStopGamePacket.class, TicTacToeStopGamePacket::new);
+        register(TicTacToeCanMakeMovePacket.class, TicTacToeCanMakeMovePacket::new);
+        register(TicTacToeClientToServerDrawShapePacket.class, TicTacToeClientToServerDrawShapePacket::new);
+        register(TicTacToeServerToClientDrawShapePacket.class, TicTacToeServerToClientDrawShapePacket::new);
     }
 
     private static <MSG extends IPacket> void register(Class<MSG> clazz, Function<FriendlyByteBuf, MSG> constructor) {

@@ -1,19 +1,19 @@
-package gameblock.game.paddles.packets;
+package gameblock.game.tictactoe.packets;
 
-import gameblock.game.paddles.PaddleGameCodePrompt;
-import gameblock.game.paddles.PaddlesGame;
+import gameblock.game.tictactoe.TicTacToeGame;
+import gameblock.game.tictactoe.TicTacToeGameCodePrompt;
 import gameblock.packet.UpdateGamePacket;
 import gameblock.util.CompletionStatus;
 import net.minecraft.network.FriendlyByteBuf;
 
-public class PaddleGameCodeConfirmationPacket extends UpdateGamePacket<PaddlesGame> {
+public class TicTacToeGameCodeConfirmationPacket extends UpdateGamePacket<TicTacToeGame> {
     CompletionStatus result;
 
-    public PaddleGameCodeConfirmationPacket(CompletionStatus result) {
+    public TicTacToeGameCodeConfirmationPacket(CompletionStatus result) {
         this.result = result;
     }
 
-    public PaddleGameCodeConfirmationPacket(FriendlyByteBuf buffer) {
+    public TicTacToeGameCodeConfirmationPacket(FriendlyByteBuf buffer) {
         super(buffer);
     }
 
@@ -28,16 +28,16 @@ public class PaddleGameCodeConfirmationPacket extends UpdateGamePacket<PaddlesGa
     }
 
     @Override
-    public void gameUpdateReceivedOnClient(PaddlesGame game) {
+    public void gameUpdateReceivedOnClient(TicTacToeGame game) {
         if (result == CompletionStatus.SUCCESS) {
-            if (game.prompt instanceof PaddleGameCodePrompt) game.prompt.close();
+            if (game.prompt instanceof TicTacToeGameCodePrompt) game.prompt.close();
         } else {
             game.gameCode = null;
-            PaddleGameCodePrompt prompt;
-            if (game.prompt instanceof PaddleGameCodePrompt codePrompt) {
+            TicTacToeGameCodePrompt prompt;
+            if (game.prompt instanceof TicTacToeGameCodePrompt codePrompt) {
                 prompt = codePrompt;
             } else {
-                prompt = new PaddleGameCodePrompt(game);
+                prompt = new TicTacToeGameCodePrompt(game);
                 game.prompt = prompt;
             }
 

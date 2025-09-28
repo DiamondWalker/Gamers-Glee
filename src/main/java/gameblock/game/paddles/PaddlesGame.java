@@ -3,24 +3,22 @@ package gameblock.game.paddles;
 import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
 import gameblock.game.GamePlayer;
-import gameblock.game.paddles.packets.ClientToServerPaddleUpdatePacket;
 import gameblock.game.paddles.packets.PaddleGameRoundEndPacket;
 import gameblock.game.paddles.packets.PaddleGameScoreUpdatePacket;
 import gameblock.game.paddles.packets.PaddleGameStatePacket;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.GameState;
-import gameblock.util.MathHelper;
 import gameblock.util.TickTimer;
 import gameblock.util.rendering.ColorF;
 import gameblock.util.physics.Direction1D;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
-import net.minecraft.world.phys.Vec3;
 
 import java.util.Random;
 
@@ -59,6 +57,18 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
     }
 
     @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        if (gameCode == null) buffer.writeBoolean(true); // whether the prompt should be opened. The game code hasn't been selected so this must be the host player
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        if (buffer.readBoolean()) prompt = new PaddleGameCodePrompt(this);
+    }
+
+    @Override
     public int getMaxPlayers() {
         return 2;
     }
@@ -91,7 +101,9 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
         ball = new PaddlesBall(this);
         ball.motion = new Vec2(-1, 0);
         leftScore = rightScore = 0;
-        setGameState(GameState.ACTIVE);
+        setGameState(GameState.PLAYING);
+
+        forEachPlayer((GamePlayer<PaddlesPlayerData> p) -> GameblockPackets.sendToPlayer((ServerPlayer) p.playerEntity(), new PaddleGameStatePacket(p.data().direction)));
     }
 
     public void stopGame() {
@@ -119,7 +131,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
                 sendToAllPlayers(new PaddleGameScoreUpdatePacket(leftScore, rightScore), null);
                 scoreTimer.reset();
                 if (gameEnd) {
-                    setGameState(GameState.WIN);
+                    setGameState(GameState.GAME_OVER_WIN);
                 }
             });
         }
@@ -129,7 +141,6 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
     protected void onPlayerJoined(GamePlayer<PaddlesPlayerData> player) {
         if (!gameStarted && getPlayerCount() == getMaxPlayers()) {
             initializeGame();
-            forEachPlayer((GamePlayer<PaddlesPlayerData> p) -> GameblockPackets.sendToPlayer((ServerPlayer) p.playerEntity(), new PaddleGameStatePacket(p.data().direction)));
         }
     }
 
@@ -145,11 +156,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
 
     @Override
     protected void tick() {
-        if (!gameStarted) {
-            if (isClientSide() && gameCode == null && prompt == null) prompt = new PaddleGameCodePrompt(this);
-        } else {
-            if (isClientSide() && prompt != null) prompt.close();
-
+        if (gameStarted) {
             leftPaddle.tick();
             rightPaddle.tick();
 

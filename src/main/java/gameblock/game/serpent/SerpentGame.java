@@ -130,7 +130,7 @@ public class SerpentGame extends GameInstance<SerpentGame, GamePlayer.GamePlayer
             snakeDirectionChanged = false;
 
             if (getSnakeTicksFromTile(nextX, nextY) == -1 || isSnakeTile(nextX, nextY) && !isClientSide()) {
-                setGameState(GameState.LOSS);
+                setGameState(GameState.GAME_OVER_LOSS);
             } else {
                 headX = nextX;
                 headY = nextY;

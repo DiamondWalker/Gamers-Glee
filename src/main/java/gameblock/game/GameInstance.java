@@ -47,7 +47,7 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
     private final GamePlayer<PlayerDataType>[] players;
     private final Supplier<PlayerDataType> playerDataSupplier;
 
-    private final ArrayList<TickTimer> gameTimers = new ArrayList<>();
+    private final LinkedList<TickTimer> gameTimers = new LinkedList<>();
 
     private final boolean clientSide;
 
@@ -60,7 +60,7 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
     public static final float SCREEN_HEIGHT = MAX_Y - MIN_Y;
 
     private long gameTime = 0;
-    private GameState gameState = GameState.ACTIVE;
+    private GameState gameState = GameState.PLAYING;
 
     public GamePrompt prompt = null;
 
@@ -155,7 +155,7 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
         }
 
         for (int i = 1; i < players.length; i++) {
-            if (players[i].playerEntity() == player) {
+            if (players[i] != null && players[i].playerEntity() == player) {
                 GamePlayer<PlayerDataType> gamePlayer = players[i];
                 players[i] = null;
                 onPlayerDisconnected(gamePlayer);
@@ -190,9 +190,9 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
         if (!isClientSide()) {
             sendToAllPlayers(new GameStatePacket(state), null);
         }
-        if (state == GameState.WIN) {
+        if (state == GameState.GAME_OVER_WIN) {
             onGameWin();
-        } else if (state == GameState.LOSS) {
+        } else if (state == GameState.GAME_OVER_LOSS) {
             onGameLoss();
         }
     }
@@ -308,7 +308,7 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {}
 
     public boolean isGameOver() {
-        return gameState != GameState.ACTIVE;
+        return gameState != GameState.PLAYING;
     }
 
     public void addTickTimer(TickTimer timer) {
@@ -335,15 +335,13 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
             }
 
             // tick game timers
-            int i = 0;
-            while (i < gameTimers.size()) {
-                TickTimer timer = gameTimers.get(i);
+            ListIterator<TickTimer> iter = gameTimers.listIterator();
+            while (iter.hasNext()) {
+                TickTimer timer = iter.next();
                 timer.tick();
-                if (timer.getState() == TickTimer.TimerState.RUNNING) {
-                    i++;
-                } else {
+                if (timer.getState() != TickTimer.TimerState.RUNNING) {
                     timer.executeScheduledAction();
-                    gameTimers.remove(i);
+                    iter.remove();
                 }
             }
 

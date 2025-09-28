@@ -109,7 +109,7 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
             }
             if (timeLeft <= 0) {
                 generateBombsIfTheyHaventBeenGeneratedYet(null);
-                setGameState(GameState.LOSS);
+                setGameState(GameState.GAME_OVER_LOSS);
             }
         }
     }
@@ -125,7 +125,7 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
             });
         }
 
-        if (isWon.get()) setGameState(GameState.WIN);
+        if (isWon.get()) setGameState(GameState.GAME_OVER_WIN);
     }
 
     private void generateBombsIfTheyHaventBeenGeneratedYet(Vec2i safeTile) {
@@ -150,7 +150,7 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
 
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
         if (defusalTile != null && defusalTile.getState() == DefusalTile.State.HIDDEN && defusalTile.isBomb()) {
-            setGameState(GameState.LOSS);
+            setGameState(GameState.GAME_OVER_LOSS);
             return;
         }
         ArrayList<TileRevealPacket.TileInfo> tileInfos = new ArrayList<>();
@@ -237,13 +237,13 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
                 //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, new ColorF(0.8f), 0);
                 drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 32, 0, 6, 6, ColorF.WHITE);
 
-                if (getGameState() == GameState.LOSS && tile.isBomb()) {
+                if (getGameState() == GameState.GAME_OVER_LOSS && tile.isBomb()) {
                     drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, ColorF.WHITE);
                     //drawRectangle(graphics, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, ColorF.RED, 0);
                 }
 
                 if (tile.getState() == DefusalTile.State.FLAGGED) {
-                    if (getGameState() == GameState.LOSS && !tile.isBomb()) {
+                    if (getGameState() == GameState.GAME_OVER_LOSS && !tile.isBomb()) {
                         drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 7, 7, 0, 0, 0, 7, 7, ColorF.WHITE);
                         drawTexture(SPRITE, coords.getX() * 7, coords.getY() * 7 - 8, 6, 6, 0, 21, 0, 7, 7, ColorF.WHITE);
                     } else {
@@ -273,9 +273,9 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
 
         //drawRectangle(graphics, 0, 62.0f, 15, 15, ColorF.WHITE, 0);
         int u = 0;
-        if (getGameState() == GameState.WIN) {
+        if (getGameState() == GameState.GAME_OVER_WIN) {
             u = 24;
-        } else if (getGameState() == GameState.LOSS) {
+        } else if (getGameState() == GameState.GAME_OVER_LOSS) {
             u = 8;
         } else if (getGameTime() - lastRevealTime < 5) {
             u = 16;

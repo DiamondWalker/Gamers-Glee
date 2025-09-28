@@ -89,7 +89,7 @@ public class BlockBreakBall {
                         moveUpdate = true;
                         sendBounceNoise = true;
                     } else if (y <= GameInstance.MIN_Y - BlockBreakBall.SIZE / 2) {
-                        if (!game.isClientSide()) game.setGameState(GameState.LOSS);
+                        if (!game.isClientSide()) game.setGameState(GameState.GAME_OVER_LOSS);
                         return;
                     }
 
@@ -135,7 +135,7 @@ public class BlockBreakBall {
                                 if (!game.isClientSide()) {
                                     game.blocksBroken++;
                                     game.blocks.set(i, null);//blocks.set(i, null);
-                                    if (game.blocksBroken >= game.blocks.size()) game.setGameState(GameState.WIN);
+                                    if (game.blocksBroken >= game.blocks.size()) game.setGameState(GameState.GAME_OVER_WIN);
                                     game.sendToAllPlayers(new BrickUpdatePacket(i), null);
                                 } else {
                                     game.blocks.get(i).breaking = BlockBreakGame.BRICK_BREAK_CLIENT_REAPPEAR_TIME;
