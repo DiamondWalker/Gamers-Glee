@@ -113,10 +113,13 @@ public class DefusalGame extends GameInstance<DefusalGame> {
 
     protected void reveal(Vec2i tile) {
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
-        if (defusalTile != null && defusalTile.getState() == DefusalTile.State.HIDDEN && defusalTile.isBomb()) {
+        if (defusalTile == null || defusalTile.getState() != DefusalTile.State.HIDDEN) return;
+
+        if (defusalTile.isBomb()) {
             setGameState(GameState.LOSS);
             return;
         }
+
         ArrayList<TileRevealPacket.TileInfo> tileInfos = new ArrayList<>();
         recursiveReveal(tile.getX(), tile.getY(), tileInfos);
         forEachPlayer((Player player) -> {
