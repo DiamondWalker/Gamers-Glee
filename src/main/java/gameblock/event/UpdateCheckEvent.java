@@ -2,6 +2,7 @@ package gameblock.event;
 
 import gameblock.GameblockConfig;
 import gameblock.GameblockMod;
+import gameblock.util.HostedData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -58,10 +59,10 @@ public class UpdateCheckEvent {
             }
 
             if (updateMsg != null) event.getServer().getPlayerList().broadcastSystemMessage(updateMsg, false);
-            if (firstCheck && GameblockConfig.PROMOTE_DISCORD_SERVER.get()) {
+            if (firstCheck && GameblockConfig.PROMOTE_DISCORD_SERVER.get() && HostedData.DISCORD_URL != null) {
                 Component discordComponent = Component.translatable("chat.gameblock.discord.link").withStyle(style -> style
                         .applyFormats(ChatFormatting.BLUE, ChatFormatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discord.gg/mAnZzgGXCv")));
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, HostedData.DISCORD_URL)));
                 event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("chat.gameblock.discord.message", modName, discordComponent)
                         .withStyle(ChatFormatting.BLUE), false);
             }
