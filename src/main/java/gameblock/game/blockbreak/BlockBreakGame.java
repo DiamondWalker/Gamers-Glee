@@ -171,29 +171,29 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame, GamePlayer.Game
     private long endTime = -1;
 
     @Override
-    protected void onGameWin() {
-        if (!isClientSide()) {
-            score += 50;
-            sendToAllPlayers(new ScoreUpdatePacket(score, timeSinceLaunch / 20), null);
-        }
-        endTime = getGameTime();
-    }
-
-    @Override
-    protected void onGameLoss() {
-        if (particleManager != null) {
-            Random random = new Random();
-            for (int i = 0; i < 25; i++) {
-                float x = random.nextFloat(10.0f) - 5.0f;
-                particleManager.addParticle(ball.x + x, -75.0f,
-                        0.0f, 1.2f + random.nextFloat(3.0f),
-                        40,
-                        new ColorF(random.nextInt(256), 255, 255));
+    protected void onGameStateChange(GameState oldState, GameState newState) {
+        super.onGameStateChange(oldState, newState);
+        if (newState == GameState.GAME_OVER_WIN) {
+            if (!isClientSide()) {
+                score += 50;
+                sendToAllPlayers(new ScoreUpdatePacket(score, timeSinceLaunch / 20), null);
             }
+            endTime = getGameTime();
+        } else if (newState == GameState.GAME_OVER_LOSS) {
+            if (particleManager != null) {
+                Random random = new Random();
+                for (int i = 0; i < 25; i++) {
+                    float x = random.nextFloat(10.0f) - 5.0f;
+                    particleManager.addParticle(ball.x + x, -75.0f,
+                            0.0f, 1.2f + random.nextFloat(3.0f),
+                            40,
+                            new ColorF(random.nextInt(256), 255, 255));
+                }
 
-            playSound(GameblockSounds.BALL_BROKEN.get());
+                playSound(GameblockSounds.BALL_BROKEN.get());
+            }
+            endTime = getGameTime();
         }
-        endTime = getGameTime();
     }
 
     @Override

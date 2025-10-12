@@ -79,7 +79,8 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenGame, GamePlaye
     }
 
     @Override
-    protected void onGameLoss() {
+    protected void onGameStateChange(GameState oldState, GameState newState) {
+        super.onGameStateChange(oldState, newState);
         if (isClientSide()) {
             playSound(SoundEvents.CHICKEN_DEATH);
             gameOverFallDirection = new Random().nextFloat() * 2 - 1;

@@ -59,7 +59,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
     @Override
     public void writeToBuffer(FriendlyByteBuf buffer) {
         super.writeToBuffer(buffer);
-        if (gameCode == null) buffer.writeBoolean(true); // whether the prompt should be opened. The game code hasn't been selected so this must be the host player
+        buffer.writeBoolean(gameCode == null); // whether the prompt should be opened. The game code hasn't been selected so this must be the host player
     }
 
     @Override
@@ -131,7 +131,7 @@ public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
                 sendToAllPlayers(new PaddleGameScoreUpdatePacket(leftScore, rightScore), null);
                 scoreTimer.reset();
                 if (gameEnd) {
-                    setGameState(GameState.GAME_OVER_WIN);
+                    setGameState(GameState.GAME_OVER_NEUTRAL);
                 }
             });
         }

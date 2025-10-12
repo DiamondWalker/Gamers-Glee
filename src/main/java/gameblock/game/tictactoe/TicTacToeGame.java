@@ -2,12 +2,11 @@ package gameblock.game.tictactoe;
 
 import gameblock.game.GameInstance;
 import gameblock.game.GamePlayer;
-import gameblock.game.tictactoe.packets.TicTacToeCanMakeMovePacket;
-import gameblock.game.tictactoe.packets.TicTacToeStartGamePacket;
-import gameblock.game.tictactoe.packets.TicTacToeStopGamePacket;
-import gameblock.game.tictactoe.packets.TicTacToeClientToServerDrawShapePacket;
+import gameblock.game.tictactoe.packets.*;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.GameState;
+import gameblock.util.MiscHelper;
 import gameblock.util.TickTimer;
 import gameblock.util.datastructure.TileGrid2D;
 import gameblock.util.physics.Direction1D;
@@ -16,6 +15,7 @@ import gameblock.util.rendering.ColorF;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
@@ -30,6 +30,8 @@ public class TicTacToeGame extends GameInstance<TicTacToeGame, TicTacToePlayerDa
     // CLIENT DATA
     public TicTacToeShapeType myType = null;
     public boolean canMakeMove = false;
+    private TicTacToeWinConditions win = null;
+    private TickTimer winDrawTimer = new TickTimer(this);
 
     public TicTacToeGame(Player player) {
         super(player, GameblockGames.TIC_TAC_TOE_GAME, TicTacToePlayerData::new);
@@ -67,6 +69,8 @@ public class TicTacToeGame extends GameInstance<TicTacToeGame, TicTacToePlayerDa
     }
 
     private void startGame() {
+        shapes.setAll((shape) -> null);
+
         if (new Random().nextBoolean()) {
             getPlayer(0).data().shape = TicTacToeShapeType.X;
             getPlayer(1).data().shape = TicTacToeShapeType.O;
@@ -126,10 +130,55 @@ public class TicTacToeGame extends GameInstance<TicTacToeGame, TicTacToePlayerDa
         if (buttonPressed == Direction1D.LEFT) {
             if (canMakeMove) {
                 Vec2i mouseOver = getSlotAtCoordinates(clickCoordinates);
-                if (shapes.get(mouseOver.getX(), mouseOver.getY()) == null && !isShapeCurrentlyBeingDrawn()) {
-                    GameblockPackets.sendToServer(new TicTacToeClientToServerDrawShapePacket(mouseOver));
+                if (Math.abs(mouseOver.getX()) <= 1 && Math.abs(mouseOver.getY()) <= 1) {
+                    if (shapes.get(mouseOver.getX(), mouseOver.getY()) == null && !isShapeCurrentlyBeingDrawn()) {
+                        GameblockPackets.sendToServer(new TicTacToeClientToServerDrawShapePacket(mouseOver));
+                    }
                 }
             }
+        }
+    }
+
+    public void drawShape(Vec2i tile, TicTacToeShapeType shape) {
+        shapes.set(tile.getX(), tile.getY(), new TicTacToeShape(this, shape));
+
+        TicTacToeWinConditions win = checkWin();
+        System.out.println(win);
+        if (win != null) {
+            setNextShape(null);
+            sendToAllPlayers(new TicTacToeServerToClientDrawShapePacket(tile, shape), null);
+            setGameState(GameState.GAME_OVER_NEUTRAL);
+        } else {
+            setNextShape(getNextShape() == TicTacToeShapeType.X ? TicTacToeShapeType.O : TicTacToeShapeType.X);
+            sendToAllPlayers(new TicTacToeServerToClientDrawShapePacket(tile, shape), null);
+        }
+
+    }
+
+    public TicTacToeWinConditions checkWin() {
+        for (TicTacToeWinConditions win : TicTacToeWinConditions.values()) {
+            TicTacToeShape shape1 = shapes.get(win.pos1.getX(), win.pos1.getY());
+            TicTacToeShape shape2 = shapes.get(win.pos2.getX(), win.pos2.getY());
+            TicTacToeShape shape3 = shapes.get(win.pos3.getX(), win.pos3.getY());
+            if (shape1 != null && shape2 != null && shape3 != null && MiscHelper.areAllEqual(
+                    shape1.type,
+                    shape2.type,
+                    shape3.type
+            )) {
+                return win;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void onGameStateChange(GameState oldState, GameState newState) {
+        super.onGameStateChange(oldState, newState);
+        if (newState == GameState.GAME_OVER_NEUTRAL && isClientSide()) {
+            win = checkWin();
+            if (win == null) throw new RuntimeException("Client could not identify how Tic-Tac-Toe game was won");
+            winDrawTimer.start(30);
         }
     }
 
@@ -154,6 +203,12 @@ public class TicTacToeGame extends GameInstance<TicTacToeGame, TicTacToePlayerDa
                         myType.render(this, new Vec2(hoveringOver.getX(), hoveringOver.getY()).scale(40), 1.0f, new ColorF(0.4f));
                     }
                 }
+            }
+
+            if (win != null) {
+                System.out.println(winDrawTimer.getProgress());
+                Vec2 end = new Vec2(Mth.lerp(winDrawTimer.getProgress(), win.startLine.x, win.endLine.x), Mth.lerp(winDrawTimer.getProgress(), win.startLine.y, win.endLine.y));
+                drawLine(win.startLine, end, 3, true, ColorF.WHITE);
             }
         } else if (prompt == null) {
             drawText(0.0f, 8.0f, 0.85f, ColorF.WHITE, Component.literal("Waiting for opponent")); // TODO: localize

@@ -211,14 +211,16 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
     }
 
     @Override
-    protected void onGameLoss() {
-        ArrayList<Vec2i> bombs = new ArrayList<>();
-        tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
-            if (otherDefusalTile.isBomb()) bombs.add(coords);
-        });
-        sendToAllPlayers(new BombRevealPacket(bombs.toArray(new Vec2i[]{})), null);
-        super.onGameLoss();
-        playSound(SoundEvents.GENERIC_EXPLODE);
+    protected void onGameStateChange(GameState oldState, GameState newState) {
+        super.onGameStateChange(oldState, newState);
+        if (newState == GameState.GAME_OVER_LOSS) {
+            ArrayList<Vec2i> bombs = new ArrayList<>();
+            tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
+                if (otherDefusalTile.isBomb()) bombs.add(coords);
+            });
+            sendToAllPlayers(new BombRevealPacket(bombs.toArray(new Vec2i[]{})), null);
+            playSound(SoundEvents.GENERIC_EXPLODE);
+        }
     }
 
     @Override

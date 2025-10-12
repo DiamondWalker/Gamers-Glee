@@ -35,6 +35,11 @@ public class TicTacToeClientToServerDrawShapePacket extends UpdateGamePacket<Tic
     public void gameUpdateReceivedOnServer(TicTacToeGame game, ServerPlayer sender) {
         TicTacToeShapeType playerShape = game.getGamePlayer(sender).data().shape;
 
+        if (playerShape == null) {
+            GameblockMod.LOGGER.warn("Tic-tac-toe player attempted to draw null shape. This shouldn't happen!");
+            return;
+        }
+
         if (playerShape != game.getNextShape()) {
             GameblockMod.LOGGER.warn("Tic-tac-toe player attempted to draw shape when it wasn't their turn");
             return;
@@ -47,8 +52,6 @@ public class TicTacToeClientToServerDrawShapePacket extends UpdateGamePacket<Tic
             GameblockMod.LOGGER.warn("Player attempted to draw shape in tile that already had a shape. This shouldn't happen!");
         }
 
-        game.shapes.set(tile.getX(), tile.getY(), new TicTacToeShape(game, playerShape));
-        game.setNextShape(game.getNextShape() == TicTacToeShapeType.X ? TicTacToeShapeType.O : TicTacToeShapeType.X);
-        game.sendToAllPlayers(new TicTacToeServerToClientDrawShapePacket(tile, playerShape), null);
+        game.drawShape(tile, playerShape);
     }
 }

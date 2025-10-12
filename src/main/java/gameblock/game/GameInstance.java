@@ -186,15 +186,17 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
     }
 
     public final void setGameState(GameState state) {
+        GameState oldState = gameState;
         gameState = state;
         if (!isClientSide()) {
             sendToAllPlayers(new GameStatePacket(state), null);
         }
-        if (state == GameState.GAME_OVER_WIN) {
+        onGameStateChange(oldState, gameState);
+        /*if (state == GameState.GAME_OVER_WIN) {
             onGameWin();
         } else if (state == GameState.GAME_OVER_LOSS) {
             onGameLoss();
-        }
+        }*/
     }
 
     public final void save() {
@@ -285,11 +287,7 @@ public abstract class GameInstance<T extends GameInstance<?, ?>, PlayerDataType 
         return gameState;
     }
 
-    protected void onGameWin() {
-
-    }
-
-    protected void onGameLoss() {
+    protected void onGameStateChange(GameState oldState, GameState newState) {
 
     }
 

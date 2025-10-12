@@ -117,9 +117,12 @@ public class SerpentGame extends GameInstance<SerpentGame, GamePlayer.GamePlayer
     }
 
     @Override
-    protected void onGameLoss() {
-        playSound(GameblockSounds.SNAKE_DEATH.get());
-        endTime = getGameTime();
+    protected void onGameStateChange(GameState oldState, GameState newState) {
+        super.onGameStateChange(oldState, newState);
+        if (newState == GameState.GAME_OVER_LOSS) {
+            playSound(GameblockSounds.SNAKE_DEATH.get());
+            endTime = getGameTime();
+        }
     }
 
     @Override

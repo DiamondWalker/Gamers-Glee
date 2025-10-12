@@ -29,5 +29,6 @@ public class TicTacToeStartGamePacket extends UpdateGamePacket<TicTacToeGame> {
     @Override
     public void gameUpdateReceivedOnClient(TicTacToeGame game) {
         game.myType = shape;
+        game.shapes.setAll((shape) -> null);
     }
 }
