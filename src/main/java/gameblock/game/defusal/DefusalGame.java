@@ -149,10 +149,14 @@ public class DefusalGame extends GameInstance<DefusalGame, GamePlayer.GamePlayer
         generateBombsIfTheyHaventBeenGeneratedYet(tile);
 
         DefusalTile defusalTile = tiles.get(tile.getX(), tile.getY());
-        if (defusalTile != null && defusalTile.getState() == DefusalTile.State.HIDDEN && defusalTile.isBomb()) {
+      
+        if (defusalTile == null || defusalTile.getState() != DefusalTile.State.HIDDEN) return;
+
+        if (defusalTile.isBomb()) {
             setGameState(GameState.GAME_OVER_LOSS);
             return;
         }
+
         ArrayList<TileRevealPacket.TileInfo> tileInfos = new ArrayList<>();
         recursiveReveal(tile.getX(), tile.getY(), tileInfos);
         sendToAllPlayers(new BombCountPacket(bombCount), null);
