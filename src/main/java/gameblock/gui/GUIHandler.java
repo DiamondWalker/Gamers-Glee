@@ -9,7 +9,7 @@ public class GUIHandler {
         if (Minecraft.getInstance().screen instanceof GameScreen) Minecraft.getInstance().screen.onClose();
     }
 
-    public static void openGameScreen(GameInstance<?> game) {
+    public static void openGameScreen(GameInstance<?, ?> game) {
         Minecraft.getInstance().setScreen(new GameScreen(game));
     }
 }

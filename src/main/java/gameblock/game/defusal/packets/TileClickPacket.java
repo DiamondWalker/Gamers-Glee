@@ -1,0 +1,44 @@
+package gameblock.game.defusal.packets;
+
+import gameblock.game.defusal.DefusalGame;
+import gameblock.packet.UpdateGamePacket;
+import gameblock.util.physics.Direction1D;
+import gameblock.util.physics.Vec2i;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.level.ServerPlayer;
+
+public class TileClickPacket extends UpdateGamePacket<DefusalGame> {
+    private Direction1D mouseClick;
+    private Vec2i tileClicked;
+
+    public TileClickPacket(Direction1D mouse, Vec2i tile) {
+        this.mouseClick = mouse;
+        this.tileClicked = tile;
+    }
+
+    public TileClickPacket(FriendlyByteBuf buffer) {
+        super(buffer);
+    }
+
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        buffer.writeEnum(mouseClick);
+        buffer.writeShort(tileClicked.getX());
+        buffer.writeShort(tileClicked.getY());
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        mouseClick = buffer.readEnum(Direction1D.class);
+        tileClicked = new Vec2i(buffer.readShort(), buffer.readShort());
+    }
+
+    @Override
+    public void gameUpdateReceivedOnServer(DefusalGame game, ServerPlayer sender) {
+        if (mouseClick == Direction1D.LEFT) {
+            game.reveal(tileClicked);
+        } else if (mouseClick == Direction1D.RIGHT) {
+            game.cycle(tileClicked);
+        }
+    }
+}

@@ -1,20 +1,20 @@
 {
-  "chat.gameblock.discord.message": "%s Join the %s for spoilers, news, and updates!",
+  "chat.gameblock.discord.message": "Join the %s for spoilers, news, and updates!",
   "chat.gameblock.discord.link": "Gamer's Glee Discord server",
-  "chat.gameblock.update.could_not_connect": "%s Could not connect to update checker.",
+  "chat.gameblock.update.could_not_connect": "Could not connect to update checker.",
   "chat.gameblock.update.download": "Click here to download the latest features and fixes!",
-  "chat.gameblock.update.out_of_date": "%s Gamer's Glee is %s out of date! %s",
+  "chat.gameblock.update.out_of_date": "Gamer's Glee is %s out of date! %s",
   "chat.gameblock.update.out_of_date_singular": "%s version",
   "chat.gameblock.update.out_of_date_multiple": "%s versions",
-  "chat.gameblock.update.out_of_date_special_0": "%s update ur gamers glee bruh",
-  "chat.gameblock.update.out_of_date_special_1": "%s Update or die.",
-  "chat.gameblock.update.out_of_date_special_2": "%s Not updating your Minecraft mods is a federal offense punishable by life in prison without parole.",
-  "chat.gameblock.update.out_of_date_special_3": "%s Update Gamer's Glee. All the cool kids are doing it.",
-  "chat.gameblock.update.out_of_date_special_4": "%s Update Gamer's Glee or the man standing behind you will do it for you.",
-  "chat.gameblock.update.out_of_date_special_5": "%s Update plz",
-  "chat.gameblock.update.out_of_date_special_6": "%s Update me.",
-  "chat.gameblock.update.out_of_date_special_7": "%s :(",
-  "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
+  "chat.gameblock.update.out_of_date_special_0": "update ur gamers glee bruh",
+  "chat.gameblock.update.out_of_date_special_1": "Update or die.",
+  "chat.gameblock.update.out_of_date_special_2": "Not updating your Minecraft mods is a federal offense punishable by life in prison without parole.",
+  "chat.gameblock.update.out_of_date_special_3": "Update Gamer's Glee. All the cool kids are doing it.",
+  "chat.gameblock.update.out_of_date_special_4": "Update Gamer's Glee or the man standing behind you will do it for you.",
+  "chat.gameblock.update.out_of_date_special_5": "Update plz",
+  "chat.gameblock.update.out_of_date_special_6": "Update me.",
+  "chat.gameblock.update.out_of_date_special_7": ":(",
+  "chat.gameblock.update.up_to_date": "Gamer's Glee is up to date. Enjoy!",
 
   "icon.gameblock.block_break": "Block Break",
   "icon.gameblock.defusal": "Defusal",
@@ -30,6 +30,8 @@
 
   "gui.gameblock.os.no_cartridges_1": "No cartridges detected.",
   "gui.gameblock.os.no_cartridges_2": "Find some in loot chests!",
+  "gui.gameblock.os.enter_game_code": "Enter 8-character game code:",
+  "gui.gameblock.os.select_game_code": "Enter",
 
   "gui.gameblock.block_break.score": "Score: %s",
   "gui.gameblock.block_break.time": "Time: %s",
@@ -43,5 +45,11 @@
   "gui.gameblock.flying_chicken.score": "Score: %s",
   "gui.gameblock.flying_chicken.best": "Best: %s",
   "gui.gameblock.flying_chicken.new_best": "New Best!",
-  "gui.gameblock.flying_chicken.retry": "Retry?"
+  "gui.gameblock.flying_chicken.retry": "Retry?",
+
+  "gui.gameblock.paddles.enter_game_code": "Enter an 8-character game code:",
+  "gui.gameblock.paddles.game_code_already_used": "That game code is already used!",
+  "gui.gameblock.paddles.game_code_info": "(Other players will need this code to join!)",
+  "gui.gameblock.paddles.waiting_for_players": "Waiting for players...",
+  "gui.gameblock.paddles.game_code_reminder": "(Remember: your game code is %s)"
 }

@@ -1,14 +1,71 @@
 package gameblock.game.paddles;
 
+import gameblock.GameblockMod;
 import gameblock.game.GameInstance;
+import gameblock.game.GamePlayer;
+import gameblock.game.paddles.packets.PaddleGameRoundEndPacket;
+import gameblock.game.paddles.packets.PaddleGameScoreUpdatePacket;
+import gameblock.game.paddles.packets.PaddleGameStatePacket;
 import gameblock.registry.GameblockGames;
-import net.minecraft.client.gui.GuiGraphics;
+import gameblock.registry.GameblockPackets;
+import gameblock.util.GameState;
+import gameblock.util.TickTimer;
+import gameblock.util.rendering.ColorF;
+import gameblock.util.physics.Direction1D;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.phys.Vec2;
 
-public class PaddlesGame extends GameInstance<PaddlesGame> {
+import java.util.Random;
+
+public class PaddlesGame extends GameInstance<PaddlesGame, PaddlesPlayerData> {
+    public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/paddles.png");
+
+    // COMMON DATA
+    private boolean gameStarted = false;
+    public String gameCode = null;
+
+    public Paddle leftPaddle;
+    public Paddle rightPaddle;
+
+    public PaddlesBall ball;
+
+    public byte leftScore;
+    public byte rightScore;
+    public final TickTimer scoreTimer = new TickTimer(this);
+
+    // SERVER DATA
+    public static final Direction1D[] PLAYER_DIRECTIONS = {Direction1D.LEFT, Direction1D.RIGHT}; // maps player indexes to their paddle directions
+
+    // CLIENT DATA
+    public Direction1D whichPaddleAmI;
+    public float otherPaddleUpdatePos = 0.0f;
+    public Direction1D winSide = Direction1D.CENTER;
+
     public PaddlesGame(Player player) {
-        super(player, GameblockGames.PADDLES_GAME);
+        super(player, GameblockGames.PADDLES_GAME, PaddlesPlayerData::new);
+    }
+
+    public Paddle getPaddleFromDirection(Direction1D direction) {
+        if (direction == Direction1D.LEFT) return leftPaddle;
+        if (direction == Direction1D.RIGHT) return rightPaddle;
+        throw new IllegalArgumentException("Attempted to get paddle with invalid direction " + direction);
+    }
+
+    @Override
+    public void writeToBuffer(FriendlyByteBuf buffer) {
+        super.writeToBuffer(buffer);
+        buffer.writeBoolean(gameCode == null); // whether the prompt should be opened. The game code hasn't been selected so this must be the host player
+    }
+
+    @Override
+    public void readFromBuffer(FriendlyByteBuf buffer) {
+        super.readFromBuffer(buffer);
+        if (buffer.readBoolean()) prompt = new PaddleGameCodePrompt(this);
     }
 
     @Override
@@ -17,18 +74,122 @@ public class PaddlesGame extends GameInstance<PaddlesGame> {
     }
 
     @Override
+    public boolean canJoin() {
+        return super.canJoin() && !gameStarted;
+    }
+
+    @Override
     public String getGameCode() {
-        if (getPlayerCount() == getMaxPlayers()) return null;
-        return "TESTTEST";
+        return gameCode;
+    }
+
+    public void initializeGame() {
+        gameStarted = true;
+        leftPaddle = new Paddle(this, Direction1D.LEFT);
+        rightPaddle = new Paddle(this, Direction1D.RIGHT);
+
+        if (!isClientSide()) {
+            getPlayer(0).data().direction = Direction1D.LEFT;
+            getPlayer(1).data().direction = Direction1D.RIGHT;
+
+            if (new Random().nextBoolean()) {
+                getPlayer(0).data().direction = getPlayer(0).data().direction.getOpposite();
+                getPlayer(1).data().direction = getPlayer(1).data().direction.getOpposite();
+            }
+        }
+
+        ball = new PaddlesBall(this);
+        ball.motion = new Vec2(-1, 0);
+        leftScore = rightScore = 0;
+        setGameState(GameState.PLAYING);
+
+        forEachPlayer((GamePlayer<PaddlesPlayerData> p) -> GameblockPackets.sendToPlayer((ServerPlayer) p.playerEntity(), new PaddleGameStatePacket(p.data().direction)));
+    }
+
+    public void stopGame() {
+        gameStarted = false;
+        whichPaddleAmI = null;
+    }
+
+    public void score(Direction1D dir) {
+        if (scoreTimer.getState() == TickTimer.TimerState.STOPPED) {
+            if (dir == Direction1D.LEFT) {
+                leftScore++;
+            } else if (dir == Direction1D.RIGHT) {
+                rightScore++;
+            } else {
+                throw new IllegalArgumentException("Invalid score direction!");
+            }
+
+            boolean gameEnd = leftScore >= 11 || rightScore >= 11;
+            // tell the clients that the round has ended and inform them of the winner. This lets them know to start flashing one of the numbers
+            sendToAllPlayers(new PaddleGameRoundEndPacket(dir, gameEnd), null);
+
+            // schedule the start of the new round.
+            scoreTimer.start(40, () -> {
+                ball.resetBall();
+                sendToAllPlayers(new PaddleGameScoreUpdatePacket(leftScore, rightScore), null);
+                scoreTimer.reset();
+                if (gameEnd) {
+                    setGameState(GameState.GAME_OVER_NEUTRAL);
+                }
+            });
+        }
+    }
+
+    @Override
+    protected void onPlayerJoined(GamePlayer<PaddlesPlayerData> player) {
+        if (!gameStarted && getPlayerCount() == getMaxPlayers()) {
+            initializeGame();
+        }
+    }
+
+    @Override
+    protected void onPlayerDisconnected(GamePlayer<PaddlesPlayerData> player) {
+        if (gameStarted) {
+            gameStarted = false;
+            forEachPlayer((GamePlayer<PaddlesPlayerData> p) -> {
+                GameblockPackets.sendToPlayer((ServerPlayer) p.playerEntity(), new PaddleGameStatePacket(Direction1D.CENTER)); // value of center means unassigned
+            });
+        }
     }
 
     @Override
     protected void tick() {
+        if (gameStarted) {
+            leftPaddle.tick();
+            rightPaddle.tick();
 
+            if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) ball.tick();
+        }
     }
 
     @Override
-    public void render(GuiGraphics graphics, float partialTicks) {
+    public void render() {
+        if (gameStarted) {
+            // draw the dividing line
+            for (int i = -30; i <= 30; i++) {
+                drawRectangle(0, i * 5, 1, 3, ColorF.WHITE, 0);
+            }
 
+            // draw the score counters
+            if ((scoreTimer.getTicksElapsed() / 3) % 2 == 0 || winSide != Direction1D.LEFT) {
+                drawTexture(SPRITE, -30, 50, 18, 27, 0, 250, 9 * leftScore, 6, 9);
+            }
+            if ((scoreTimer.getTicksElapsed() / 3) % 2 == 0 || winSide != Direction1D.RIGHT) {
+                drawTexture(SPRITE, 30, 50, 18, 27, 0, 250, 9 * rightScore, 6, 9);
+            }
+            float partialTicks = getPartialTicks();
+
+            if (!isGameOver()) {
+                drawRectangle(-Paddle.POSITION, Mth.lerp(partialTicks, leftPaddle.oldPos, leftPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, ColorF.WHITE, 0);
+                drawRectangle(Paddle.POSITION, Mth.lerp(partialTicks, rightPaddle.oldPos, rightPaddle.pos), Paddle.DEPTH, Paddle.WIDTH, ColorF.WHITE, 0);
+            }
+
+            if (scoreTimer.getState() != TickTimer.TimerState.RUNNING) drawRectangle(Mth.lerp(partialTicks, ball.oldPos.x, ball.pos.x), Mth.lerp(partialTicks, ball.oldPos.y, ball.pos.y), PaddlesBall.SIZE, PaddlesBall.SIZE, ColorF.WHITE, 0);
+        } else if (prompt == null) {
+            drawText(0.0f, 0.0f, 1.0f, ColorF.WHITE, Component.translatable("gui.gameblock.paddles.waiting_for_players"));
+            drawText(0.0f, -10.0f, 0.5f, ColorF.WHITE, Component.translatable("gui.gameblock.paddles.game_code_reminder", gameCode));
+        }
     }
 }

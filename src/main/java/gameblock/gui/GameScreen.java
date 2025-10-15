@@ -4,34 +4,33 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gameblock.game.GameInstance;
-import gameblock.game.os.GameblockOS;
-import gameblock.packet.GameChangePacket;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.packet.GameClosePacket;
+import gameblock.game.os.GameblockOS;
+import gameblock.packet.CloseGamePacket;
+import gameblock.packet.LeaveGameblockPacket;
 import gameblock.registry.GameblockPackets;
-import gameblock.util.Direction1D;
+import gameblock.util.physics.Direction1D;
 import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.MusicManager;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FastColor;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import org.jetbrains.annotations.Nullable;
+import org.lwjgl.glfw.GLFW;
 
 public class GameScreen extends Screen {
     public static final ResourceLocation TEXTURE_LOCATION = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/gameblock.png");
     private static final int IMAGE_WIDTH = 206;
     private static final int IMAGE_HEIGHT = 208;
 
-    private final GameInstance<?> game;
+    private final GameInstance<?, ?> game;
 
     public GameScreen(GameInstance game) {
         super(GameNarrator.NO_TITLE);
@@ -72,8 +71,10 @@ public class GameScreen extends Screen {
         float scale = (float)frameWidth / 200;
         stack.translate((frameMinX + frameMaxX) / 2, (frameMinY + frameMaxY) / 2, 0.0);
         stack.scale(scale, -scale, 1.0f);
-        game.render(graphics, partialTicks);
-        if (game.prompt != null) game.prompt.render(graphics, partialTicks);
+        game.startFrame(graphics, partialTicks);
+        game.render();
+        if (game.prompt != null) game.prompt.render();
+        game.endFrame();
         stack.popPose();
         super.render(graphics, p_281550_, p_282878_, partialTicks);
         graphics.disableScissor();
@@ -134,6 +135,10 @@ public class GameScreen extends Screen {
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (game.prompt != null && game.prompt.handleKeyPress(pKeyCode)) return true;
         if (game.pressKey(pKeyCode)) return true;
+        if (pKeyCode == GLFW.GLFW_KEY_ESCAPE && !(game instanceof GameblockOS)) {
+            GameblockPackets.sendToServer(new CloseGamePacket());
+            return true;
+        }
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
@@ -157,7 +162,7 @@ public class GameScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        GameblockPackets.sendToServer(new GameClosePacket());
+        GameblockPackets.sendToServer(new LeaveGameblockPacket());
         game.soundManager.stopAll();
         if (currentMusic != null) minecraft.getMusicManager().stopPlaying(currentMusic);
     }

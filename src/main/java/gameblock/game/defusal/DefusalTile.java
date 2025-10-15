@@ -34,7 +34,7 @@ public class DefusalTile {
         };
     }
 
-    enum State {
+    public enum State {
         HIDDEN,
         REVEALED,
         FLAGGED,

@@ -3,6 +3,7 @@ package gameblock.event;
 import gameblock.GameblockConfig;
 import gameblock.GameblockMod;
 import gameblock.util.HostedData;
+import gameblock.util.ChatHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -30,14 +31,13 @@ public class UpdateCheckEvent {
 
             boolean firstCheck = ticks == 0;
 
-            MutableComponent modName = Component.literal("<Gamer's Glee>").withStyle(ChatFormatting.YELLOW);
             MutableComponent updateMsg = null;
 
             if (version.status() == VersionChecker.Status.OUTDATED) {
                 if (firstCheck || GameblockConfig.REPEAT_UPDATE_NOTIFICATION.get()) {
                     Random rand = new Random();
                     if (!firstCheck && rand.nextInt(5) == 0) {
-                        updateMsg = Component.translatable("chat.gameblock.update.out_of_date_special_" + rand.nextInt(8), modName)
+                        updateMsg = Component.translatable("chat.gameblock.update.out_of_date_special_" + rand.nextInt(8))
                                 .withStyle(ChatFormatting.DARK_RED);
                     } else {
                         Component linkComponent = Component.translatable("chat.gameblock.update.download").withStyle(style -> style
@@ -45,26 +45,26 @@ public class UpdateCheckEvent {
                                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, version.url() + "/version/" + version.target())));
                         Component versionsComponent = Component.translatable("chat.gameblock.update.out_of_date_" + (version.changes().size() == 1 ? "singular" : "multiple"), version.changes().size())
                                 .withStyle(ChatFormatting.DARK_RED);
-                        updateMsg = Component.translatable("chat.gameblock.update.out_of_date", modName, versionsComponent, linkComponent)
+                        updateMsg = Component.translatable("chat.gameblock.update.out_of_date", versionsComponent, linkComponent)
                                 .withStyle(ChatFormatting.DARK_RED);
                     }
                 }
 
             } else if (firstCheck) {
                 if (version.status() == VersionChecker.Status.FAILED) {
-                    updateMsg = Component.translatable("chat.gameblock.update.could_not_connect", modName).withStyle(ChatFormatting.DARK_PURPLE);
+                    updateMsg = Component.translatable("chat.gameblock.update.could_not_connect").withStyle(ChatFormatting.DARK_PURPLE);
                 } else {
-                    updateMsg = Component.translatable("chat.gameblock.update.up_to_date", modName).withStyle(ChatFormatting.GREEN);
+                    updateMsg = Component.translatable("chat.gameblock.update.up_to_date").withStyle(ChatFormatting.GREEN);
                 }
             }
-
-            if (updateMsg != null) event.getServer().getPlayerList().broadcastSystemMessage(updateMsg, false);
+            
+            if (updateMsg != null) ChatHelper.sendModMessageToAllPlayers(event.getServer(), updateMsg);
             if (firstCheck && GameblockConfig.PROMOTE_DISCORD_SERVER.get() && HostedData.DISCORD_URL != null) {
                 Component discordComponent = Component.translatable("chat.gameblock.discord.link").withStyle(style -> style
                         .applyFormats(ChatFormatting.BLUE, ChatFormatting.UNDERLINE)
                         .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, HostedData.DISCORD_URL)));
-                event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("chat.gameblock.discord.message", modName, discordComponent)
-                        .withStyle(ChatFormatting.BLUE), false);
+                ChatHelper.sendModMessageToAllPlayers(event.getServer(), Component.translatable("chat.gameblock.discord.message", discordComponent)
+                        .withStyle(ChatFormatting.BLUE));
             }
         }
     }
