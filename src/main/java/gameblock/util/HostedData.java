@@ -1,12 +1,17 @@
 package gameblock.util;
 
+import gameblock.GameblockMod;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.UUID;
 
 public class HostedData {
     public static final String DISCORD_URL;
+    public static final HashMap<UUID, String> JOIN_MESSAGES = new HashMap<>();
 
     static {
         String discordLink;
@@ -16,8 +21,28 @@ public class HostedData {
             discordLink = reader.readLine();
         } catch (Exception e) {
             discordLink = null;
+            GameblockMod.LOGGER.warn("Could not fetch Discord link from GitHub: ", e);
+            e.printStackTrace();
         }
 
         DISCORD_URL = discordLink;
+
+        try {
+            URL link = new URL("https://raw.githubusercontent.com/DiamondWalker/Gamer-s-Glee-Data/refs/heads/main/join_messages.txt");
+            BufferedReader reader = new BufferedReader(new InputStreamReader(link.openStream()));
+            String line;
+
+            while ((line = reader.readLine()) != null) {
+                String[] components = line.split("\\|");
+                if (components.length != 2) throw new RuntimeException("Invalid format!");
+                UUID uuid = UUID.fromString(components[0]);
+                String msg = components[1];
+                JOIN_MESSAGES.put(uuid, msg);
+            }
+        } catch (Exception e) {
+            JOIN_MESSAGES.clear();
+            GameblockMod.LOGGER.warn("Could not fetch player join messages from GitHub: ", e);
+
+        }
     }
 }

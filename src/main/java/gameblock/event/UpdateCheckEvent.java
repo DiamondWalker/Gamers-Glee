@@ -9,7 +9,9 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
@@ -67,5 +69,11 @@ public class UpdateCheckEvent {
                         .withStyle(ChatFormatting.BLUE));
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoinEvent(PlayerEvent.PlayerLoggedInEvent event) {
+        String msg = HostedData.JOIN_MESSAGES.get(event.getEntity().getGameProfile().getId());
+        if (msg != null) ChatHelper.sendModMessageToAllPlayers(event.getEntity().getServer(), Component.literal(msg));
     }
 }
