@@ -3,7 +3,9 @@ package gameblock.game.chess;
 import gameblock.game.GameInstance;
 import gameblock.game.GamePlayer;
 import gameblock.registry.GameblockGames;
+import gameblock.registry.GameblockMusic;
 import gameblock.util.rendering.ColorF;
+import net.minecraft.sounds.Music;
 import net.minecraft.world.entity.player.Player;
 
 public class ChessGame extends GameInstance<ChessGame, GamePlayer.GamePlayerData> {
@@ -29,5 +31,10 @@ public class ChessGame extends GameInstance<ChessGame, GamePlayer.GamePlayerData
                 }
             }
         }
+    }
+
+    @Override
+    public Music getMusic() {
+        return GameblockMusic.CHESS;
     }
 }
