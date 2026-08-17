@@ -5,6 +5,7 @@ import gameblock.game.defusal.DefusalGame;
 import gameblock.item.CartridgeItem;
 import gameblock.item.GameblockItem;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
@@ -43,6 +44,7 @@ public class GameblockItems {
     public static final RegistryObject<CreativeModeTab> CREATIVE_TAB = CREATIVE_MODE_TABS.register("games", () -> CreativeModeTab.builder()
             .withTabsBefore(CreativeModeTabs.COMBAT)
             .icon(() -> GAMEBLOCK.get().getDefaultInstance())
+            .title(Component.translatable("itemGroup.gameblock"))
             .displayItems((parameters, output) -> {
                 output.accept(GAMEBLOCK.get());
                 output.accept(CARTRIDGE_BLOCK_BREAK.get());

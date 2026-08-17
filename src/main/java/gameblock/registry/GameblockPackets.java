@@ -13,6 +13,7 @@ import gameblock.game.os.MultiplayerPromptPacket;
 import gameblock.game.os.SelectGamePacket;
 import gameblock.game.serpent.EatFoodPacket;
 import gameblock.game.serpent.SnakeUpdatePacket;
+import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.packet.GameClosePacket;
 import net.minecraft.network.FriendlyByteBuf;
@@ -40,6 +41,7 @@ public class GameblockPackets {
         INSTANCE.registerMessage(id++, GameStatePacket.class, GameStatePacket::writeToBuffer, GameStatePacket::new, GameStatePacket::handle);
         INSTANCE.registerMessage(id++, GameClosePacket.class, GameClosePacket::writeToBuffer, GameClosePacket::new, GameClosePacket::handle);
         INSTANCE.registerMessage(id++, GameRestartPacket.class, GameRestartPacket::writeToBuffer, GameRestartPacket::new, GameRestartPacket::handle);
+        INSTANCE.registerMessage(id++, CosmeticSyncPacket.class, CosmeticSyncPacket::writeToBuffer, CosmeticSyncPacket::new, CosmeticSyncPacket::handle);
 
         // OS
         INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
@@ -78,5 +80,9 @@ public class GameblockPackets {
 
     public static <MSG> void sendToPlayer(ServerPlayer player, MSG packet) {
         INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), packet);
+    }
+
+    public static <MSG> void sendToPlayerAndOthers(ServerPlayer player, MSG packet) {
+        INSTANCE.send(PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> player), packet);
     }
 }

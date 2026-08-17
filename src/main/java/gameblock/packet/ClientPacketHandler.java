@@ -5,6 +5,7 @@ import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
@@ -37,6 +38,14 @@ public class ClientPacketHandler {
                     GameblockMod.LOGGER.warn("Could not handle UpdateGamePacket as game was not found.");
                 }
             }
+        }
+    }
+
+    public static void handleCosmeticSyncPacket(CosmeticSyncPacket packet) {
+        ClientLevel level = Minecraft.getInstance().level;
+        if (level.getEntity(packet.player) instanceof Player player) {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME).orElse(null);
+            if (cap != null) cap.setCosmetic(packet.cosmetic);
         }
     }
 }

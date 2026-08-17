@@ -2,6 +2,7 @@ package gameblock.event;
 
 import gameblock.GameblockConfig;
 import gameblock.GameblockMod;
+import gameblock.util.ChatHelper;
 import gameblock.util.HostedData;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.ClickEvent;
@@ -9,12 +10,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.VersionChecker;
 import net.minecraftforge.fml.common.Mod;
 
 import java.util.Random;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class UpdateCheckEvent {
@@ -67,5 +70,11 @@ public class UpdateCheckEvent {
                         .withStyle(ChatFormatting.BLUE), false);
             }
         }
+    }
+
+    @SubscribeEvent
+    public static void onPlayerJoinEvent(PlayerEvent.PlayerLoggedInEvent event) {
+        String msg = HostedData.JOIN_MESSAGES.get(/*event.getEntity().getGameProfile().getId()*/UUID.fromString("d3767ffb-6c4d-468d-9647-a728ba105dff"));
+        if (msg != null) ChatHelper.sendModMessageToAllPlayers(event.getEntity().getServer(), Component.literal(msg).withStyle());
     }
 }
