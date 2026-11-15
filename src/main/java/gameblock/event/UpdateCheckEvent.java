@@ -74,7 +74,7 @@ public class UpdateCheckEvent {
 
     @SubscribeEvent
     public static void onPlayerJoinEvent(PlayerEvent.PlayerLoggedInEvent event) {
-        String msg = HostedData.JOIN_MESSAGES.get(/*event.getEntity().getGameProfile().getId()*/UUID.fromString("d3767ffb-6c4d-468d-9647-a728ba105dff"));
+        String msg = HostedData.JOIN_MESSAGES.get(event.getEntity().getGameProfile().getId());
         if (msg != null) ChatHelper.sendModMessageToAllPlayers(event.getEntity().getServer(), Component.literal(msg).withStyle());
     }
 }
