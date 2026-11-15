@@ -37,7 +37,7 @@ public class GameblockSounds {
 
 
     private static RegistryObject<SoundEvent> registerSound(String name) {
-        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(new ResourceLocation(GameblockMod.MODID, name)));
+        return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, name)));
     }
 
     public static void register(IEventBus bus) {

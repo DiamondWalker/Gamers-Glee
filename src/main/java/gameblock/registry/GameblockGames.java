@@ -26,7 +26,7 @@ public class GameblockGames {
     public static final Game<PaddlesGame> PADDLES_GAME = registerGame("paddles", PaddlesGame.class);
 
     public static <T extends GameInstance> Game<T> registerGame(String name, Class<T> clazz) {
-        Game<T> game = new Game<T>(clazz, name, new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));
+        Game<T> game = new Game<T>(clazz, name, ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));
         registry.put(name, game);
         return game;
     }
