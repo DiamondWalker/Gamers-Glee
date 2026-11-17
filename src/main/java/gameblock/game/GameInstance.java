@@ -16,7 +16,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.UUID;
 
-public abstract class GameInstance {
+public abstract class GameInstance <T extends NetworkManager<?>> {
     public final Game<?> gameType;
     private final boolean clientSide;
 
@@ -32,12 +32,14 @@ public abstract class GameInstance {
     public final GameControls controls = new GameControls();
     public final RenderManager renderer = new RenderManager();
     public final GameblockSoundManager soundManager;
+    public final T networkManager;
 
     public GameInstance(Player player, Game<?> gameType) {
         clientSide = player.level().isClientSide();
         soundManager = clientSide ? new GameblockSoundManager() : null;
         this.players = new PlayerManager(this, player);
         this.gameType = gameType;
+        this.networkManager = getNetworkManager();
     }
 
     public boolean isClientSide() {
@@ -55,6 +57,8 @@ public abstract class GameInstance {
     public String getGameCode() {
         return null;
     }
+
+    protected abstract T getNetworkManager();
 
     protected final void setGameState(GameState state) {
         gameState = state;

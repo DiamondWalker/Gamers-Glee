@@ -23,7 +23,7 @@ public class MultiplayerGamePrompt extends GamePrompt<GameblockOS> {
     public boolean click(Vec2 clickCoordinates) {
         if (Math.abs(clickCoordinates.x) < 40 && Math.abs(clickCoordinates.y - -18) < 10) {
             if (get().length() == 8) {
-                GameblockPackets.sendToServer(new JoinGamePacket(get()));
+                game.networkManager.sendJoinGame(get());
             }
             return true;
         }

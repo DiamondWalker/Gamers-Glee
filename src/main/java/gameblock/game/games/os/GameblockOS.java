@@ -21,7 +21,7 @@ import net.minecraft.world.phys.Vec2;
 
 import java.util.*;
 
-public class GameblockOS extends GameInstance {
+public class GameblockOS extends GameInstance<OSNetworkManager> {
     private static final int LOGO_DURATION = 200;
     private static final int LOGO_FADE_OUT_TIME = 20;
     private static final int MENU_FADE_IN_TIME = 80;
@@ -92,11 +92,16 @@ public class GameblockOS extends GameInstance {
     }
 
     @Override
+    protected OSNetworkManager getNetworkManager() {
+        return new OSNetworkManager(this);
+    }
+
+    @Override
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
         if (buttonPressed == Direction1D.LEFT && isMenuInteractable() && gameIcons != null) {
             for (OSIcon icon : gameIcons) {
                 if (icon.isOverIcon(clickCoordinates)) {
-                    GameblockPackets.sendToServer(new SelectGamePacket(icon.index));
+                    networkManager.sendSelectGame(icon.index);
                     return;
                 }
             }

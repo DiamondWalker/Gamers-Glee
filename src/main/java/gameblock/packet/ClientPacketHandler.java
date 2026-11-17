@@ -3,14 +3,9 @@ package gameblock.packet;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.game.GameInstance;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.network.NetworkDirection;
-import net.minecraftforge.network.NetworkEvent;
-
-import java.util.function.Supplier;
 
 public class ClientPacketHandler {
     public static void handleGameChangePacket(GameChangePacket packet) {
@@ -27,13 +22,14 @@ public class ClientPacketHandler {
         }
     }
 
-    public static <T extends GameInstance> void handleUpdateGamePacket(UpdateGamePacket<T> packet) {
+    public static void handleUpdateGamePacket(UpdateGamePacket packet) {
         Player player = Minecraft.getInstance().player;
         if (player != null) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null && cap.isPlaying()) {
                 try {
-                    packet.handleGameUpdate((T) cap.getGame());
+                    cap.getGame().networkManager.receive(packet, null);
+                    //packet.handleGameUpdate((T) cap.getGame());
                 } catch (ClassCastException e) {
                     GameblockMod.LOGGER.warn("Could not handle UpdateGamePacket as game was not found.");
                 }
