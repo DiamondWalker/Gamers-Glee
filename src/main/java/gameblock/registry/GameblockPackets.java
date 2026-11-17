@@ -2,28 +2,25 @@ package gameblock.registry;
 
 import gameblock.game.GameRestartPacket;
 import gameblock.game.GameStatePacket;
-import gameblock.game.blockbreak.*;
-import gameblock.game.defusal.*;
-import gameblock.game.flyingchicken.FlyingChickenHighScorePacket;
-import gameblock.game.flyingchicken.PipeSpawnPacket;
-import gameblock.game.flyingchicken.ScorePacket;
-import gameblock.game.flyingchicken.WingFlapPacket;
-import gameblock.game.os.JoinGamePacket;
-import gameblock.game.os.MultiplayerPromptPacket;
-import gameblock.game.os.SelectGamePacket;
-import gameblock.game.serpent.EatFoodPacket;
-import gameblock.game.serpent.SnakeUpdatePacket;
+import gameblock.game.games.blockbreak.*;
+import gameblock.game.games.defusal.*;
+import gameblock.game.games.flyingchicken.FlyingChickenHighScorePacket;
+import gameblock.game.games.flyingchicken.PipeSpawnPacket;
+import gameblock.game.games.flyingchicken.ScorePacket;
+import gameblock.game.games.flyingchicken.WingFlapPacket;
+import gameblock.game.games.os.JoinGamePacket;
+import gameblock.game.games.os.MultiplayerPromptPacket;
+import gameblock.game.games.os.SelectGamePacket;
+import gameblock.game.games.serpent.EatFoodPacket;
+import gameblock.game.games.serpent.SnakeUpdatePacket;
 import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
 import gameblock.packet.GameClosePacket;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
-
-import java.lang.reflect.Method;
 
 public class GameblockPackets {
     private static int id = 0;

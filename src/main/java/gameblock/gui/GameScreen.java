@@ -4,8 +4,6 @@ import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import gameblock.game.GameInstance;
-import gameblock.game.os.GameblockOS;
-import gameblock.packet.GameChangePacket;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
@@ -16,9 +14,7 @@ import net.minecraft.client.GameNarrator;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.sounds.MusicManager;
-import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.FastColor;
@@ -49,10 +45,12 @@ public class GameScreen extends Screen {
         if (player != null) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
-                if (cap.getGame() != null) return;
+                if (cap.getGame() != null) {
+                    game.soundManager.update();
+                    return;
+                }
             }
         }
-        game.soundManager.update();
         onClose();
     }
 
@@ -72,8 +70,12 @@ public class GameScreen extends Screen {
         float scale = (float)frameWidth / 200;
         stack.translate((frameMinX + frameMaxX) / 2, (frameMinY + frameMaxY) / 2, 0.0);
         stack.scale(scale, -scale, 1.0f);
-        game.render(graphics, partialTicks);
-        if (game.prompt != null) game.prompt.render(graphics, partialTicks);
+
+        game.renderer.prepareRender(graphics);
+        game.render(partialTicks);
+        if (game.prompt != null) game.prompt.render(partialTicks);
+        game.renderer.endRender();
+
         stack.popPose();
         super.render(graphics, p_281550_, p_282878_, partialTicks);
         graphics.disableScissor();
@@ -98,7 +100,7 @@ public class GameScreen extends Screen {
 
     @Override
     public void mouseMoved(double pMouseX, double pMouseY) {
-        game.setMouseCoordinates(convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY));
+        game.controls.setMouseCoordinates(convertMouseCoordinatesToGameCoordinates(pMouseX, pMouseY));
     }
 
     @Override
@@ -133,7 +135,7 @@ public class GameScreen extends Screen {
     @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (game.prompt != null && game.prompt.handleKeyPress(pKeyCode)) return true;
-        if (game.pressKey(pKeyCode)) return true;
+        if (!game.isGameOver() && game.controls.pressKey(pKeyCode)) return true;
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
     }
 
@@ -145,7 +147,7 @@ public class GameScreen extends Screen {
 
     @Override
     public boolean keyReleased(int pKeyCode, int pScanCode, int pModifiers) {
-        if (game.releaseKey(pKeyCode)) return true;
+        if (!game.isGameOver() && game.controls.releaseKey(pKeyCode)) return true;
         return super.keyReleased(pKeyCode, pScanCode, pModifiers);
     }
 

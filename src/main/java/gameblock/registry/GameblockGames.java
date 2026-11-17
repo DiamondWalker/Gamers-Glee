@@ -2,12 +2,12 @@ package gameblock.registry;
 
 import gameblock.GameblockMod;
 import gameblock.game.Game;
-import gameblock.game.blockbreak.BlockBreakGame;
-import gameblock.game.defusal.DefusalGame;
-import gameblock.game.flyingchicken.FlyingChickenGame;
-import gameblock.game.os.GameblockOS;
-import gameblock.game.paddles.PaddlesGame;
-import gameblock.game.serpent.SerpentGame;
+import gameblock.game.games.blockbreak.BlockBreakGame;
+import gameblock.game.games.defusal.DefusalGame;
+import gameblock.game.games.flyingchicken.FlyingChickenGame;
+import gameblock.game.games.os.GameblockOS;
+import gameblock.game.games.paddles.PaddlesGame;
+import gameblock.game.games.serpent.SerpentGame;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;

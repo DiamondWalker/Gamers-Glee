@@ -2,8 +2,6 @@ package gameblock.item;
 
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
-import gameblock.game.GameInstance;
-import gameblock.game.os.GameblockOS;
 import gameblock.registry.GameblockGames;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;

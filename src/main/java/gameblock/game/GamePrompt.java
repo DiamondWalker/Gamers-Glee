@@ -64,5 +64,5 @@ public abstract class GamePrompt<T extends GameInstance> {
         return builder.toString();
     }
 
-    public abstract void render(GuiGraphics graphics, float partialTicks);
+    public abstract void render(float partialTicks);
 }

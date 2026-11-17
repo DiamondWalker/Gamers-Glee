@@ -14,6 +14,7 @@ public class GameblockSoundManager {
         SimpleSoundInstance sound = SimpleSoundInstance.forUI(event, pitch, volume);
         Minecraft.getInstance().getSoundManager().play(sound);
         sounds.add(sound);
+        System.out.println(sounds.size());
     }
 
     public void update() {
