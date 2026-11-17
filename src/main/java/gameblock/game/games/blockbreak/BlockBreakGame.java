@@ -322,7 +322,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakNetworkManager> {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BlockBreakHighScorePacket(highScore)));
+        networkManager.sendHighScore(highScore);
     }
 
     @Override

@@ -2,6 +2,7 @@ package gameblock.game;
 
 import gameblock.packet.UpdateGamePacket;
 import gameblock.registry.GameblockPackets;
+import gameblock.util.GameState;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.ArrayList;
@@ -13,8 +14,27 @@ public abstract class NetworkManager <T extends GameInstance<?>> {
     private final ArrayList<BiConsumer<UpdateGamePacket, UUID>> messages = new ArrayList<>();
     protected final T game;
 
+    private final int gameRestart = registerMessage(this::receiveGameRestart);
+    private final int gameState = registerMessage(this::receiveGameState);
+
     public NetworkManager(T game) {
         this.game = game;
+    }
+
+    public final void sendGameRestart() {
+        sendToServer(gameRestart, (packet) -> {});
+    }
+
+    public final void receiveGameRestart(UpdateGamePacket packet, UUID sender) {
+        game.restart();
+    }
+
+    public final void sendGameState(GameState state) {
+        sendToAll(gameState, (packet) -> packet.add(state.ordinal()));
+    }
+
+    public final void receiveGameState(UpdateGamePacket packet, UUID sender) {
+        game.setGameState(GameState.values()[packet.get(Integer.class)]);
     }
 
     protected final int registerMessage(BiConsumer<UpdateGamePacket, UUID> receiver) {

@@ -35,22 +35,8 @@ public class GameblockPackets {
 
     public static void registerPackets() {
         INSTANCE.registerMessage(id++, GameChangePacket.class, GameChangePacket::writeToBuffer, GameChangePacket::new, GameChangePacket::handle);
-        INSTANCE.registerMessage(id++, GameStatePacket.class, GameStatePacket::writeToBuffer, GameStatePacket::new, GameStatePacket::handle);
         INSTANCE.registerMessage(id++, GameClosePacket.class, GameClosePacket::writeToBuffer, GameClosePacket::new, GameClosePacket::handle);
-        INSTANCE.registerMessage(id++, GameRestartPacket.class, GameRestartPacket::writeToBuffer, GameRestartPacket::new, GameRestartPacket::handle);
         INSTANCE.registerMessage(id++, CosmeticSyncPacket.class, CosmeticSyncPacket::writeToBuffer, CosmeticSyncPacket::new, CosmeticSyncPacket::handle);
-
-        // OS
-        INSTANCE.registerMessage(id++, SelectGamePacket.class, SelectGamePacket::writeToBuffer, SelectGamePacket::new, SelectGamePacket::handle);
-        INSTANCE.registerMessage(id++, MultiplayerPromptPacket.class, MultiplayerPromptPacket::writeToBuffer, MultiplayerPromptPacket::new, MultiplayerPromptPacket::handle);
-        INSTANCE.registerMessage(id++, JoinGamePacket.class, JoinGamePacket::writeToBuffer, JoinGamePacket::new, JoinGamePacket::handle);
-
-        // block break
-        INSTANCE.registerMessage(id++, BallUpdatePacket.class, BallUpdatePacket::writeToBuffer, BallUpdatePacket::new, BallUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, BallLaunchPacket.class, BallLaunchPacket::writeToBuffer, BallLaunchPacket::new, BallLaunchPacket::handle);
-        INSTANCE.registerMessage(id++, BlockUpdatePacket.class, BlockUpdatePacket::writeToBuffer, BlockUpdatePacket::new, BlockUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, ScoreUpdatePacket.class, ScoreUpdatePacket::writeToBuffer, ScoreUpdatePacket::new, ScoreUpdatePacket::handle);
-        INSTANCE.registerMessage(id++, BlockBreakHighScorePacket.class, BlockBreakHighScorePacket::writeToBuffer, BlockBreakHighScorePacket::new, BlockBreakHighScorePacket::handle);
 
         // serpent
         INSTANCE.registerMessage(id++, SnakeUpdatePacket.class, SnakeUpdatePacket::writeToBuffer, SnakeUpdatePacket::new, SnakeUpdatePacket::handle);

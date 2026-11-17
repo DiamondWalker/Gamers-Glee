@@ -63,7 +63,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     protected final void setGameState(GameState state) {
         gameState = state;
         if (!isClientSide()) {
-            players.forEachPlayerEntity((player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state)));
+            networkManager.sendGameState(state);
         }
         if (state == GameState.WIN) {
             onGameWin();
@@ -150,7 +150,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
                 }
             });
         } else {
-            GameblockPackets.sendToServer(new GameRestartPacket());
+            networkManager.sendGameRestart();
         }
     }
 

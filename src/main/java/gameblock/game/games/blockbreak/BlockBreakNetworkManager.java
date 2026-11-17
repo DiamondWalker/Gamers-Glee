@@ -72,4 +72,12 @@ public class BlockBreakNetworkManager extends NetworkManager<BlockBreakGame> {
         game.score = packet.get(Integer.class);
         game.timeSinceLaunch = packet.get(Integer.class) * 20;
     }
+
+    public void sendHighScore(int highScore) {
+        sendToAll(highScore, (packet) -> packet.add(highScore));
+    }
+
+    public void receiveHighScore(UpdateGamePacket packet, UUID sender) {
+        game.highScore = packet.get(Integer.class);
+    }
 }
