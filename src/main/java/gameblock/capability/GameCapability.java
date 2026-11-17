@@ -15,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
 
 @AutoRegisterCapability
 public class GameCapability {

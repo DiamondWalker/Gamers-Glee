@@ -5,7 +5,6 @@ import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.*;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -91,7 +90,7 @@ public class DefusalGame extends GameInstance {
             timeLeft--;
             int secondsAfter = timeLeft / 20;
             if (secondsBefore != secondsAfter) {
-                players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new TimePacket(timeLeft)));
+                players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new TimePacket(timeLeft)));
             }
             if (timeLeft <= 0) setGameState(GameState.LOSS);
         }
@@ -122,7 +121,7 @@ public class DefusalGame extends GameInstance {
 
         ArrayList<TileRevealPacket.TileInfo> tileInfos = new ArrayList<>();
         recursiveReveal(tile.getX(), tile.getY(), tileInfos);
-        players.forEachPlayer((Player player) -> {
+        players.forEachPlayerEntity((Player player) -> {
             GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
             GameblockPackets.sendToPlayer((ServerPlayer) player, new TileRevealPacket(tileInfos.toArray(new TileRevealPacket.TileInfo[]{})));
         });
@@ -151,7 +150,7 @@ public class DefusalGame extends GameInstance {
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount++;
             defusalTile.cycleState();
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount--;
-            players.forEachPlayer((Player player) -> {
+            players.forEachPlayerEntity((Player player) -> {
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new BombCountPacket(bombCount));
                 GameblockPackets.sendToPlayer((ServerPlayer) player, new TileStatePacket(tile, defusalTile.getState()));
             });
@@ -187,7 +186,7 @@ public class DefusalGame extends GameInstance {
         tiles.forEach((Vec2i coords, DefusalTile otherDefusalTile) -> {
             if (otherDefusalTile.isBomb()) bombs.add(coords);
         });
-        players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BombRevealPacket(bombs.toArray(new Vec2i[]{}))));
+        players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BombRevealPacket(bombs.toArray(new Vec2i[]{}))));
         super.onGameLoss();
         playSound(SoundEvents.GENERIC_EXPLODE);
     }

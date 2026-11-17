@@ -6,6 +6,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.HashMap;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
@@ -28,7 +29,11 @@ public class PlayerManager {
         return players.get(id);
     }
 
-    public void forEachPlayer(Consumer<Player> action) {
+    public Set<UUID> getPlayers() {
+        return players.keySet();
+    }
+
+    public void forEachPlayerEntity(Consumer<Player> action) {
         for (Player player : players.values()) {
             if (player != null) action.accept(player);
         }

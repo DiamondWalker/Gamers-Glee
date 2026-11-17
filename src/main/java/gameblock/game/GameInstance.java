@@ -59,7 +59,7 @@ public abstract class GameInstance {
     protected final void setGameState(GameState state) {
         gameState = state;
         if (!isClientSide()) {
-            players.forEachPlayer((player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state)));
+            players.forEachPlayerEntity((player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new GameStatePacket(state)));
         }
         if (state == GameState.WIN) {
             onGameWin();
@@ -139,7 +139,7 @@ public abstract class GameInstance {
 
     public final void restart() {
         if (!isClientSide()) {
-            players.forEachPlayer((player) -> {
+            players.forEachPlayerEntity((player) -> {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null) {
                     cap.setGame(gameType, player);

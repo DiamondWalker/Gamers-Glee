@@ -8,7 +8,6 @@ import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.*;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -107,7 +106,7 @@ public class BlockBreakGame extends GameInstance {
             score = (int) Math.max(0, blocksBroken - timeSinceLaunch / 100);
             if (getGameState() == GameState.WIN) score += 100;
             if (score != oldScore || timeSinceLaunch % 20 == 0) {
-                players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20)));
+                players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20)));
             }
         }
     }
@@ -225,7 +224,7 @@ public class BlockBreakGame extends GameInstance {
                                     blocksBroken++;
                                     if (blocksBroken == blocks.size()) setGameState(GameState.WIN);
                                     int finalI = i;
-                                    players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BlockUpdatePacket(finalI)));
+                                    players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BlockUpdatePacket(finalI)));
                                 } else {
                                     blocks.get(i).breaking = BRICK_BREAK_FLASH_TIME;
                                     spawnBrickBreakParticles(blocks.get(i));
@@ -240,7 +239,7 @@ public class BlockBreakGame extends GameInstance {
             if (ballLaunched && !isClientSide()) { // server dictates the ball position
                 if (ballMoveUpdate || getGameTime() - lastPacketTime > MAX_PACKET_INTERVAL) {
                     boolean finalSendBounceNoise = sendBounceNoise;
-                    players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY, finalSendBounceNoise)));
+                    players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BallUpdatePacket(ballX, ballY, ballMoveX, ballMoveY, finalSendBounceNoise)));
                     lastPacketTime = getGameTime();
                 }
                 timeSinceLaunch++;
@@ -284,7 +283,7 @@ public class BlockBreakGame extends GameInstance {
     protected void onGameWin() {
         if (!isClientSide()) {
             score += 50;
-            players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20)));
+            players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new ScoreUpdatePacket(score, timeSinceLaunch / 20)));
         }
         endTime = getGameTime();
     }
@@ -316,7 +315,7 @@ public class BlockBreakGame extends GameInstance {
     @Override
     protected void readSaveData(CompoundTag tag) {
         highScore = tag.getInt("highScore");
-        players.forEachPlayer((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BlockBreakHighScorePacket(highScore)));
+        players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new BlockBreakHighScorePacket(highScore)));
     }
 
     @Override
