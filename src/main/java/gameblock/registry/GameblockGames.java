@@ -1,7 +1,7 @@
 package gameblock.registry;
 
 import gameblock.GameblockMod;
-import gameblock.game.GameInstance;
+import gameblock.game.Game;
 import gameblock.game.blockbreak.BlockBreakGame;
 import gameblock.game.defusal.DefusalGame;
 import gameblock.game.flyingchicken.FlyingChickenGame;
@@ -9,46 +9,21 @@ import gameblock.game.os.GameblockOS;
 import gameblock.game.paddles.PaddlesGame;
 import gameblock.game.serpent.SerpentGame;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.player.Player;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
 
 public class GameblockGames {
-    private static final HashMap<String, Game> registry = new HashMap<>();
+    public static final DeferredRegister<Game<?>> GAMES = DeferredRegister.create(ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "games"), GameblockMod.MODID);
 
-    public static final Game<GameblockOS> GAMEBLOCK_OS = registerGame("gameblock_os", GameblockOS.class);
-    public static final Game<BlockBreakGame> BLOCK_BREAK_GAME = registerGame("block_break", BlockBreakGame.class);
-    public static final Game<SerpentGame> SERPENT_GAME = registerGame("serpent", SerpentGame.class);
-    public static final Game<FlyingChickenGame> FLYING_CHICKEN_GAME = registerGame("flying_chicken", FlyingChickenGame.class);
-    public static final Game<DefusalGame> DEFUSAL_GAME = registerGame("defusal", DefusalGame.class);
-    public static final Game<PaddlesGame> PADDLES_GAME = registerGame("paddles", PaddlesGame.class);
+    public static final RegistryObject<Game<GameblockOS>> GAMEBLOCK_OS = GAMES.register("gameblock_os", () -> new Game<>(GameblockOS::new));
+    public static final RegistryObject<Game<BlockBreakGame>> BLOCK_BREAK = GAMES.register("block_break", () -> new Game<>(BlockBreakGame::new));
+    public static final RegistryObject<Game<SerpentGame>> SERPENT = GAMES.register("serpent", () -> new Game<>(SerpentGame::new));
+    public static final RegistryObject<Game<FlyingChickenGame>> FLYING_CHICKEN = GAMES.register("flying_chicken", () -> new Game<>(FlyingChickenGame::new));
+    public static final RegistryObject<Game<DefusalGame>> DEFUSAL = GAMES.register("defusal", () -> new Game<>(DefusalGame::new));
+    public static final RegistryObject<Game<PaddlesGame>> PADDLES = GAMES.register("paddles", () -> new Game<>(PaddlesGame::new));
 
-    public static <T extends GameInstance> Game<T> registerGame(String name, Class<T> clazz) {
-        Game<T> game = new Game<T>(clazz, name, ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/logo/" + name + ".png"));
-        registry.put(name, game);
-        return game;
-    }
-
-    public static <T extends GameInstance> Game<T> getGame(String key) {
-        return registry.get(key);
-    }
-
-    public static class Game<T extends GameInstance> {
-        public final Class<T> gameClass;
-        public final String gameID;
-        public final ResourceLocation logo;
-
-        private Game(Class<T> clazz, String id, ResourceLocation tex) {
-            this.gameClass = clazz;
-            this.gameID = id;
-            this.logo = tex;
-        }
-
-        public T createInstance(Player player) throws NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-            Constructor<T> constructor = gameClass.getConstructor(Player.class);
-            return constructor.newInstance(player);
-        }
+    public static void register(IEventBus bus) {
+        GAMES.register(bus);
     }
 }

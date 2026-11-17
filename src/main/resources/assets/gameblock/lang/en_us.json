@@ -16,11 +16,11 @@
   "chat.gameblock.update.out_of_date_special_7": "%s :(",
   "chat.gameblock.update.up_to_date": "%s Gamer's Glee is up to date. Enjoy!",
 
-  "icon.gameblock.block_break": "Block Break",
-  "icon.gameblock.defusal": "Defusal",
-  "icon.gameblock.flying_chicken": "Flying Chicken",
-  "icon.gameblock.multiplayer": "Join Game",
-  "icon.gameblock.serpent": "Serpent",
+  "game.gameblock.block_break": "Block Break",
+  "game.gameblock.defusal": "Defusal",
+  "game.gameblock.flying_chicken": "Flying Chicken",
+  "game.gameblock.multiplayer": "Join Game",
+  "game.gameblock.serpent": "Serpent",
 
   "item.gameblock.block_break": "Block Break Cartridge",
   "item.gameblock.defusal": "Defusal Cartridge",

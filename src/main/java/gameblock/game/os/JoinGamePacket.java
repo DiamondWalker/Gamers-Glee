@@ -35,7 +35,7 @@ public class JoinGamePacket extends UpdateGamePacket<GameblockOS> {
             for (ServerPlayer player : serverPlayer.getServer().getPlayerList().getPlayers()) {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null && cap.isPlaying()) {
-                    GameInstance<?> joinGame = cap.getGame();
+                    GameInstance joinGame = cap.getGame();
                     if (joinGame.getGameCode().matches(gameCode)) {
                         if (joinGame.addPlayer(serverPlayer)) return;
                     }

@@ -18,8 +18,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DefusalGame extends GameInstance<DefusalGame> {
-    public static final ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/defusal.png");
+public class DefusalGame extends GameInstance {
+    public static final ResourceLocation SPRITE = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/game/defusal.png");
 
     public static final ColorF[] NUMBER_COLORS = new ColorF[] {
             new ColorF(0.0f, 0.0f, 1.0f), // 1
@@ -41,7 +41,7 @@ public class DefusalGame extends GameInstance<DefusalGame> {
     private ArrayList<SweatDrop> sweatDrops;
 
     public DefusalGame(Player player) {
-        super(player, GameblockGames.DEFUSAL_GAME);
+        super(player, GameblockGames.DEFUSAL.get());
 
         tiles = new TileGrid2D<>(-12, 12, -8, 8);
         tiles.setAll((DefusalTile t) -> new DefusalTile());

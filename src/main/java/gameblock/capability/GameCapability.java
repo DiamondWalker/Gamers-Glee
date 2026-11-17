@@ -1,6 +1,7 @@
 package gameblock.capability;
 
 import gameblock.cosmetics.particles.BaseParticleCosmetic;
+import gameblock.game.Game;
 import gameblock.game.GameInstance;
 import gameblock.gui.GUIHandler;
 import gameblock.packet.CosmeticSyncPacket;
@@ -29,7 +30,7 @@ public class GameCapability {
         return game != null;
     }
 
-    public void setGame(GameblockGames.Game<?> gameType, Player player) {
+    public void setGame(Game<?> gameType, Player player) {
         /*
             Sometimes game constructors will send new packets. If this happens before the game change packet is sent it'll cause issues
             Therefore we must send the game change packet before the game instance is created.
@@ -39,11 +40,7 @@ public class GameCapability {
                 if (game != null) game.save();
             }
             if (gameType != null) {
-                try {
-                    game = gameType.createInstance(player);
-                } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException(e);
-                }
+                game = gameType.createInstance(player);
             } else {
                 this.game = null;
             }

@@ -25,8 +25,8 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BlockBreakGame extends GameInstance<BlockBreakGame> {
-    public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/block_break.png");
+public class BlockBreakGame extends GameInstance {
+    public static ResourceLocation SPRITE = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/game/block_break.png");
 
     private static final int UPDATES_PER_TICK = 30;
 
@@ -72,7 +72,7 @@ public class BlockBreakGame extends GameInstance<BlockBreakGame> {
     protected long clientToPacketBallUpdateTime = -1;
 
     public BlockBreakGame(Player player) {
-        super(player, GameblockGames.BLOCK_BREAK_GAME);
+        super(player, GameblockGames.BLOCK_BREAK.get());
         int col = 0;
         for (int y = 6; y >= 3; y--) {
             if (y < 6) {

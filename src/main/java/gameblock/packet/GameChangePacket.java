@@ -1,16 +1,22 @@
 package gameblock.packet;
 
+import gameblock.game.Game;
+import gameblock.registry.GameblockCustomRegistries;
 import gameblock.registry.GameblockGames;
+import io.netty.buffer.ByteBufUtil;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ForgeRegistry;
 
 import java.util.function.Supplier;
 
 public class GameChangePacket {
-    public GameblockGames.Game<?> game;
+    public Game<?> game;
 
-    public GameChangePacket(GameblockGames.Game<?> game) {
+    public GameChangePacket(Game<?> game) {
         this.game = game;
     }
 
@@ -19,11 +25,13 @@ public class GameChangePacket {
     }
 
     public void writeToBuffer(FriendlyByteBuf buffer) {
-        buffer.writeUtf(game != null ? game.gameID : "");
+        ResourceLocation rl = GameblockCustomRegistries.GAMES.get().getKey(game);
+        buffer.writeUtf(rl != null ? rl.toString() : "");
     }
 
     public void readFromBuffer(FriendlyByteBuf buffer) {
-        game = GameblockGames.getGame(buffer.readUtf());
+        String id = buffer.readUtf();
+        game = !id.isEmpty() ? GameblockCustomRegistries.GAMES.get().getValue(ResourceLocation.parse(id)) : null;
     }
 
     public void handle(Supplier<NetworkEvent.Context> context) {

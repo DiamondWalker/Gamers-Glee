@@ -18,8 +18,8 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SerpentGame extends GameInstance<SerpentGame> {
-    public static ResourceLocation SPRITE = new ResourceLocation(GameblockMod.MODID, "textures/gui/game/serpent.png");
+public class SerpentGame extends GameInstance {
+    public static ResourceLocation SPRITE = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/game/serpent.png");
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
     protected final TileGrid2D<Integer> tiles;
@@ -41,7 +41,7 @@ public class SerpentGame extends GameInstance<SerpentGame> {
     final GameInstance.KeyBinding down = registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
 
     public SerpentGame(Player player) {
-        super(player, GameblockGames.SERPENT_GAME);
+        super(player, GameblockGames.SERPENT.get());
         tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         if (!isClientSide()) randomFoodPosition(); // FIXME: doesn't work?

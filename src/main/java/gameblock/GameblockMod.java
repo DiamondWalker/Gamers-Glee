@@ -6,10 +6,7 @@ import gameblock.game.flyingchicken.FlyingChickenGame;
 import gameblock.game.serpent.SerpentGame;
 import gameblock.item.CartridgeItem;
 import gameblock.item.GameblockItem;
-import gameblock.registry.GameblockItems;
-import gameblock.registry.GameblockLootModifiers;
-import gameblock.registry.GameblockPackets;
-import gameblock.registry.GameblockSounds;
+import gameblock.registry.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
@@ -38,6 +35,8 @@ public class GameblockMod
     public GameblockMod(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
 
+        GameblockCustomRegistries.register(modEventBus);
+        GameblockGames.register(modEventBus);
         GameblockItems.register(modEventBus);
         GameblockSounds.register(modEventBus);
 

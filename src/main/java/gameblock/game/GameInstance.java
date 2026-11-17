@@ -35,8 +35,8 @@ import java.util.HashMap;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-public abstract class GameInstance<T extends GameInstance<?>> {
-    public final GameblockGames.Game<T> gameType;
+public abstract class GameInstance {
+    public final Game<?> gameType;
     private final HashMap<Integer, KeyBinding> keyBindings = new HashMap<>();
     private Vec2 mouseCoordinates = new Vec2(Float.NaN, Float.NaN);
 
@@ -53,7 +53,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
     public final GameblockSoundManager soundManager;
 
-    public GameInstance(Player player, GameblockGames.Game<T> gameType) {
+    public GameInstance(Player player, Game<?> gameType) {
         clientSide = player.level().isClientSide();
         soundManager = clientSide ? new GameblockSoundManager() : null;
         this.players = new Player[clientSide ? 1 : getMaxPlayers()];
@@ -139,7 +139,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
         if (gameblockItem != null) {
             String playerName = getHostPlayer().getGameProfile().getName();
-            String gameName = gameType.gameID;
+            String gameName = gameType.getId().toString();
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
             if (!tag.contains("gameSaveData")) tag.put("gameSaveData", new CompoundTag());
@@ -168,7 +168,7 @@ public abstract class GameInstance<T extends GameInstance<?>> {
 
         if (gameblockItem != null) {
             String playerName = getHostPlayer().getGameProfile().getName();
-            String gameName = gameType.gameID;
+            String gameName = gameType.getId().toString();
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
             if (tag.contains("gameSaveData")) {

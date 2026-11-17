@@ -3,6 +3,7 @@ package gameblock.game.os;
 import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
+import gameblock.game.Game;
 import gameblock.game.GameInstance;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockGames;
@@ -11,6 +12,7 @@ import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
+import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -19,12 +21,13 @@ import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 
 import java.util.*;
 
-public class GameblockOS extends GameInstance<GameblockOS> {
+public class GameblockOS extends GameInstance {
     private static final int LOGO_DURATION = 200;
     private static final int LOGO_FADE_OUT_TIME = 20;
     private static final int MENU_FADE_IN_TIME = 80;
@@ -37,7 +40,7 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     private GameblockBackgroundRenderer bgRenderer;
 
     public GameblockOS(Player player) {
-        super(player, GameblockGames.GAMEBLOCK_OS);
+        super(player, GameblockGames.GAMEBLOCK_OS.get());
         if (isClientSide()) {
             logoRenderer = new GameblockLogoRenderer(this);
             bgRenderer = new GameblockBackgroundRenderer(this);
@@ -48,20 +51,21 @@ public class GameblockOS extends GameInstance<GameblockOS> {
     protected void tick() {
         if (gameIcons == null) {
             gameIcons = new HashSet<>();
-            LinkedHashSet<GameblockGames.Game<?>> gamesFound = new LinkedHashSet<>();
+            LinkedHashSet<Game<?>> gamesFound = new LinkedHashSet<>();
             int index = 0;
 
             Inventory playerInventory = getHostPlayer().getInventory();
             for (int i = 0; i < playerInventory.getContainerSize(); i++) {
                 ItemStack stack = playerInventory.getItem(i);
-                if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                    if (!gamesFound.contains(cartridge.gameType)) {
-                        gamesFound.add(cartridge.gameType);
+                if (stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                    Game<?> game = cartridge.getGame();
+                    if (!gamesFound.contains(game)) {
+                        gamesFound.add(game);
                         gameIcons.add(new OSIcon(
                                 this,
-                                () -> selectGameAndSentToClient(cartridge.gameType),
-                                cartridge.gameType.logo,
-                                Component.translatable("icon.gameblock." + cartridge.gameType.gameID),
+                                () -> selectGameAndSentToClient(game),
+                                game.getIconLocation(),
+                                game.getName(),
                                 index++
                         ));
                     }
@@ -141,12 +145,12 @@ public class GameblockOS extends GameInstance<GameblockOS> {
         }
     }
 
-    protected void selectGameAndSentToClient(GameblockGames.Game<?> game) {
+    protected void selectGameAndSentToClient(Game<?> game) {
         Inventory playerInventory = getHostPlayer().getInventory();
         for (int i = 0; i < playerInventory.getContainerSize(); i++) {
             ItemStack stack = playerInventory.getItem(i);
             if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                if (cartridge.gameType == game) {
+                if (cartridge.getGame() == game) {
                     GameCapability cap = getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap != null) {
                         cap.setGame(game, getHostPlayer());
