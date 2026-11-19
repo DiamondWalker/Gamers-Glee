@@ -184,16 +184,6 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
         if (player == players.mainPlayer()) {
             tick();
             gameTime++;
-
-            if (!clientSide) {
-                for (UUID sendTo : players.getPlayers()) {
-                    Collection<GameUpdate.Outgoing> updates = networkManager.getPendingUpdatesFor(sendTo);
-                    if (!updates.isEmpty()) GameblockPackets.sendToPlayer((ServerPlayer)players.getPlayerEntity(sendTo), new GameUpdatePacket(updates));
-                }
-            } else {
-                Collection<GameUpdate.Outgoing> updates = networkManager.getPendingUpdatesFor(null);
-                if (!updates.isEmpty()) GameblockPackets.sendToServer(new GameUpdatePacket(networkManager.getPendingUpdatesFor(null)));
-            }
         }
     }
 

@@ -41,6 +41,7 @@ public class GameScreen extends Screen {
     @Override
     public void tick() {
         super.tick();
+
         Player player = Minecraft.getInstance().player;
         if (player != null) {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
@@ -51,6 +52,7 @@ public class GameScreen extends Screen {
                 }
             }
         }
+
         onClose();
     }
 

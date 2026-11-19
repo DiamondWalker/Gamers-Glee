@@ -2,6 +2,7 @@ package gameblock.game;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
+import gameblock.GameblockMod;
 import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.GameState;
@@ -16,8 +17,8 @@ public abstract class NetworkManager <T extends GameInstance<?>> {
 
     private final Multimap<UUID, GameUpdate.Outgoing> pendingUpdates = LinkedHashMultimap.create();
 
-    private final GameUpdateType<T> gameRestart = registerMessage(this::receiveGameRestart);
-    private final GameUpdateType<T> gameState = registerMessage(this::receiveGameState);
+    private final GameUpdateType<T> gameRestart = registerMessage(this::receiveGameRestart, true, false);
+    private final GameUpdateType<T> gameState = registerMessage(this::receiveGameState, false, true);
 
     public NetworkManager(T game) {
         this.game = game;
@@ -39,14 +40,29 @@ public abstract class NetworkManager <T extends GameInstance<?>> {
         game.setGameState(GameState.values()[packet.get(Integer.class)]);
     }
 
-    protected final GameUpdateType<T> registerMessage(BiConsumer<GameUpdate.Incoming, UUID> receiver) {
+    /**
+     * Registers a network update type
+     *
+     * @param receiver The code that will read and handle this type of update when received
+     * @param sentFromClient Whether this update can be sent from the client side
+     * @param sentFromServer Whether this update can be sent from the server side
+     *
+     * @return A {@link GameUpdateType} instance that can be used to send updates of this type
+     */
+    protected final GameUpdateType<T> registerMessage(BiConsumer<GameUpdate.Incoming, UUID> receiver, boolean sentFromClient, boolean sentFromServer) {
         int index = messages.size();
-        GameUpdateType<T> updateType = new GameUpdateType<>(index, receiver, this);
+        GameUpdateType<T> updateType = new GameUpdateType<>(index, receiver, this, sentFromClient, sentFromServer);
         messages.add(updateType);
         return updateType;
     }
 
-    public final void queueUpdate(UUID player, GameUpdate.Outgoing update) {
+    /**
+     *
+     *
+     * @param player
+     * @param update
+     */
+    final void queueUpdate(UUID player, GameUpdate.Outgoing update) {
         if (!game.isClientSide()) {
             if (player == null) {
                 for (UUID aPlayer : game.players.getPlayers()) {
@@ -62,7 +78,12 @@ public abstract class NetworkManager <T extends GameInstance<?>> {
     }
 
     public final void receive(GameUpdate.Incoming update, UUID sender) {
-        messages.get(update.messageType).handler.accept(update, sender);
+        GameUpdateType<?> updateType = messages.get(update.messageType);
+        if (game.isClientSide() ? updateType.acceptOnClient() : updateType.acceptOnServer()) {
+            updateType.handler.accept(update, sender);
+        } else {
+            GameblockMod.LOGGER.warn("Ignoring game update with ID {} as it is not accepted on the {} side", update.messageType, game.isClientSide() ? "client" : "server");
+        }
     }
 
     public final Collection<GameUpdate.Outgoing> getPendingUpdatesFor(UUID player) {

@@ -12,9 +12,9 @@ import net.minecraft.server.level.ServerPlayer;
 import java.util.UUID;
 
 public class OSNetworkManager extends NetworkManager<GameblockOS> {
-    private final GameUpdateType<GameblockOS> joinGame = registerMessage(this::receiveJoinGame);
-    private final GameUpdateType<GameblockOS> multiplayerPrompt = registerMessage(this::receiveMultiplayerPrompt);
-    private final GameUpdateType<GameblockOS> selectGame = registerMessage(this::receiveSelectGame);
+    private final GameUpdateType<GameblockOS> joinGame = registerMessage(this::receiveJoinGame, true, false);
+    private final GameUpdateType<GameblockOS> multiplayerPrompt = registerMessage(this::receiveMultiplayerPrompt, false, true);
+    private final GameUpdateType<GameblockOS> selectGame = registerMessage(this::receiveSelectGame, true, false);
 
     public OSNetworkManager(GameblockOS game) {
         super(game);

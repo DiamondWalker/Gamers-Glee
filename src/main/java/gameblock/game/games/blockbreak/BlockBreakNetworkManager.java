@@ -9,11 +9,11 @@ import gameblock.registry.GameblockSounds;
 import java.util.UUID;
 
 public class BlockBreakNetworkManager extends NetworkManager<BlockBreakGame> {
-    private final GameUpdateType<BlockBreakGame> ballLaunch = registerMessage(this::receiveBallLaunch);
-    private final GameUpdateType<BlockBreakGame> ballUpdate = registerMessage(this::receiveBallUpdate);
-    private final GameUpdateType<BlockBreakGame> blockUpdate = registerMessage(this::receiveBlockUpdate);
-    private final GameUpdateType<BlockBreakGame> scoreUpdate = registerMessage(this::receiveScoreUpdate);
-    private final GameUpdateType<BlockBreakGame> highScoreUpdate = registerMessage(this::receiveHighScore);
+    private final GameUpdateType<BlockBreakGame> ballLaunch = registerMessage(this::receiveBallLaunch, true, false);
+    private final GameUpdateType<BlockBreakGame> ballUpdate = registerMessage(this::receiveBallUpdate, true, true);
+    private final GameUpdateType<BlockBreakGame> blockUpdate = registerMessage(this::receiveBlockUpdate, false, true);
+    private final GameUpdateType<BlockBreakGame> scoreUpdate = registerMessage(this::receiveScoreUpdate, false, true);
+    private final GameUpdateType<BlockBreakGame> highScoreUpdate = registerMessage(this::receiveHighScore, false, true);
 
     public BlockBreakNetworkManager(BlockBreakGame game) {
         super(game);

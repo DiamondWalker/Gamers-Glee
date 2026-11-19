@@ -14,8 +14,8 @@ import java.util.Random;
 import java.util.UUID;
 
 public class SerpentNetworkManager extends NetworkManager<SerpentGame> {
-    private final GameUpdateType<SerpentGame> snakeUpdate = registerMessage(this::receiveSnakeUpdate);
-    private final GameUpdateType<SerpentGame> eatFood = registerMessage(this::receiveEatFood);
+    private final GameUpdateType<SerpentGame> snakeUpdate = registerMessage(this::receiveSnakeUpdate, true, false);
+    private final GameUpdateType<SerpentGame> eatFood = registerMessage(this::receiveEatFood, false, true);
 
     public SerpentNetworkManager(SerpentGame game) {
         super(game);

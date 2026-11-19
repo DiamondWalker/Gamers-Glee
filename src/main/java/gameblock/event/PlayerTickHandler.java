@@ -5,13 +5,20 @@ import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.cosmetics.particles.BaseParticleCosmetic;
 import gameblock.game.GameInstance;
+import gameblock.game.GameUpdate;
+import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockItems;
+import gameblock.registry.GameblockPackets;
 import gameblock.util.ServerSafeMinecraftAccess;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+
+import java.util.Collection;
+import java.util.UUID;
 
 @Mod.EventBusSubscriber
 public class PlayerTickHandler {
@@ -23,8 +30,24 @@ public class PlayerTickHandler {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
                 if (cap.isPlaying()) {
-                    GameInstance game = cap.getGame();
-                    game.baseTick(player);
+                    cap.getGame().baseTick(player);
+
+                    // it's possible the game instance changed so we need access it again
+                    // TOOD: this is kinda hacky and ugly so maybe improve it eventually
+                    GameInstance<?> game = cap.getGame();
+                    if (!player.level().isClientSide()) {
+                        for (UUID sendTo : game.players.getPlayers()) {
+                            Collection<GameUpdate.Outgoing> updates = game.networkManager.getPendingUpdatesFor(sendTo);
+                            if (!updates.isEmpty()) {
+                                GameblockPackets.sendToPlayer((ServerPlayer)game.players.getPlayerEntity(sendTo), new GameUpdatePacket(updates));
+                            }
+                        }
+                    } else {
+                        Collection<GameUpdate.Outgoing> updates = game.networkManager.getPendingUpdatesFor(null);
+                        if (!updates.isEmpty()) {
+                            GameblockPackets.sendToServer(new GameUpdatePacket(updates));
+                        }
+                    }
 
                     if (!player.level().isClientSide()) {
                         boolean stayOpen = true;

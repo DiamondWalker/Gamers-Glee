@@ -65,7 +65,7 @@ public class GameCapability {
         }
     }
 
-    public GameInstance getGame() {
+    public GameInstance<?> getGame() {
         return game;
     }
 
