@@ -1,8 +1,6 @@
 package gameblock.packet;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
-import gameblock.game.GameInstance;
+import gameblock.game.GameUpdate;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkDirection;
@@ -10,13 +8,14 @@ import net.minecraftforge.network.NetworkEvent;
 import org.apache.commons.lang3.tuple.Triple;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.UUID;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class UpdateGamePacket {
+public class GameUpdatePacket {
     //private static final HashBiMap<Class<?>, Byte> DATA_TYPES = HashBiMap.create();
     private static final ArrayList<Triple<Class<?>, BiConsumer<FriendlyByteBuf, Object>, Function<FriendlyByteBuf, Object>>> DATA_TYPES = new ArrayList<>();
 
@@ -38,56 +37,55 @@ public class UpdateGamePacket {
         addType(UUID.class, (buf, uuid) -> buf.writeUUID((UUID) uuid), FriendlyByteBuf::readUUID);
     }
 
-    public int messageType;
-    private final ArrayList<Object> data = new ArrayList<>();
+    public final List<GameUpdate> updates = new ArrayList<>();
 
-    private int readIndex = 0;
-
-    public UpdateGamePacket(int messageType) {
-        this.messageType = messageType;
-
+    public GameUpdatePacket(Collection<GameUpdate.Outgoing> updates) {
+        this.updates.addAll(updates);
     }
 
-    public UpdateGamePacket(FriendlyByteBuf buffer) {
+    public GameUpdatePacket(FriendlyByteBuf buffer) {
         readFromBuffer(buffer);
     }
 
-    public <T> UpdateGamePacket add(T data) {
-        this.data.add(data);
-        return this;
-    }
-
-    public <T> T get(Class<T> clazz) {
-        Object current = data.get(readIndex++);
-        if (!current.getClass().equals(clazz)) throw new IllegalStateException("Incorrectly expected type " + clazz.getName() + ". Provided type " + current.getClass().getName());
-        return clazz.cast(current);
-    }
-
     public void writeToBuffer(FriendlyByteBuf buffer) {
-        buffer.writeByte(messageType);
-        buffer.writeInt(data.size());
+        buffer.writeInt(updates.size());
 
-        DATA_LOOP: for (Object var : data) {
-            Class<?> clazz = var.getClass();
-            for (byte b = 0; b < DATA_TYPES.size(); b++) {
-                if (DATA_TYPES.get(b).getLeft().equals(clazz)) {
-                    buffer.writeByte(b);
-                    DATA_TYPES.get(b).getMiddle().accept(buffer, var);
-                    continue DATA_LOOP;
+        for (GameUpdate update : updates) {
+            List<Object> data = update.getData();
+
+            buffer.writeByte(update.messageType);
+            buffer.writeInt(data.size());
+
+            DATA_LOOP: for (Object var : data) {
+                Class<?> clazz = var.getClass();
+                for (byte b = 0; b < DATA_TYPES.size(); b++) {
+                    if (DATA_TYPES.get(b).getLeft().equals(clazz)) {
+                        buffer.writeByte(b);
+                        DATA_TYPES.get(b).getMiddle().accept(buffer, var);
+                        continue DATA_LOOP;
+                    }
                 }
-            }
 
-            throw new IllegalStateException(clazz.getName() + " is not an accepted data type for a game update packet!");
+                throw new IllegalStateException(clazz.getName() + " is not an accepted data type for a game update packet!");
+            }
         }
     }
 
     public void readFromBuffer(FriendlyByteBuf buffer) {
-        messageType = buffer.readByte();
-        int dataCount = buffer.readInt();
+        int size = buffer.readInt();
 
-        for (int i = 0; i < dataCount; i++) {
-            byte type = buffer.readByte();
-            data.add(DATA_TYPES.get(type).getRight().apply(buffer));
+        for (int i = 0; i < size; i++) {
+            List<Object> data = new ArrayList<>();
+
+            byte messageType = buffer.readByte();
+            int dataCount = buffer.readInt();
+
+            for (int j = 0; j < dataCount; j++) {
+                byte type = buffer.readByte();
+                data.add(DATA_TYPES.get(type).getRight().apply(buffer));
+            }
+
+            updates.add(new GameUpdate.Incoming(messageType, data));
         }
     }
 

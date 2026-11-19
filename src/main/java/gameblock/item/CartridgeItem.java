@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.RegistryObject;
 
-public class CartridgeItem<T extends GameInstance> extends Item {
+public class CartridgeItem<T extends GameInstance<?>> extends Item {
     private final RegistryObject<Game<T>> gameType;
 
     public CartridgeItem(RegistryObject<Game<T>> game) {

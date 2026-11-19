@@ -20,10 +20,11 @@ public class CartridgeDropHandler {
         LivingEntity dropper = event.getEntity();
         if (dropper.getType() == EntityType.ENDERMAN && event.getSource().getEntity() instanceof Creeper) {
             Item[] cartridges = new Item[] {
-                    GameblockItems.CARTRIDGE_DEFUSAL.get(),
+                    GameblockItems.CARTRIDGE_BLOCK_BREAK.get(),
                     GameblockItems.CARTRIDGE_SERPENT.get(),
                     GameblockItems.CARTRIDGE_BLOCK_BREAK.get(),
-                    GameblockItems.CARTRIDGE_FLYING_CHICKEN.get()
+                    //GameblockItems.CARTRIDGE_FLYING_CHICKEN.get()
+                    //GameblockItems.CARTRIDGE_DEFUSAL.get(),
             };
             ItemStack item = new ItemStack(cartridges[dropper.getRandom().nextInt(cartridges.length)]);
             ItemEntity itementity = new ItemEntity(dropper.level(), dropper.getX(), dropper.getY(), dropper.getZ(), item);

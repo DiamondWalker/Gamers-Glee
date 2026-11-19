@@ -38,7 +38,7 @@ public class PlayerTickHandler {
                         }
 
                         if (!stayOpen) {
-                            cap.setGame(null, player);
+                            cap.setGame(null);
                         }
                     }
                 }

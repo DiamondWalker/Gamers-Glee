@@ -4,6 +4,7 @@ import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -11,11 +12,11 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 public class PlayerManager {
-    private final GameInstance game;
+    private final GameInstance<?> game;
     private final HashMap<UUID, Player> players = new HashMap<>();
     private final Player mainPlayer;
 
-    public PlayerManager(GameInstance game, Player mainPlayer) {
+    public PlayerManager(GameInstance<?> game, Player mainPlayer) {
         this.game = game;
         this.mainPlayer = mainPlayer;
         players.put(mainPlayer.getUUID(), mainPlayer);
@@ -25,7 +26,7 @@ public class PlayerManager {
         return mainPlayer;
     }
 
-    public final Player getPlayer(UUID id) {
+    public final Player getPlayerEntity(UUID id) {
         return players.get(id);
     }
 
@@ -45,12 +46,17 @@ public class PlayerManager {
             if (cap != null) {
                 UUID uuid = player.getUUID();
                 players.put(uuid, player);
-                cap.setGame(game.gameType, player);
+                cap.setGame(game.gameType.createInstance(player));
                 game.onPlayerJoined(uuid);
                 return uuid;
             }
         }
         return null;
+    }
+
+    public final void removePlayer(UUID id) {
+        game.networkManager.getPendingUpdatesFor(id); // remove pending updates for this player
+        throw new NotImplementedException();
     }
 
     public final int getPlayerCount() {

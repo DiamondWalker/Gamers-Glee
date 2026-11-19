@@ -3,26 +3,28 @@ package gameblock.game.games.os;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
+import gameblock.game.GameUpdate;
+import gameblock.game.GameUpdateType;
 import gameblock.game.NetworkManager;
-import gameblock.packet.UpdateGamePacket;
+import gameblock.packet.GameUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
 public class OSNetworkManager extends NetworkManager<GameblockOS> {
-    private final int joinGame = registerMessage(this::receiveJoinGame);
-    private final int multiplayerPrompt = registerMessage(this::receiveMultiplayerPrompt);
-    private final int selectGame = registerMessage(this::receiveSelectGame);
+    private final GameUpdateType<GameblockOS> joinGame = registerMessage(this::receiveJoinGame);
+    private final GameUpdateType<GameblockOS> multiplayerPrompt = registerMessage(this::receiveMultiplayerPrompt);
+    private final GameUpdateType<GameblockOS> selectGame = registerMessage(this::receiveSelectGame);
 
     public OSNetworkManager(GameblockOS game) {
         super(game);
     }
 
     public void sendJoinGame(String code) {
-        sendToServer(joinGame, (packet) -> packet.add(code));
+        joinGame.sendToServer().add(code);
     }
 
-    public void receiveJoinGame(UpdateGamePacket packet, UUID sender) {
+    public void receiveJoinGame(GameUpdate.Incoming packet, UUID sender) {
         String gameCode = packet.get(String.class);
 
         if (game.players.mainPlayer() instanceof ServerPlayer serverPlayer) { // TODO: eventually this handle method will be updated to receive a player instance as an argument. When it is use that instead of getHostPlayer()
@@ -40,19 +42,19 @@ public class OSNetworkManager extends NetworkManager<GameblockOS> {
         }
     }
 
-    public void sendMultiplayerPrompt(ServerPlayer player) {
-        sendToClient(multiplayerPrompt, (packet) -> {}, player);
+    public void sendMultiplayerPrompt(UUID player) {
+        multiplayerPrompt.sendToClient(player);
     }
 
-    public void receiveMultiplayerPrompt(UpdateGamePacket packet, UUID sender) {
+    public void receiveMultiplayerPrompt(GameUpdate.Incoming packet, UUID sender) {
         game.prompt = new MultiplayerGamePrompt(game);
     }
 
     public void sendSelectGame(int index) {
-        sendToServer(selectGame, (packet) -> packet.add(index));
+        selectGame.sendToServer().add(index);
     }
 
-    public void receiveSelectGame(UpdateGamePacket packet, UUID sender) {
+    public void receiveSelectGame(GameUpdate.Incoming packet, UUID sender) {
         int index = packet.get(Integer.class);
 
         for (OSIcon icon : game.gameIcons) {

@@ -1,41 +1,43 @@
 package gameblock.game.games.blockbreak;
 
+import gameblock.game.GameUpdate;
+import gameblock.game.GameUpdateType;
 import gameblock.game.NetworkManager;
-import gameblock.packet.UpdateGamePacket;
+import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockSounds;
-import net.minecraft.server.level.ServerPlayer;
 
 import java.util.UUID;
 
 public class BlockBreakNetworkManager extends NetworkManager<BlockBreakGame> {
-    private final int ballLaunch = registerMessage(this::receiveBallLaunch);
-    private final int ballUpdate = registerMessage(this::receiveBallUpdate);
-    private final int blockUpdate = registerMessage(this::receiveBlockUpdate);
-    private final int scoreUpdate = registerMessage(this::receiveScoreUpdate);
+    private final GameUpdateType<BlockBreakGame> ballLaunch = registerMessage(this::receiveBallLaunch);
+    private final GameUpdateType<BlockBreakGame> ballUpdate = registerMessage(this::receiveBallUpdate);
+    private final GameUpdateType<BlockBreakGame> blockUpdate = registerMessage(this::receiveBlockUpdate);
+    private final GameUpdateType<BlockBreakGame> scoreUpdate = registerMessage(this::receiveScoreUpdate);
+    private final GameUpdateType<BlockBreakGame> highScoreUpdate = registerMessage(this::receiveHighScore);
 
     public BlockBreakNetworkManager(BlockBreakGame game) {
         super(game);
     }
 
     public void sendBallLaunch(float xPos, float xMotion) {
-        sendToServer(ballLaunch, (packet) -> packet.add(xPos).add(xMotion));
+        ballLaunch.sendToServer().add(xPos).add(xMotion);
     }
 
-    public void receiveBallLaunch(UpdateGamePacket packet, UUID sender) {
+    public void receiveBallLaunch(GameUpdate.Incoming packet, UUID sender) {
         game.lastPacketTime = game.getGameTime();
         game.ballX = packet.get(Float.class);
         game.launchBall(packet.get(Float.class));
     }
 
     public void sendBallUpdateToServer(float x, float y, float xMotion, float yMotion, boolean playSound) {
-        sendToServer(ballUpdate, (packet) -> packet.add(x).add(y).add(xMotion).add(yMotion).add(playSound));
+        ballUpdate.sendToServer().add(x).add(y).add(xMotion).add(yMotion).add(playSound);
     }
 
     public void sendBallUpdateToAll(float x, float y, float xMotion, float yMotion, boolean playSound) {
-        sendToAll(ballUpdate, (packet) -> packet.add(x).add(y).add(xMotion).add(yMotion).add(playSound));
+        ballUpdate.sendToAllClients().add(x).add(y).add(xMotion).add(yMotion).add(playSound);
     }
 
-    public void receiveBallUpdate(UpdateGamePacket packet, UUID sender) {
+    public void receiveBallUpdate(GameUpdate.Incoming packet, UUID sender) {
         if (!game.isClientSide()) {
             game.lastPacketTime = game.getGameTime();
         } else {
@@ -49,10 +51,10 @@ public class BlockBreakNetworkManager extends NetworkManager<BlockBreakGame> {
     }
 
     public void sendBlockUpdate(short brick) {
-        sendToAll(blockUpdate, (packet) -> packet.add(brick));
+        blockUpdate.sendToAllClients().add(brick);
     }
 
-    public void receiveBlockUpdate(UpdateGamePacket packet, UUID sender) {
+    public void receiveBlockUpdate(GameUpdate.Incoming packet, UUID sender) {
         short block = packet.get(Short.class);
         if (game.blocks.get(block) != null) {
             if (game.blocks.get(block).breaking == 0) {
@@ -65,19 +67,19 @@ public class BlockBreakNetworkManager extends NetworkManager<BlockBreakGame> {
     }
 
     public void sendScoreUpdate(int score, long seconds) {
-        sendToAll(scoreUpdate, (packet) -> packet.add(score).add(seconds));
+        scoreUpdate.sendToAllClients().add(score).add(seconds);
     }
 
-    public void receiveScoreUpdate(UpdateGamePacket packet, UUID sender) {
+    public void receiveScoreUpdate(GameUpdate.Incoming packet, UUID sender) {
         game.score = packet.get(Integer.class);
-        game.timeSinceLaunch = packet.get(Integer.class) * 20;
+        game.timeSinceLaunch = packet.get(Long.class) * 20;
     }
 
     public void sendHighScore(int highScore) {
-        sendToAll(highScore, (packet) -> packet.add(highScore));
+        highScoreUpdate.sendToAllClients().add(highScore);
     }
 
-    public void receiveHighScore(UpdateGamePacket packet, UUID sender) {
+    public void receiveHighScore(GameUpdate.Incoming packet, UUID sender) {
         game.highScore = packet.get(Integer.class);
     }
 }

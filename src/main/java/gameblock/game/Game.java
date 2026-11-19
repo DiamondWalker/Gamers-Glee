@@ -12,7 +12,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
-public class Game<T extends GameInstance> {
+public class Game<T extends GameInstance<?>> {
     private final Function<Player, T> constructor;
     private ResourceLocation id = null;
     private String translationKey = null;

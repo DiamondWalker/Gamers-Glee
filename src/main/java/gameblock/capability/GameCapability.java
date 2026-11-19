@@ -6,6 +6,7 @@ import gameblock.game.GameInstance;
 import gameblock.gui.GUIHandler;
 import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
+import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockCosmetics;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
@@ -15,13 +16,14 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Collections;
 import java.util.function.Supplier;
 
 @AutoRegisterCapability
 public class GameCapability {
     // game
     private final Player player;
-    private GameInstance game = null;
+    private GameInstance<?> game = null;
 
     protected GameCapability(Player player) {
         this.player = player;
@@ -31,30 +33,36 @@ public class GameCapability {
         return game != null;
     }
 
-    public void setGame(Game<?> gameType, Player player) {
-        /*
-            Sometimes game constructors will send new packets. If this happens before the game change packet is sent it'll cause issues
-            Therefore we must send the game change packet before the game instance is created.
-             */
-            if (player instanceof ServerPlayer serverPlayer) {
-                GameblockPackets.sendToPlayer(serverPlayer, new GameChangePacket(gameType));
-                if (game != null) game.save();
-            }
-            if (gameType != null) {
-                game = gameType.createInstance(player);
+    public void setGame(GameInstance<?> newGame) {
+        if (!player.level().isClientSide()) {
+            if (game != null) game.save();
+            if (newGame != null) newGame.load();
+        } else {
+            if (newGame == null) {
+                GUIHandler.closeGameScreen();
             } else {
-                this.game = null;
+                GUIHandler.openGameScreen(newGame);
             }
+        }
 
-            if (player.level().isClientSide()) {
-                if (game == null) {
-                    GUIHandler.closeGameScreen();
-                } else {
-                    GUIHandler.openGameScreen(game);
-                }
+        game = newGame;
+
+        if (player instanceof ServerPlayer serverPlayer) {
+            if (game != null) {
+                GameblockPackets.sendToPlayer(
+                        serverPlayer,
+                        new GameChangePacket(
+                                game.gameType,
+                                game.networkManager.getPendingUpdatesFor(serverPlayer.getUUID())
+                        )
+                );
             } else {
-                if (game != null) game.load();
+                GameblockPackets.sendToPlayer(
+                        serverPlayer,
+                        new GameChangePacket(null, Collections.emptySet())
+                );
             }
+        }
     }
 
     public GameInstance getGame() {

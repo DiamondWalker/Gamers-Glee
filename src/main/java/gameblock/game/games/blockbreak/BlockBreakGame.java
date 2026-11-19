@@ -346,11 +346,6 @@ public class BlockBreakGame extends GameInstance<BlockBreakNetworkManager> {
             graphics.flush();
         });
 
-        String timeString = "XX:XX";
-        if (ballLaunched) {
-            timeString = TextUtil.getTimeString(timeSinceLaunch, false, true);
-        }
-
         renderer.drawTexture(SPRITE,
                 oldPlatformPos + (platformPos - oldPlatformPos) * partialTicks,
                 PLATFORM_Y,
@@ -401,6 +396,10 @@ public class BlockBreakGame extends GameInstance<BlockBreakNetworkManager> {
                     col, 0);
         }
 
+        String timeString = "XX:XX";
+        if (ballLaunched) {
+            timeString = TextUtil.getTimeString(timeSinceLaunch, false, true);
+        }
         if (!isGameOver()) {
             renderer.drawText(80.0f, 67.5f, 0.5f, new ColorF(1.0f), Component.translatable("gui.gameblock.block_break.score", score));
             renderer.drawText(80.0f, 62.5f, 0.5f, new ColorF(1.0f), Component.literal(timeString));

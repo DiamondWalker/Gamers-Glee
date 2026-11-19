@@ -1,67 +1,71 @@
 package gameblock.game;
 
-import gameblock.packet.UpdateGamePacket;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.GameState;
 import net.minecraft.server.level.ServerPlayer;
 
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 public abstract class NetworkManager <T extends GameInstance<?>> {
-    private final ArrayList<BiConsumer<UpdateGamePacket, UUID>> messages = new ArrayList<>();
+    private final ArrayList<GameUpdateType<?>> messages = new ArrayList<>();
     protected final T game;
 
-    private final int gameRestart = registerMessage(this::receiveGameRestart);
-    private final int gameState = registerMessage(this::receiveGameState);
+    private final Multimap<UUID, GameUpdate.Outgoing> pendingUpdates = LinkedHashMultimap.create();
+
+    private final GameUpdateType<T> gameRestart = registerMessage(this::receiveGameRestart);
+    private final GameUpdateType<T> gameState = registerMessage(this::receiveGameState);
 
     public NetworkManager(T game) {
         this.game = game;
     }
 
     public final void sendGameRestart() {
-        sendToServer(gameRestart, (packet) -> {});
+        gameRestart.sendToServer();
     }
 
-    public final void receiveGameRestart(UpdateGamePacket packet, UUID sender) {
+    public final void receiveGameRestart(GameUpdate.Incoming packet, UUID sender) {
         game.restart();
     }
 
     public final void sendGameState(GameState state) {
-        sendToAll(gameState, (packet) -> packet.add(state.ordinal()));
+        gameState.sendToAllClients().add(state.ordinal());
     }
 
-    public final void receiveGameState(UpdateGamePacket packet, UUID sender) {
+    public final void receiveGameState(GameUpdate.Incoming packet, UUID sender) {
         game.setGameState(GameState.values()[packet.get(Integer.class)]);
     }
 
-    protected final int registerMessage(BiConsumer<UpdateGamePacket, UUID> receiver) {
+    protected final GameUpdateType<T> registerMessage(BiConsumer<GameUpdate.Incoming, UUID> receiver) {
         int index = messages.size();
-        messages.add(receiver);
-        return index;
+        GameUpdateType<T> updateType = new GameUpdateType<>(index, receiver, this);
+        messages.add(updateType);
+        return updateType;
     }
 
-    protected final void sendToClient(int type, Consumer<UpdateGamePacket> data, ServerPlayer player) {
-        UpdateGamePacket packet = new UpdateGamePacket(type);
-        data.accept(packet);
-        GameblockPackets.sendToPlayer(player, packet);
+    public final void queueUpdate(UUID player, GameUpdate.Outgoing update) {
+        if (!game.isClientSide()) {
+            if (player == null) {
+                for (UUID aPlayer : game.players.getPlayers()) {
+                    queueUpdate(aPlayer, update);
+                }
+            } else {
+                pendingUpdates.put(player, update);
+            }
+        } else {
+            if (player != null) throw new IllegalStateException("Updates sent to the server cannot target a player");
+            pendingUpdates.put(null, update);
+        }
     }
 
-    protected final void sendToAll(int type, Consumer<UpdateGamePacket> data) {
-        UpdateGamePacket packet = new UpdateGamePacket(type);
-        data.accept(packet);
-        game.players.forEachPlayerEntity((player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, packet));
+    public final void receive(GameUpdate.Incoming update, UUID sender) {
+        messages.get(update.messageType).handler.accept(update, sender);
     }
 
-    protected final void sendToServer(int type, Consumer<UpdateGamePacket> data) {
-        UpdateGamePacket packet = new UpdateGamePacket(type);
-        data.accept(packet);;
-        GameblockPackets.sendToServer(packet);
-    }
-
-    public final void receive(UpdateGamePacket packet, UUID sender) {
-        messages.get(packet.messageType).accept(packet, sender);
+    public final Collection<GameUpdate.Outgoing> getPendingUpdatesFor(UUID player) {
+        return pendingUpdates.removeAll(player);
     }
 }

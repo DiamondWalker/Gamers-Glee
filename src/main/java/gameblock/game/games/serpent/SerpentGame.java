@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import gameblock.GameblockMod;
 import gameblock.game.GameControls;
 import gameblock.game.GameInstance;
+import gameblock.game.NetworkManager;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
 import gameblock.registry.GameblockPackets;
@@ -18,7 +19,7 @@ import net.minecraft.world.entity.player.Player;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class SerpentGame extends GameInstance {
+public class SerpentGame extends GameInstance<SerpentNetworkManager> {
     public static ResourceLocation SPRITE = ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/game/serpent.png");
     private static final int INITIAL_SNAKE_LENGTH = 2;
     private static final int SNAKE_LENGTH_INCREASE = 5;
@@ -71,7 +72,7 @@ public class SerpentGame extends GameInstance {
 
                 break;
             }
-            GameblockPackets.sendToServer(new SnakeUpdatePacket(snakeDirection, coords));
+            networkManager.sendSnakeUpdate(snakeDirection, coords);
             snakeDirectionChanged = true;
         }
     }
@@ -94,7 +95,12 @@ public class SerpentGame extends GameInstance {
             foodX = random.nextInt((tiles.maxX - tiles.minX) + 1) + tiles.minX;
             foodY = random.nextInt((tiles.maxY - tiles.minY) + 1) + tiles.minY;
         } while (isSnakeTile(foodX, foodY));
-        players.forEachPlayerEntity((Player player) -> GameblockPackets.sendToPlayer((ServerPlayer) player, new EatFoodPacket(foodX, foodY, targetSnakeLength, foodEaten)));
+        networkManager.sendEatFood(foodX, foodY, targetSnakeLength, foodEaten);
+    }
+
+    @Override
+    protected SerpentNetworkManager getNetworkManager() {
+        return new SerpentNetworkManager(this);
     }
 
     @Override

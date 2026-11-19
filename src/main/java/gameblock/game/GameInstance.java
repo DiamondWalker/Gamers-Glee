@@ -2,6 +2,7 @@ package gameblock.game;
 
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
+import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockItems;
 import gameblock.registry.GameblockPackets;
 import gameblock.util.*;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 
+import java.util.Collection;
 import java.util.UUID;
 
 public abstract class GameInstance <T extends NetworkManager<?>> {
@@ -146,7 +148,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
             players.forEachPlayerEntity((player) -> {
                 GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                 if (cap != null) {
-                    cap.setGame(gameType, player);
+                    cap.setGame(gameType.createInstance(player));
                 }
             });
         } else {
@@ -182,6 +184,16 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
         if (player == players.mainPlayer()) {
             tick();
             gameTime++;
+
+            if (!clientSide) {
+                for (UUID sendTo : players.getPlayers()) {
+                    Collection<GameUpdate.Outgoing> updates = networkManager.getPendingUpdatesFor(sendTo);
+                    if (!updates.isEmpty()) GameblockPackets.sendToPlayer((ServerPlayer)players.getPlayerEntity(sendTo), new GameUpdatePacket(updates));
+                }
+            } else {
+                Collection<GameUpdate.Outgoing> updates = networkManager.getPendingUpdatesFor(null);
+                if (!updates.isEmpty()) GameblockPackets.sendToServer(new GameUpdatePacket(networkManager.getPendingUpdatesFor(null)));
+            }
         }
     }
 
