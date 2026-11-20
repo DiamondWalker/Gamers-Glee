@@ -57,26 +57,24 @@ public abstract class NetworkManager <T extends GameInstance<?>> {
     }
 
     /**
+     * Queues an outgoing update to be sent
      *
-     *
-     * @param player
-     * @param update
+     * @param update The update
+     * @param player The player to send the update to. Should be null for client-to-server updates
+     * @throws IllegalStateException If {@code player} is nonnull on the client side
      */
-    final void queueUpdate(UUID player, GameUpdate.Outgoing update) {
-        if (!game.isClientSide()) {
-            if (player == null) {
-                for (UUID aPlayer : game.players.getPlayers()) {
-                    queueUpdate(aPlayer, update);
-                }
-            } else {
-                pendingUpdates.put(player, update);
-            }
-        } else {
-            if (player != null) throw new IllegalStateException("Updates sent to the server cannot target a player");
-            pendingUpdates.put(null, update);
-        }
+    final void queueUpdate(GameUpdate.Outgoing update, UUID player) {
+        if (game.isClientSide() && player != null) throw new IllegalStateException("Updates sent to the server cannot target a player");
+
+        pendingUpdates.put(player, update);
     }
 
+    /**
+     * Receives an incoming update and dispatches it to the appropriate handler
+     *
+     * @param update The update
+     * @param sender The sender. Null for server-to-client updates
+     */
     public final void receive(GameUpdate.Incoming update, UUID sender) {
         GameUpdateType<?> updateType = messages.get(update.messageType);
         if (game.isClientSide() ? updateType.acceptOnClient() : updateType.acceptOnServer()) {
@@ -86,7 +84,15 @@ public abstract class NetworkManager <T extends GameInstance<?>> {
         }
     }
 
+    /**
+     * Retrieves and clears the list of updates that need to be sent to this player
+     *
+     * @param player The player to retrieve updates for. Must be null on the client side
+     * @return The collection of updates to be sent
+     * @throws IllegalStateException If {@code player} is nonnull on the client side
+     */
     public final Collection<GameUpdate.Outgoing> getPendingUpdatesFor(UUID player) {
+        if (game.isClientSide() && player != null) throw new IllegalStateException("Cannot retrieve pending updates for a non-null player");
         return pendingUpdates.removeAll(player);
     }
 }

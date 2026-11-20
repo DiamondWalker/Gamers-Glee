@@ -35,9 +35,10 @@ public class GameUpdate {
         /**
          * Retrieves an object from this update's data
          *
-         * @param clazz The class data type to be read. Will throw an {@link IllegalStateException} if the class does not match
+         * @param clazz The class data type to be read
          * @return The object read
          * @param <T> The type to be read
+         * @throws IllegalStateException if the next object does not match the given class
          */
         public <T> T get(Class<T> clazz) {
             Object current = data.get(readIndex++);

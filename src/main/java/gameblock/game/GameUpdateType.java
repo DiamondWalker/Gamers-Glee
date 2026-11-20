@@ -25,40 +25,43 @@ public class GameUpdateType <T extends GameInstance<?>> {
     /**
      * Send an update of this type to a specific client
      * @param player The client to send the update to
-     * @return An outgoing game update. Use {@link GameUpdate.Outgoing#add(Object)} to attack data to the update
+     * @return An outgoing game update. Use {@link GameUpdate.Outgoing#add(Object)} to attach data to the update
+     * @throws IllegalStateException if this update type cannot be sent from this side
      */
     public GameUpdate.Outgoing sendToClient(UUID player) {
         if (manager.game.isClientSide()) throw new IllegalStateException("sendToClient cannot be called on client side");
         if (!canBeSentFromServer) throw new IllegalStateException("Game update cannot be sent from server side");
 
         GameUpdate.Outgoing update = new GameUpdate.Outgoing(id);
-        manager.queueUpdate(player, update);
+        manager.queueUpdate(update, player);
         return update;
     }
 
     /**
      * Send an update of this type to all clients
      * @return An outgoing game update. Use {@link GameUpdate.Outgoing#add(Object)} to attack data to the update
+     * @throws IllegalStateException if this update type cannot be sent from this side
      */
     public GameUpdate.Outgoing sendToAllClients() {
         if (manager.game.isClientSide()) throw new IllegalStateException("sendToAllClients cannot be called on client side");
         if (!canBeSentFromServer) throw new IllegalStateException("Game update cannot be sent from server side");
 
         GameUpdate.Outgoing update = new GameUpdate.Outgoing(id);
-        manager.queueUpdate(null, update);
+        for (UUID player : manager.game.players.getPlayers()) manager.queueUpdate(update, player);
         return update;
     }
 
     /**
      * Send an update of this type to the server
      * @return An outgoing game update. Use {@link GameUpdate.Outgoing#add(Object)} to attack data to the update
+     * @throws IllegalStateException if this update type cannot be sent from this side
      */
     public GameUpdate.Outgoing sendToServer() {
         if (!manager.game.isClientSide()) throw new IllegalStateException("sendToServer cannot be called on server side");
         if (!canBeSentFromClient) throw new IllegalStateException("Game update cannot be sent from client side");
 
         GameUpdate.Outgoing update = new GameUpdate.Outgoing(id);
-        manager.queueUpdate(null, update);
+        manager.queueUpdate(update, null);
         return update;
     }
 
