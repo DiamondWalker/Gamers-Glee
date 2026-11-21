@@ -196,7 +196,9 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     }
 
     public final void playSound(SoundEvent event, float pitch, float volume) {
-        if (soundManager != null) soundManager.play(event, pitch, volume);
+        if (soundManager != null) {
+            soundManager.play(event, pitch, volume);
+        }
     }
 
     public final void playSound(SoundEvent event) {
