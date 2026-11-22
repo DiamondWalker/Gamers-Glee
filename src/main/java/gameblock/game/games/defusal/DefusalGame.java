@@ -8,7 +8,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 
 import java.util.ArrayList;
@@ -35,13 +34,20 @@ public class DefusalGame extends GameInstance<DefusalNetworkManager> {
 
     protected long lastRevealTime = Integer.MIN_VALUE;
 
-    private ArrayList<SweatDrop> sweatDrops;
+    private final ArrayList<SweatDrop> sweatDrops;
 
-    public DefusalGame(Player player) {
-        super(player, GameblockGames.DEFUSAL.get());
+    public DefusalGame(boolean clientSide) {
+        super(clientSide, GameblockGames.DEFUSAL.get());
 
         tiles = new TileGrid2D<>(-12, 12, -8, 8);
         tiles.setAll((DefusalTile t) -> new DefusalTile());
+
+        sweatDrops = isClientSide() ? new ArrayList<>() : null;
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
 
         if (!isClientSide()) {
             Random rand = new Random();
@@ -51,10 +57,8 @@ public class DefusalGame extends GameInstance<DefusalNetworkManager> {
                 if (setBomb(randX, randY)) bombCount++;
             }
 
-            networkManager.sendTime(timeLeft, player.getUUID());
-            networkManager.sendBombCountUpdate(bombCount, player.getUUID());
-        } else {
-            sweatDrops = new ArrayList<>();
+            networkManager.sendTime(timeLeft);
+            networkManager.sendBombCountUpdate(bombCount);
         }
     }
 
@@ -88,7 +92,7 @@ public class DefusalGame extends GameInstance<DefusalNetworkManager> {
             timeLeft--;
             int secondsAfter = timeLeft / 20;
             if (secondsBefore != secondsAfter) {
-                networkManager.sendTimeToAll(timeLeft);
+                networkManager.sendTime(timeLeft);
             }
             if (timeLeft <= 0) setGameState(GameState.LOSS);
         }
@@ -119,7 +123,7 @@ public class DefusalGame extends GameInstance<DefusalNetworkManager> {
 
         ArrayList<DefusalNetworkManager.TileInfo> tileInfos = new ArrayList<>();
         recursiveReveal(tile.getX(), tile.getY(), tileInfos);
-        networkManager.sendBombCountUpdateToAll(bombCount);
+        networkManager.sendBombCountUpdate(bombCount);
         networkManager.sendTileReveal(tileInfos.toArray(new DefusalNetworkManager.TileInfo[]{}));
 
         checkWin();
@@ -146,7 +150,7 @@ public class DefusalGame extends GameInstance<DefusalNetworkManager> {
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount++;
             defusalTile.cycleState();
             if (defusalTile.getState() == DefusalTile.State.FLAGGED) bombCount--;
-            networkManager.sendBombCountUpdateToAll(bombCount);
+            networkManager.sendBombCountUpdate(bombCount);
             networkManager.sendTileState(tile, defusalTile.getState());
 
             checkWin();

@@ -30,38 +30,41 @@ public class PlayerTickHandler {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
                 if (cap.isPlaying()) {
-                    cap.getGame().baseTick(player);
-
-                    // it's possible the game instance changed so we need access it again
-                    // TOOD: this is kinda hacky and ugly so maybe improve it eventually
                     GameInstance<?> game = cap.getGame();
-                    if (!player.level().isClientSide()) {
-                        for (UUID sendTo : game.players.getPlayers()) {
-                            Collection<GameUpdate.Outgoing> updates = game.networkManager.getPendingUpdatesFor(sendTo);
-                            if (!updates.isEmpty()) {
-                                GameblockPackets.sendToPlayer((ServerPlayer)game.players.getPlayerEntity(sendTo), new GameUpdatePacket(updates));
-                            }
-                        }
-                    } else {
-                        Collection<GameUpdate.Outgoing> updates = game.networkManager.getPendingUpdatesFor(null);
-                        if (!updates.isEmpty()) {
-                            GameblockPackets.sendToServer(new GameUpdatePacket(updates));
-                        }
-                    }
 
-                    if (!player.level().isClientSide()) {
-                        boolean stayOpen = true;
+                    boolean stayOpen = true;
+                    if (!game.isClientSide()) {
                         if ((!player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) && !player.getItemInHand(InteractionHand.OFF_HAND).is(GameblockItems.GAMEBLOCK.get()))) {
                             stayOpen = false;
-                        } else if (game.players.mainPlayer() == null || !game.players.mainPlayer().isAlive()) {
+                        } else if (game.players.getHostPlayer() == null || !game.players.getHostPlayer().isAlive()) {
                             stayOpen = false;
                         } else {
-                            GameCapability hostCapability = game.players.mainPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                            GameCapability hostCapability = game.players.getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                             if (hostCapability == null || hostCapability.getGame() != game) stayOpen = false;
                         }
 
                         if (!stayOpen) {
-                            cap.setGame(null);
+                            cap.startGame(null);
+                        }
+                    }
+
+                    if (stayOpen) {
+                        if (player == game.players.getHostPlayer() || game.players.getHostPlayer() == null) {
+                            game.baseTick();
+
+                            if (!game.isClientSide()) {
+                                for (UUID sendTo : game.players.getPlayers()) {
+                                    Collection<GameUpdate.Outgoing> updates = game.networkManager.getPendingUpdatesFor(sendTo);
+                                    if (!updates.isEmpty()) {
+                                        GameblockPackets.sendToPlayer((ServerPlayer)game.players.getPlayerEntity(sendTo), new GameUpdatePacket(updates));
+                                    }
+                                }
+                            } else {
+                                Collection<GameUpdate.Outgoing> updates = game.networkManager.getPendingUpdatesFor(null);
+                                if (!updates.isEmpty()) {
+                                    GameblockPackets.sendToServer(new GameUpdatePacket(updates));
+                                }
+                            }
                         }
                     }
                 }

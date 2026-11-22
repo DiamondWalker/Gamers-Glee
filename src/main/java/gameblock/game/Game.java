@@ -13,17 +13,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.Function;
 
 public class Game<T extends GameInstance<?>> {
-    private final Function<Player, T> constructor;
+    public final Function<Boolean, T> constructor;
     private ResourceLocation id = null;
     private String translationKey = null;
     private ResourceLocation iconLocation = null;
 
-    public Game(Function<Player, T> constructor) {
+    public Game(Function<Boolean, T> constructor) {
         this.constructor = constructor;
-    }
-
-    public T createInstance(Player player) {
-        return constructor.apply(player);
     }
 
     private void createIdsIfNull() {

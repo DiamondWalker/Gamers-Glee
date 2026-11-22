@@ -28,7 +28,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     private long gameTime = 0;
     private GameState gameState = GameState.ACTIVE;
 
-    public GamePrompt prompt = null;
+    public GamePrompt<?> prompt = null;
 
     public final PlayerManager players;
     public final GameControls controls = new GameControls();
@@ -36,10 +36,10 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     public final GameblockSoundManager soundManager;
     public final T networkManager;
 
-    public GameInstance(Player player, Game<?> gameType) {
-        clientSide = player.level().isClientSide();
+    public GameInstance(boolean clientSide, Game<?> gameType) {
+        this.clientSide = clientSide;
         soundManager = clientSide ? new GameblockSoundManager() : null;
-        this.players = new PlayerManager(this, player);
+        this.players = new PlayerManager(this);
         this.gameType = gameType;
         this.networkManager = getNetworkManager();
     }
@@ -53,6 +53,10 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     }
 
     protected void onPlayerJoined(UUID player) {
+
+    }
+
+    protected void onPlayerLeft(UUID player) {
 
     }
 
@@ -77,7 +81,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     public final void save() {
         ItemStack gameblockItem = null;
         for (InteractionHand hand : InteractionHand.values()) {
-            gameblockItem = players.mainPlayer().getItemInHand(hand);
+            gameblockItem = players.getHostPlayer().getItemInHand(hand);
             if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
                 break;
             } else {
@@ -86,7 +90,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
         }
 
         if (gameblockItem != null) {
-            String playerName = players.mainPlayer().getGameProfile().getName();
+            String playerName = players.getHostPlayer().getGameProfile().getName();
             String gameName = gameType.getId().toString();
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
@@ -106,7 +110,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
     public final void load() {
         ItemStack gameblockItem = null;
         for (InteractionHand hand : InteractionHand.values()) {
-            gameblockItem = players.mainPlayer().getItemInHand(hand);
+            gameblockItem = players.getHostPlayer().getItemInHand(hand);
             if (gameblockItem.is(GameblockItems.GAMEBLOCK.get())) {
                 break;
             } else {
@@ -115,7 +119,7 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
         }
 
         if (gameblockItem != null) {
-            String playerName = players.mainPlayer().getGameProfile().getName();
+            String playerName = players.getHostPlayer().getGameProfile().getName();
             String gameName = gameType.getId().toString();
             CompoundTag tag = gameblockItem.getOrCreateTag();
 
@@ -143,14 +147,17 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
 
     }
 
-    public final void restart() {
+    public void initialize() {
+
+    }
+
+    public final void restart() { // TODO: this whole method needs to be redone
         if (!isClientSide()) {
-            players.forEachPlayerEntity((player) -> {
-                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null) {
-                    cap.setGame(gameType.createInstance(player));
-                }
-            });
+            Player mainPlayer = players.getHostPlayer();
+            GameCapability cap = mainPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null) {
+                cap.startGame(gameType);
+            }
         } else {
             networkManager.sendGameRestart();
         }
@@ -178,13 +185,11 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
         return gameState != GameState.ACTIVE;
     }
 
-    public final void baseTick(Player player) {
+    public final void baseTick() {
         if (prompt != null && prompt.shouldClose()) prompt = null;
 
-        if (player == players.mainPlayer()) {
-            tick();
-            gameTime++;
-        }
+        tick();
+        gameTime++;
     }
 
     protected abstract void tick();

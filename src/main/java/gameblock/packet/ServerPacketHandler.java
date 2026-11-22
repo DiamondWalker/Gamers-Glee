@@ -10,7 +10,7 @@ public class ServerPacketHandler {
         if (sender != null) {
             GameCapability cap = sender.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
-                cap.setGame(null);
+                cap.startGame(null);
             }
         }
     }

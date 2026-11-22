@@ -21,11 +21,7 @@ public class DefusalNetworkManager extends NetworkManager<DefusalGame> {
         super(game);
     }
 
-    public void sendBombCountUpdate(int bombCount, UUID sender) {
-        bombCountUpdate.sendToClient(sender).add(bombCount);
-    }
-
-    public void sendBombCountUpdateToAll(int bombCount) {
+    public void sendBombCountUpdate(int bombCount) {
         bombCountUpdate.sendToAllClients().add(bombCount);
     }
 
@@ -107,11 +103,7 @@ public class DefusalNetworkManager extends NetworkManager<DefusalGame> {
         game.tiles.get(tile.getX(), tile.getY()).setState(state);
     }
 
-    public void sendTime(int ticks, UUID player) {
-        time.sendToClient(player).add(ticks / 20);
-    }
-
-    public void sendTimeToAll(int ticks) {
+    public void sendTime(int ticks) {
         time.sendToAllClients().add(ticks / 20);
     }
 

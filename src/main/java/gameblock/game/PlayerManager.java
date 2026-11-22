@@ -4,6 +4,8 @@ import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.HashMap;
@@ -14,19 +16,48 @@ import java.util.function.Consumer;
 public class PlayerManager {
     private final GameInstance<?> game;
     private final HashMap<UUID, Player> players = new HashMap<>();
-    private final Player mainPlayer;
+    private Player host;
+    private Player localPlayer;
 
-    public PlayerManager(GameInstance<?> game, Player mainPlayer) {
+    public PlayerManager(GameInstance<?> game) {
         this.game = game;
-        this.mainPlayer = mainPlayer;
-        players.put(mainPlayer.getUUID(), mainPlayer);
     }
 
-    public final Player mainPlayer() {
-        return mainPlayer;
+    public void setHost(Player player) {
+        if (player != null && !players.containsKey(player.getUUID())) throw new IllegalStateException("Host player must be in the game!");
+
+        host = player;
     }
 
-    public final Player getPlayerEntity(UUID id) {
+    /**
+     * Getter for the host Player entity
+     * <p>
+     * On the server side, this is the player hosting the game (or, for singleplayer games, just the player)
+     * On the client side, the host player will be null
+     *
+     * @return The Player entity hosting this game
+     */
+    public Player getHostPlayer() {
+        return host;
+    }
+
+    public void setLocalPlayer(Player player) {
+        localPlayer = player;
+    }
+
+    /**
+     * Getter for the local Player entity
+     * <p>
+     * On the client side, this is the player belonging to this client
+     * On the server side, the local player will be null
+     *
+     * @return The local player
+     */
+    public Player getLocalPlayer() {
+        return localPlayer;
+    }
+
+    public Player getPlayerEntity(UUID id) {
         return players.get(id);
     }
 
@@ -34,32 +65,31 @@ public class PlayerManager {
         return players.keySet();
     }
 
-    public void forEachPlayerEntity(Consumer<Player> action) {
-        for (Player player : players.values()) {
-            if (player != null) action.accept(player);
+    public boolean canAddPlayers() {
+        return getPlayerCount() < game.getMaxPlayers();
+    }
+
+    public void addPlayer(Player player) {
+        if (!canAddPlayers()) throw new IllegalStateException("No room for adding more players");
+
+        UUID uuid = player.getUUID();
+        players.put(uuid, player);
+        game.onPlayerJoined(uuid);
+    }
+
+    public void removePlayer(UUID id) {
+        if (!players.containsKey(id)) throw new IllegalStateException("Player with id " + id.toString() + " is not in game");
+
+        game.onPlayerLeft(id);
+        Player player = players.remove(id);
+        if (player == host) {
+            setHost(null);
         }
+
+        if (!game.isClientSide()) game.networkManager.getPendingUpdatesFor(id); // flush pending updates for this player
     }
 
-    public final UUID addPlayer(ServerPlayer player) {
-        if (players.size() < game.getMaxPlayers()) {
-            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-            if (cap != null) {
-                UUID uuid = player.getUUID();
-                players.put(uuid, player);
-                cap.setGame(game.gameType.createInstance(player));
-                game.onPlayerJoined(uuid);
-                return uuid;
-            }
-        }
-        return null;
-    }
-
-    public final void removePlayer(UUID id) {
-        game.networkManager.getPendingUpdatesFor(id); // remove pending updates for this player
-        throw new NotImplementedException();
-    }
-
-    public final int getPlayerCount() {
+    public int getPlayerCount() {
         return players.size();
     }
 }

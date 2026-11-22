@@ -7,7 +7,6 @@ import gameblock.game.GameInstance;
 import gameblock.item.CartridgeItem;
 import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockMusic;
-import gameblock.registry.GameblockPackets;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
@@ -33,8 +32,9 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
     private GameblockLogoRenderer logoRenderer;
     private GameblockBackgroundRenderer bgRenderer;
 
-    public GameblockOS(Player player) {
-        super(player, GameblockGames.GAMEBLOCK_OS.get());
+    public GameblockOS(boolean clientSide) {
+        super(clientSide, GameblockGames.GAMEBLOCK_OS.get());
+
         if (isClientSide()) {
             logoRenderer = new GameblockLogoRenderer(this);
             bgRenderer = new GameblockBackgroundRenderer(this);
@@ -42,39 +42,44 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
     }
 
     @Override
-    protected void tick() {
-        if (gameIcons == null) {
-            gameIcons = new HashSet<>();
-            LinkedHashSet<Game<?>> gamesFound = new LinkedHashSet<>();
-            int index = 0;
+    public void initialize() {
+        super.initialize();
 
-            Inventory playerInventory = players.mainPlayer().getInventory();
-            for (int i = 0; i < playerInventory.getContainerSize(); i++) {
-                ItemStack stack = playerInventory.getItem(i);
-                if (stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                    Game<?> game = cartridge.getGame();
-                    if (!gamesFound.contains(game)) {
-                        gamesFound.add(game);
-                        gameIcons.add(new OSIcon(
-                                this,
-                                () -> selectGameAndSentToClient(game),
-                                game.getIconLocation(),
-                                game.getName(),
-                                index++
-                        ));
-                    }
+        // TODO: this would probably be better to do only on the server and then sync it somehow?
+        Player player = isClientSide() ? players.getLocalPlayer() : players.getHostPlayer();
+        gameIcons = new HashSet<>();
+        LinkedHashSet<Game<?>> gamesFound = new LinkedHashSet<>();
+        int index = 0;
+
+        Inventory playerInventory = player.getInventory();
+        for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+            ItemStack stack = playerInventory.getItem(i);
+            if (stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                Game<?> game = cartridge.getGame();
+                if (!gamesFound.contains(game)) {
+                    gamesFound.add(game);
+                    gameIcons.add(new OSIcon(
+                            this,
+                            () -> selectGameAndSentToClient(game),
+                            game.getIconLocation(),
+                            game.getName(),
+                            index++
+                    ));
                 }
             }
-
-            /*gameIcons.add(new OSIcon(
-                    this,
-                    () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer(), new MultiplayerPromptPacket()),
-                    new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
-                    Component.translatable("icon.gameblock.multiplayer"),
-                    index++
-            ));*/
         }
 
+        /*gameIcons.add(new OSIcon(
+                this,
+                () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer(), new MultiplayerPromptPacket()),
+                new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
+                Component.translatable("icon.gameblock.multiplayer"),
+                index++
+        ));*/
+    }
+
+    @Override
+    protected void tick() {
         if (isClientSide()) {
             if (getGameTime() == 85) {
                 playSound(GameblockSounds.GAMEBLOCK_LOGON.get());
@@ -145,14 +150,16 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
     }
 
     protected void selectGameAndSentToClient(Game<?> game) {
-        Inventory playerInventory = players.mainPlayer().getInventory();
+        Player mainPlayer = players.getHostPlayer();
+
+        Inventory playerInventory = mainPlayer.getInventory();
         for (int i = 0; i < playerInventory.getContainerSize(); i++) {
             ItemStack stack = playerInventory.getItem(i);
             if (stack != null && stack.getItem() instanceof CartridgeItem<?> cartridge) {
                 if (cartridge.getGame() == game) {
-                    GameCapability cap = players.mainPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+                    GameCapability cap = mainPlayer.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                     if (cap != null) {
-                        cap.setGame(game.createInstance(players.mainPlayer()));
+                        cap.startGame(game);
                     }
                 }
             }

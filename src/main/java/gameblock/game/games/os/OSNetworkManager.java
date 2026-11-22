@@ -6,8 +6,8 @@ import gameblock.game.GameInstance;
 import gameblock.game.GameUpdate;
 import gameblock.game.GameUpdateType;
 import gameblock.game.NetworkManager;
-import gameblock.packet.GameUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
+import org.apache.commons.lang3.NotImplementedException;
 
 import java.util.UUID;
 
@@ -27,19 +27,7 @@ public class OSNetworkManager extends NetworkManager<GameblockOS> {
     public void receiveJoinGame(GameUpdate.Incoming packet, UUID sender) {
         String gameCode = packet.get(String.class);
 
-        if (game.players.mainPlayer() instanceof ServerPlayer serverPlayer) { // TODO: eventually this handle method will be updated to receive a player instance as an argument. When it is use that instead of getHostPlayer()
-            for (ServerPlayer player : serverPlayer.getServer().getPlayerList().getPlayers()) {
-                GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
-                if (cap != null && cap.isPlaying()) {
-                    GameInstance joinGame = cap.getGame();
-                    if (joinGame.getGameCode().matches(gameCode)) {
-                        if (joinGame.players.addPlayer(serverPlayer) != null) return;
-                    }
-                }
-            }
-        } else {
-            throw new IllegalStateException("Host player should be an instance of ServerPlayer, but it isn't! Was the packet handled on the client?");
-        }
+        throw new NotImplementedException();
     }
 
     public void sendMultiplayerPrompt(UUID player) {

@@ -70,8 +70,19 @@ public class BlockBreakGame extends GameInstance<BlockBreakNetworkManager> {
 
     protected long clientToPacketBallUpdateTime = -1;
 
-    public BlockBreakGame(Player player) {
-        super(player, GameblockGames.BLOCK_BREAK.get());
+    public BlockBreakGame(boolean clientSide) {
+        super(clientSide, GameblockGames.BLOCK_BREAK.get());
+
+        if (isClientSide()) {
+            ballPath = new CircularStack<>(5);
+            particles = new ArrayList<>();
+        }
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
         int col = 0;
         for (int y = 6; y >= 3; y--) {
             if (y < 6) {
@@ -84,11 +95,6 @@ public class BlockBreakGame extends GameInstance<BlockBreakNetworkManager> {
                 blocks.add(new Block(x, y * 2 - 1, col));
             }
             col++;
-        }
-
-        if (isClientSide()) {
-            ballPath = new CircularStack<>(5);
-            particles = new ArrayList<>();
         }
     }
 

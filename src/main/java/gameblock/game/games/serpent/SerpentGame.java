@@ -41,9 +41,15 @@ public class SerpentGame extends GameInstance<SerpentNetworkManager> {
     final GameControls.KeyBinding up = controls.registerKey(InputConstants.KEY_UP, () -> setSnakeDirection(Direction2D.UP));
     final GameControls.KeyBinding down = controls.registerKey(InputConstants.KEY_DOWN, () -> setSnakeDirection(Direction2D.DOWN));
 
-    public SerpentGame(Player player) {
-        super(player, GameblockGames.SERPENT.get());
+    public SerpentGame(boolean clientSide) {
+        super(clientSide, GameblockGames.SERPENT.get());
         tiles = new TileGrid2D<>(-47, 47, -30, 30, -1);
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+
         tiles.setAll((Integer num) -> Integer.MAX_VALUE);
         if (!isClientSide()) randomFoodPosition(); // FIXME: doesn't work?
     }

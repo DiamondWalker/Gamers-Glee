@@ -6,18 +6,15 @@ import gameblock.game.GameInstance;
 import gameblock.gui.GUIHandler;
 import gameblock.packet.CosmeticSyncPacket;
 import gameblock.packet.GameChangePacket;
-import gameblock.packet.GameUpdatePacket;
 import gameblock.registry.GameblockCosmetics;
-import gameblock.registry.GameblockGames;
 import gameblock.registry.GameblockPackets;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
+import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Collections;
-import java.util.function.Supplier;
 
 @AutoRegisterCapability
 public class GameCapability {
@@ -33,18 +30,59 @@ public class GameCapability {
         return game != null;
     }
 
-    public void setGame(GameInstance<?> newGame) {
-        if (!player.level().isClientSide()) {
-            if (game != null) game.save();
-            if (newGame != null) newGame.load();
-        } else {
-            if (newGame == null) {
-                GUIHandler.closeGameScreen();
-            } else {
-                GUIHandler.openGameScreen(newGame);
-            }
-        }
+    /**
+     * Initializes a new instance of the given game and switches to it
+     * <p>
+     * A value of null closes the current game
+     * <p>
+     * Should be called when a game is starting a game, closing a game, switching to another game, or receiving a {@link GameChangePacket}
+     *
+     * @param gameType The game to start. A value of null simply closes the current game
+     */
+    public void startGame(Game<?> gameType) {
+        leaveCurrentGame();
 
+        if (gameType != null) {
+            GameInstance<?> gameInstance = gameType.constructor.apply(player.level().isClientSide());
+            gameInstance.players.addPlayer(player);
+
+            if (!gameInstance.isClientSide()) {
+                gameInstance.players.setHost(player);
+            } else {
+                gameInstance.players.setLocalPlayer(player);
+            }
+
+            if (!gameInstance.isClientSide()) gameInstance.load();
+            gameInstance.initialize();
+
+            setGameInstance(gameInstance);
+        } else {
+            setGameInstance(null);
+        }
+    }
+
+    /**
+     * Sets the current game instance to a preexisting one and updates its players list to include this player
+     * <p>
+     * Should only be called when connecting to a multiplayer game
+     *
+     * @param gameInstance The game instance to join
+     */
+    public void joinGame(@NotNull GameInstance<?> gameInstance) {
+        leaveCurrentGame();
+
+        gameInstance.players.addPlayer(player);
+        setGameInstance(gameInstance);
+    }
+
+    private void leaveCurrentGame() {
+        if (game != null) {
+            if (!game.isClientSide() && game.players.getHostPlayer() == player) game.save();
+            game.players.removePlayer(player.getUUID());
+        }
+    }
+
+    private void setGameInstance(GameInstance<?> newGame) {
         game = newGame;
 
         if (player instanceof ServerPlayer serverPlayer) {
@@ -61,6 +99,12 @@ public class GameCapability {
                         serverPlayer,
                         new GameChangePacket(null, Collections.emptySet())
                 );
+            }
+        } else {
+            if (game == null) {
+                GUIHandler.closeGameScreen();
+            } else {
+                GUIHandler.openGameScreen(game);
             }
         }
     }

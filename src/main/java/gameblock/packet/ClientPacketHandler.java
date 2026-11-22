@@ -15,10 +15,12 @@ public class ClientPacketHandler {
             GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
             if (cap != null) {
                 try {
-                    cap.setGame(packet.game.createInstance(player));
+                    cap.startGame(packet.game);
 
-                    for (GameUpdate update : packet.updates) {
-                        cap.getGame().networkManager.receive((GameUpdate.Incoming) update, null);
+                    if (packet.game != null) {
+                        for (GameUpdate update : packet.updates) {
+                            cap.getGame().networkManager.receive((GameUpdate.Incoming) update, null);
+                        }
                     }
                 } catch (Exception e) {
                     throw new RuntimeException(e);

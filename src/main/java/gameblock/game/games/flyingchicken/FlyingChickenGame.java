@@ -40,8 +40,8 @@ public class FlyingChickenGame extends GameInstance<FlyingChickenNetworkManager>
     final GameControls.KeyBinding jump = controls.registerKey(InputConstants.KEY_SPACE, this::flap);
     protected final CircularStack<Pipe> pipes = new CircularStack<>(5);
 
-    public FlyingChickenGame(Player player) {
-        super(player, GameblockGames.FLYING_CHICKEN.get());
+    public FlyingChickenGame(boolean clientSide) {
+        super(clientSide, GameblockGames.FLYING_CHICKEN.get());
     }
 
     protected void flap() {

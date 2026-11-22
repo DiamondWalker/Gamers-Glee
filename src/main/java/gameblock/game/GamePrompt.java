@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-public abstract class GamePrompt<T extends GameInstance> {
+public abstract class GamePrompt<T extends GameInstance<?>> {
     protected final T game;
 
     private final StringBuilder builder = new StringBuilder();
