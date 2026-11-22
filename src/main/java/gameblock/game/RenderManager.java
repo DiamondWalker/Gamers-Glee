@@ -250,8 +250,6 @@ public class RenderManager {
     }
 
     public final void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, int u, int v, int uWidth, int vHeight, ColorF color) {
-        verifyRender();
-
         float minU = (float) u / 256;
         float minV = (float) v / 256;
         float maxU = (float) (u + uWidth) / 256;
@@ -264,7 +262,7 @@ public class RenderManager {
     }
 
     private void drawTexture(ResourceLocation texture, float x, float y, float width, float height, float angle, float minU, float maxU, float minV, float maxV, ColorF color) {
-        if (graphics == null) throw new IllegalStateException("Frame is not being rendered");
+        verifyRender();
 
         RenderSystem.setShaderTexture(0, texture);
         RenderSystem.setShader(net.minecraft.client.renderer.GameRenderer::getPositionColorTexShader);
