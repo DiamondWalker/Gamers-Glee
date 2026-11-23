@@ -3,6 +3,7 @@ package gameblock.packet;
 import gameblock.game.GameUpdate;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import org.apache.commons.lang3.tuple.Triple;
@@ -35,6 +36,7 @@ public class GameUpdatePacket {
         addType(Character.class, (buf, character) -> buf.writeChar((char) character), ByteBuf::readChar);
         addType(String.class, (buf, string) -> buf.writeUtf((String) string), FriendlyByteBuf::readUtf);
         addType(UUID.class, (buf, uuid) -> buf.writeUUID((UUID) uuid), FriendlyByteBuf::readUUID);
+        addType(ResourceLocation.class, (buf, rl) -> buf.writeResourceLocation((ResourceLocation) rl), FriendlyByteBuf::readResourceLocation);
     }
 
     public final List<GameUpdate> updates = new ArrayList<>();

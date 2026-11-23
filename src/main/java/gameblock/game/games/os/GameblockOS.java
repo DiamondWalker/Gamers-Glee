@@ -11,6 +11,7 @@ import gameblock.registry.GameblockSounds;
 import gameblock.util.ColorF;
 import gameblock.util.Direction1D;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.Music;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
@@ -27,7 +28,7 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
     private static final int ICON_FADE_IN_DELAY = 20;
     private static final int ICON_FADE_IN_TIME = 80;
 
-    protected HashSet<OSIcon> gameIcons = null;
+    ArrayList<OSIcon> gameIcons = new ArrayList<>();
 
     private GameblockLogoRenderer logoRenderer;
     private GameblockBackgroundRenderer bgRenderer;
@@ -45,37 +46,58 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
     public void initialize() {
         super.initialize();
 
-        // TODO: this would probably be better to do only on the server and then sync it somehow?
-        Player player = isClientSide() ? players.getLocalPlayer() : players.getHostPlayer();
-        gameIcons = new HashSet<>();
-        LinkedHashSet<Game<?>> gamesFound = new LinkedHashSet<>();
-        int index = 0;
+        if (!isClientSide()) {
+            ArrayList<Game<?>> availableGames = new ArrayList<>();
 
-        Inventory playerInventory = player.getInventory();
-        for (int i = 0; i < playerInventory.getContainerSize(); i++) {
-            ItemStack stack = playerInventory.getItem(i);
-            if (stack.getItem() instanceof CartridgeItem<?> cartridge) {
-                Game<?> game = cartridge.getGame();
-                if (!gamesFound.contains(game)) {
-                    gamesFound.add(game);
-                    gameIcons.add(new OSIcon(
-                            this,
-                            () -> selectGameAndSentToClient(game),
-                            game.getIconLocation(),
-                            game.getName(),
-                            index++
-                    ));
+            Inventory playerInventory = players.getHostPlayer().getInventory();
+            for (int i = 0; i < playerInventory.getContainerSize(); i++) {
+                ItemStack stack = playerInventory.getItem(i);
+                if (stack.getItem() instanceof CartridgeItem<?> cartridge) {
+                    Game<?> game = cartridge.getGame();
+                    if (!availableGames.contains(game)) {
+                        availableGames.add(game);
+                    }
                 }
             }
+
+            populateIconsFromGamesList(availableGames);
+            networkManager.sendGamesList(availableGames);
+        }
+    }
+
+    void populateIconsFromGamesList(List<Game<?>> games) {
+        gameIcons.clear();
+
+        for (Game<?> game : games) {
+            addIcon(
+                    () -> selectGameAndSentToClient(game),
+                    game.getIconLocation(),
+                    game.getName()
+            );
         }
 
-        /*gameIcons.add(new OSIcon(
-                this,
-                () -> GameblockPackets.sendToPlayer((ServerPlayer) getHostPlayer(), new MultiplayerPromptPacket()),
-                new ResourceLocation(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
-                Component.translatable("icon.gameblock.multiplayer"),
-                index++
-        ));*/
+        /*addIcon(
+                networkManager::sendMultiplayerPrompt,
+                ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
+                Component.translatable("icon.gameblock.multiplayer")
+        );*/
+    }
+
+    private void addIcon(Runnable action, ResourceLocation texture, Component name) {
+        int index = gameIcons.size();
+
+        int x = (index % 4) * 40 - 60;
+        int y = 45 - (index / 4) * 30;
+
+        gameIcons.add(
+                new OSIcon(
+                        this,
+                        action,
+                        texture,
+                        name,
+                        new Vec2(x, y)
+                )
+        );
     }
 
     @Override
@@ -104,9 +126,9 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
     @Override
     public void click(Vec2 clickCoordinates, Direction1D buttonPressed) {
         if (buttonPressed == Direction1D.LEFT && isMenuInteractable() && gameIcons != null) {
-            for (OSIcon icon : gameIcons) {
-                if (icon.isOverIcon(clickCoordinates)) {
-                    networkManager.sendSelectGame(icon.index);
+            for (int i = 0; i < gameIcons.size(); i++) {
+                if (gameIcons.get(i).isOverIcon(clickCoordinates)) {
+                    networkManager.sendSelectGame(i);
                     return;
                 }
             }
