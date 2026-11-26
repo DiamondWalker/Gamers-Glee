@@ -62,13 +62,6 @@ public class UpdateCheckEvent {
             }
 
             if (updateMsg != null) event.getServer().getPlayerList().broadcastSystemMessage(updateMsg, false);
-            if (firstCheck && GameblockConfig.PROMOTE_DISCORD_SERVER.get() && HostedData.DISCORD_URL != null) {
-                Component discordComponent = Component.translatable("chat.gameblock.discord.link").withStyle(style -> style
-                        .applyFormats(ChatFormatting.BLUE, ChatFormatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, HostedData.DISCORD_URL)));
-                event.getServer().getPlayerList().broadcastSystemMessage(Component.translatable("chat.gameblock.discord.message", modName, discordComponent)
-                        .withStyle(ChatFormatting.BLUE), false);
-            }
         }
     }
 

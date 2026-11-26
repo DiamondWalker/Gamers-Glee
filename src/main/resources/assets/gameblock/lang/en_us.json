@@ -1,6 +1,4 @@
 {
-  "chat.gameblock.discord.message": "%s Join the %s for spoilers, news, and updates!",
-  "chat.gameblock.discord.link": "Gamer's Glee Discord server",
   "chat.gameblock.update.could_not_connect": "%s Could not connect to update checker.",
   "chat.gameblock.update.download": "Click here to download the latest features and fixes!",
   "chat.gameblock.update.out_of_date": "%s Gamer's Glee is %s out of date! %s",
