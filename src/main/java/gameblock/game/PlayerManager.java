@@ -66,11 +66,11 @@ public class PlayerManager {
     }
 
     public boolean canAddPlayers() {
-        return getPlayerCount() < game.getMaxPlayers();
+        return getPlayerCount() < game.getMaxPlayers() && game.canJoin();
     }
 
     public void addPlayer(Player player) {
-        if (!canAddPlayers()) throw new IllegalStateException("No room for adding more players");
+        if (getPlayerCount() >= game.getMaxPlayers()) throw new IllegalStateException("No room for adding more players");
 
         UUID uuid = player.getUUID();
         players.put(uuid, player);

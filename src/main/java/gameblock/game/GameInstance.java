@@ -10,6 +10,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.Music;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -24,6 +25,8 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
 
     public static final int MAX_X = 100;
     public static final int MAX_Y = 75;
+    public static final int MIN_X = -MAX_X;
+    public static final int MIN_Y = -MAX_Y;
 
     private long gameTime = 0;
     private GameState gameState = GameState.ACTIVE;
@@ -60,7 +63,26 @@ public abstract class GameInstance <T extends NetworkManager<?>> {
 
     }
 
+    protected boolean canJoin() {
+        return false;
+    }
+
     public String getGameCode() {
+        return null;
+    }
+
+    public GameInstance<?> findGameWithGameCode(String code) {
+        for (ServerPlayer player : players.getHostPlayer().getServer().getPlayerList().getPlayers()) {
+            GameCapability cap = player.getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null && cap.isPlaying()) {
+                GameInstance<?> joinGame = cap.getGame();
+                String joinGameCode = joinGame.getGameCode();
+                if (joinGameCode != null && code != null && joinGameCode.matches(code)) {
+                    return joinGame;
+                }
+            }
+        }
+
         return null;
     }
 

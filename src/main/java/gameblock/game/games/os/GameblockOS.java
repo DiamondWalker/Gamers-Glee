@@ -1,5 +1,6 @@
 package gameblock.game.games.os;
 
+import gameblock.GameblockMod;
 import gameblock.capability.GameCapability;
 import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.Game;
@@ -76,11 +77,11 @@ public class GameblockOS extends GameInstance<OSNetworkManager> {
             );
         }
 
-        /*addIcon(
+        addIcon(
                 networkManager::sendMultiplayerPrompt,
                 ResourceLocation.fromNamespaceAndPath(GameblockMod.MODID, "textures/gui/logo/multiplayer.png"),
                 Component.translatable("icon.gameblock.multiplayer")
-        );*/
+        );
     }
 
     private void addIcon(Runnable action, ResourceLocation texture, Component name) {

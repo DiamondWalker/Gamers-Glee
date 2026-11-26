@@ -1,5 +1,7 @@
 package gameblock.game.games.os;
 
+import gameblock.capability.GameCapability;
+import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.*;
 import gameblock.registry.GameblockCustomRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +28,13 @@ public class OSNetworkManager extends NetworkManager<GameblockOS> {
     public void receiveJoinGame(GameUpdate.Incoming packet, UUID sender) {
         String gameCode = packet.get(String.class);
 
-        throw new NotImplementedException();
+        GameInstance<?> foundGame = game.findGameWithGameCode(gameCode);
+        if (foundGame != null) {
+            GameCapability cap = game.players.getPlayerEntity(sender).getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
+            if (cap != null) {
+                cap.joinGame(foundGame);
+            }
+        }
     }
 
     public void sendMultiplayerPrompt() {

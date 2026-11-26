@@ -23,7 +23,7 @@ public class GameblockItems {
     public static final RegistryObject<Item> CARTRIDGE_SERPENT = ITEMS.register("serpent", () -> new CartridgeItem<>(GameblockGames.SERPENT)); // snake
     public static final RegistryObject<Item> CARTRIDGE_FLYING_CHICKEN = ITEMS.register("flying_chicken", () -> new CartridgeItem<>(GameblockGames.FLYING_CHICKEN)); // flappy bird
     public static final RegistryObject<Item> CARTRIDGE_DEFUSAL = ITEMS.register("defusal", () -> new CartridgeItem<>(GameblockGames.DEFUSAL)); // minesweeper
-    //public static final RegistryObject<Item> CARTRIDGE_PADDLES = ITEMS.register("paddles", () -> new CartridgeItem<>(GameblockGames.PADDLES));
+    public static final RegistryObject<Item> CARTRIDGE_PADDLES = ITEMS.register("paddles", () -> new CartridgeItem<>(GameblockGames.PADDLES));
     /*public static final RegistryObject<Item> CARTRIDGE_RHYTHM_FIGURES = ITEMS.register("rhythm_figures", () -> new CartridgeItem(Game::new)); // just shapes and beats
     public static final RegistryObject<Item> CARTRIDGE_SUPER_PLUMBER_DUDES = ITEMS.register("super_plumber_dudes", () -> new CartridgeItem(Game::new)); // super mario bros
     public static final RegistryObject<Item> CARTRIDGE_MILLIONAIRE = ITEMS.register("millionaire", () -> new CartridgeItem(Game::new)); // monopoly

@@ -22,7 +22,7 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
     }
 
     public boolean handleKeyPress(int key) {
-        if (key == InputConstants.KEY_ESCAPE) {
+        if (key == InputConstants.KEY_ESCAPE && shouldCloseOnEsc()) {
             close();
         } else if (key == InputConstants.KEY_LEFT) {
             location = Math.max(location - 1, 0);
@@ -48,12 +48,21 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
         location++;
     }
 
+    public void clear() {
+        builder.delete(0, builder.length());
+        location = 0;
+    }
+
     public boolean click(Vec2 clickCoordinates) {
         return true;
     }
 
     public void close() {
         shouldClose = true;
+    }
+
+    public boolean shouldCloseOnEsc() {
+        return true;
     }
 
     public boolean shouldClose() {
@@ -65,4 +74,19 @@ public abstract class GamePrompt<T extends GameInstance<?>> {
     }
 
     public abstract void render(float partialTicks);
+
+    public abstract static class GameCodePrompt<T extends GameInstance<?>> extends GamePrompt<T> {
+        public GameCodePrompt(T game) {
+            super(game);
+        }
+
+        @Override
+        public void handleCharTyped(char character) {
+            if (get().length() < 8 && Character.isLetterOrDigit(character)) super.handleCharTyped(Character.toUpperCase(character));
+        }
+
+        public boolean conditionsForGameCodeMet() {
+            return get().length() == 8;
+        }
+    }
 }
