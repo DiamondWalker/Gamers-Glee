@@ -1,8 +1,6 @@
 package gameblock.game.games.paddles;
 
 import gameblock.GameblockMod;
-import gameblock.capability.GameCapability;
-import gameblock.capability.GameCapabilityProvider;
 import gameblock.game.GameInstance;
 import gameblock.registry.GameblockGames;
 import gameblock.util.ColorF;
@@ -10,7 +8,6 @@ import gameblock.util.Direction1D;
 import gameblock.util.GameState;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec2;
 
@@ -40,12 +37,6 @@ public class PaddlesGame extends GameInstance<PaddlesNetworkManager> {
     @Override
     public void initialize() {
         if (isClientSide()) prompt = new PaddlesGameCodePrompt(this);
-    }
-
-    public Paddle getPaddleFromDirection(Direction1D direction) {
-        if (direction == Direction1D.LEFT) return leftPaddle;
-        if (direction == Direction1D.RIGHT) return rightPaddle;
-        throw new IllegalArgumentException("Attempted to get paddle with invalid direction " + direction);
     }
 
     @Override
@@ -79,43 +70,39 @@ public class PaddlesGame extends GameInstance<PaddlesNetworkManager> {
                 playerList.set(1, swap);
             }
 
-            startGame(
-                    new Paddle(
-                            this,
-                            Direction1D.LEFT,
-                            playerList.get(0)
-                    ),
-                    new Paddle(
-                            this,
-                            Direction1D.RIGHT,
-                            playerList.get(1)
-                    )
-            );
-
-            networkManager.sendPaddleInitialization(playerList.get(0), playerList.get(1));
-
-            setGameState(GameState.ACTIVE);
+            startGame(playerList.get(0), playerList.get(1));
         }
     }
 
     @Override
     protected void onPlayerLeft(UUID player) {
         if (gameStarted) {
-            gameStarted = false;
+            stopGame();
         }
     }
 
-    void startGame(Paddle left, Paddle right) {
+    void startGame(UUID left, UUID right) {
         gameStarted = true;
 
         prompt = null;
 
-        leftPaddle = left;
-        rightPaddle = right;
+        leftPaddle = new Paddle(this, Direction1D.LEFT, left);
+        rightPaddle = new Paddle(this, Direction1D.RIGHT, right);
 
         ball = new PaddlesBall(this);
         ball.motion = new Vec2(-1, 0);
         leftScore = rightScore = 0;
+
+        if (!isClientSide()) {
+            networkManager.sendGameStart(left, right);
+            setGameState(GameState.ACTIVE);
+        }
+    }
+
+    void stopGame() {
+        gameStarted = false;
+
+        if (!isClientSide()) networkManager.sendGameStop();
     }
 
     public void score(Direction1D dir) {
@@ -168,6 +155,7 @@ public class PaddlesGame extends GameInstance<PaddlesNetworkManager> {
             }
 
             // draw the score counters
+            System.out.println(scoreTimer);
             if ((scoreTimer / 3) % 2 == 0 || winSide != Direction1D.LEFT) {
                 renderer.drawTexture(SPRITE, -30, 50, 18, 27, 0, 250, 9 * leftScore, 6, 9);
             }

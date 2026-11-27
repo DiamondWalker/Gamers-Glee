@@ -30,6 +30,10 @@ public class GameblockSounds {
     public static final RegistryObject<SoundEvent> FLYING_CHICKEN_FLAP = registerSound("flying_chicken_flap");
     public static final RegistryObject<SoundEvent> FLYING_CHICKEN_SCORE = registerSound("flying_chicken_score");
 
+    public static final RegistryObject<SoundEvent> PADDLES_BOUNCE = registerSound("paddles_bounce");
+    public static final RegistryObject<SoundEvent> PADDLES_SCORE = registerSound("paddles_score");
+    public static final RegistryObject<SoundEvent> PADDLES_WIN = registerSound("paddles_win");
+
     public static final RegistryObject<SoundEvent> GAMEBLOCK_LOGON = registerSound("gameblock_logon");
 
     public static final RegistryObject<SoundEvent> DEFUSAL_SELECT = registerSound("defusal_select");

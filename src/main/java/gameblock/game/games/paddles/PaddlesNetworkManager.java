@@ -6,12 +6,15 @@ import gameblock.game.NetworkManager;
 import gameblock.registry.GameblockSounds;
 import gameblock.util.CompletionStatus;
 import gameblock.util.Direction1D;
+import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.phys.Vec2;
+import net.minecraftforge.registries.RegistryObject;
 
 import java.util.UUID;
 
 public class PaddlesNetworkManager extends NetworkManager<PaddlesGame> {
-    private final GameUpdateType<PaddlesGame> paddleInitialization = registerMessage(this::receivePaddleInitialization, false, true);
+    private final GameUpdateType<PaddlesGame> gameStart = registerMessage(this::receiveGameStart, false, true);
+    private final GameUpdateType<PaddlesGame> gameStop = registerMessage(this::receiveGameStop, false, true);
     private final GameUpdateType<PaddlesGame> roundEnd = registerMessage(this::receiveRoundEnd, false, true);
     private final GameUpdateType<PaddlesGame> scoreUpdate = registerMessage(this::receiveScoreUpdate, false, true);
     private final GameUpdateType<PaddlesGame> clientToServerPaddleUpdate = registerMessage(this::receiveClientToServerPaddleUpdate, true, false);
@@ -24,15 +27,23 @@ public class PaddlesNetworkManager extends NetworkManager<PaddlesGame> {
         super(game);
     }
 
-    void sendPaddleInitialization(UUID leftPlayer, UUID rightPlayer) {
-        paddleInitialization.sendToAllClients().add(leftPlayer).add(rightPlayer);
+    void sendGameStart(UUID leftPlayer, UUID rightPlayer) {
+        gameStart.sendToAllClients().add(leftPlayer).add(rightPlayer);
     }
 
-    private void receivePaddleInitialization(GameUpdate.Incoming update, UUID sender) {
+    private void receiveGameStart(GameUpdate.Incoming update, UUID sender) {
         UUID leftPlayer = update.get(UUID.class);
         UUID rightPlayer = update.get(UUID.class);
 
-        game.startGame(new Paddle(game, Direction1D.LEFT, leftPlayer), new Paddle(game, Direction1D.RIGHT, rightPlayer));
+        game.startGame(leftPlayer, rightPlayer);
+    }
+
+    void sendGameStop() {
+        gameStop.sendToAllClients();
+    }
+
+    private void receiveGameStop(GameUpdate.Incoming update, UUID sender) {
+        game.stopGame();
     }
 
     void sendRoundEnd(Direction1D winningSide, boolean finalRound) {
@@ -43,10 +54,10 @@ public class PaddlesNetworkManager extends NetworkManager<PaddlesGame> {
         Direction1D winningSide = Direction1D.values()[update.get(Integer.class)];
         boolean finalRound = update.get(Boolean.class);
 
-        game.scoreTimer = 0;
+        game.scoreTimer = 40;
         game.winSide = winningSide;
-        //RegistryObject<SoundEvent> sound = finalRound ? GameblockSounds.PADDLES_WIN : GameblockSounds.PADDLES_SCORE;
-        //game.playSound(sound.get(), 1.0f, 0.5f);
+        RegistryObject<SoundEvent> sound = finalRound ? GameblockSounds.PADDLES_WIN : GameblockSounds.PADDLES_SCORE;
+        game.playSound(sound.get(), 1.0f, 0.5f);
     }
 
     void sendScoreUpdate(int leftScore, int rightScore) {
@@ -127,7 +138,7 @@ public class PaddlesNetworkManager extends NetworkManager<PaddlesGame> {
         game.ball.speed = speed;
 
         if (game.isClientSide()) {
-            //game.playSound(GameblockSounds.PADDLES_BOUNCE.get());
+            game.playSound(GameblockSounds.PADDLES_BOUNCE.get());
         } else {
             sendBallUpdateToAllClients(pos, motion, speed);
         }

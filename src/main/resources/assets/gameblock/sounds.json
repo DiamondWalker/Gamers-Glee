@@ -126,5 +126,29 @@
         "stream": false
       }
     ]
+  },
+  "paddles_bounce": {
+    "sounds": [
+      {
+        "name": "gameblock:paddles_bounce",
+        "stream": false
+      }
+    ]
+  },
+  "paddles_score": {
+    "sounds": [
+      {
+        "name": "gameblock:paddles_score",
+        "stream": false
+      }
+    ]
+  },
+  "paddles_win": {
+    "sounds": [
+      {
+        "name": "gameblock:paddles_win",
+        "stream": false
+      }
+    ]
   }
 }

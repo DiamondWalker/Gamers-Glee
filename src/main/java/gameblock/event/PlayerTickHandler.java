@@ -37,7 +37,7 @@ public class PlayerTickHandler {
                         if ((!player.getItemInHand(InteractionHand.MAIN_HAND).is(GameblockItems.GAMEBLOCK.get()) && !player.getItemInHand(InteractionHand.OFF_HAND).is(GameblockItems.GAMEBLOCK.get()))) {
                             stayOpen = false;
                         } else if (game.players.getHostPlayer() == null || !game.players.getHostPlayer().isAlive()) {
-                            stayOpen = false;
+                            stayOpen = false; // TODO: some kind of "connection lost" message
                         } else {
                             GameCapability hostCapability = game.players.getHostPlayer().getCapability(GameCapabilityProvider.CAPABILITY_GAME, null).orElse(null);
                             if (hostCapability == null || hostCapability.getGame() != game) stayOpen = false;

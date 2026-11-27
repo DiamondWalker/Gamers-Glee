@@ -95,6 +95,7 @@ public class GameCapability {
                         )
                 );
             } else {
+                System.out.println("CLOSING ON");
                 GameblockPackets.sendToPlayer(
                         serverPlayer,
                         new GameChangePacket(null, Collections.emptySet())
